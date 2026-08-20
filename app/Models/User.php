@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+// Le contrat MustVerifyEmail était importé mais jamais implémenté : les comptes
+// (créés vérifiés d'office, cf. UserController et les factories) fonctionnaient
+// par accident, mais hasVerifiedEmail()/markEmailAsVerified() plantaient dès
+// qu'une route Breeze de vérification d'e-mail (/verify-email) était atteinte.
+class User extends Authenticatable implements MustVerifyEmailContract
 {
-    use HasFactory, Notifiable;
+    use HasFactory, MustVerifyEmailTrait, Notifiable;
 
     protected $fillable = [
         'name',

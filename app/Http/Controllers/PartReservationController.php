@@ -12,6 +12,8 @@ class PartReservationController extends Controller
 {
     public function store(StorePartReservationRequest $request, WorkOrder $workOrder): RedirectResponse
     {
+        $this->authorize('intervene', $workOrder);
+
         PartReservation::create([
             'part_id' => $request->validated('part_id'),
             'work_order_id' => $workOrder->id,
@@ -24,6 +26,7 @@ class PartReservationController extends Controller
 
     public function withdraw(WorkOrder $workOrder, PartReservation $reservation): RedirectResponse
     {
+        $this->authorize('intervene', $workOrder);
         abort_if($reservation->work_order_id !== $workOrder->id, 404);
 
         $reservation->markAsWithdrawn();
@@ -33,6 +36,7 @@ class PartReservationController extends Controller
 
     public function cancel(WorkOrder $workOrder, PartReservation $reservation): RedirectResponse
     {
+        $this->authorize('intervene', $workOrder);
         abort_if($reservation->work_order_id !== $workOrder->id, 404);
 
         $reservation->cancel();
