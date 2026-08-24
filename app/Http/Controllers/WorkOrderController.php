@@ -77,6 +77,10 @@ class WorkOrderController extends Controller
         $workOrder->load([
             'room', 'equipment', 'assignee', 'reporter', 'type', 'priority',
             'comments.user', 'attachments.uploader', 'statusHistories.changedBy',
+            'partReservations.part', 'partReservations.reservedBy',
+            'interventionSessions.technician', 'interventionReport',
+            'qualityControls.reviewer', 'correctionRequests.requester',
+            'maintenancePlan', 'slaPolicy',
         ]);
 
         return view('work-orders.show', compact('workOrder'));
