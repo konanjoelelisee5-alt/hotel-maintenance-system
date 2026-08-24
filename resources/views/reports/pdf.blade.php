@@ -13,10 +13,15 @@
         .kpi-box { display: inline-block; width: 23%; padding: 10px; border: 1px solid #ddd; margin-right: 1%; }
         .kpi-label { font-size: 10px; color: #888; }
         .kpi-value { font-size: 18px; font-weight: bold; }
+        .report-header { width: 100%; margin-bottom: 15px; }
+        .report-header img { height: 45px; float: left; margin-right: 15px; }
     </style>
 </head>
 <body>
-    <h1>Rapport d'activité — Service technique</h1>
+    <div class="report-header">
+        <img src="{{ public_path('images/logo-hotel-president-icon.jpg') }}" alt="Hôtel Président">
+        <h1>Hôtel Président — Rapport d'activité du service technique</h1>
+    </div>
     <p class="subtitle">Généré le {{ now()->format('d/m/Y à H:i') }}</p>
 
     <div class="kpi-grid">

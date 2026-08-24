@@ -6,9 +6,8 @@
                 <div class="shrink-0 flex items-center">
                     <a href="{{ Auth::user()?->dashboardRoute() ? route(Auth::user()->dashboardRoute()) : route('login') }}"
                        class="flex items-center gap-2">
-                        <span class="flex items-center justify-center h-9 w-9 rounded-full bg-gold-400 text-navy-900 font-bold text-lg">
-                            HP
-                        </span>
+                        <img src="{{ asset('images/logo-hotel-president-icon.jpg') }}" alt="Hôtel Président"
+                             class="h-9 w-9 rounded-full object-cover">
                         <span class="text-white font-semibold tracking-wide text-lg hidden sm:block">
                             Hôtel Président
                         </span>

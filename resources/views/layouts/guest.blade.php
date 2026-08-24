@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Hôtel Président') }} — Service Technique</title>
+        <link rel="icon" type="image/jpeg" href="{{ asset('images/logo-hotel-president-icon.jpg') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -22,9 +23,8 @@
 
                 <div class="relative z-10">
                     <div class="flex items-center gap-3">
-                        <span class="flex items-center justify-center h-12 w-12 rounded-full bg-gold-400 text-navy-900 font-bold text-xl">
-                            HP
-                        </span>
+                        <img src="{{ asset('images/logo-hotel-president-icon.jpg') }}" alt="Hôtel Président"
+                             class="h-12 w-12 rounded-full object-cover shadow">
                         <span class="text-white font-semibold text-2xl tracking-wide">
                             Hôtel Président
                         </span>
@@ -41,8 +41,13 @@
                     </p>
                 </div>
 
-                <div class="relative z-10 text-navy-300 text-xs">
-                    © {{ date('Y') }} Hôtel Président — Usage interne uniquement
+                <div class="relative z-10 flex items-center gap-3">
+                    <img src="{{ asset('images/logo-sonapie.jpg') }}" alt="SONAPIE"
+                         class="h-8 rounded bg-white p-1">
+                    <p class="text-navy-300 text-xs leading-snug">
+                        © {{ date('Y') }} Hôtel Président — Usage interne uniquement<br>
+                        Une propriété de la SONAPIE (Société Nationale de Gestion du Patrimoine Immobilier de l'État)
+                    </p>
                 </div>
             </div>
 
@@ -52,9 +57,8 @@
 
                     <!-- Logo visible uniquement sur mobile -->
                     <div class="flex lg:hidden items-center justify-center gap-3 mb-8">
-                        <span class="flex items-center justify-center h-10 w-10 rounded-full bg-navy-800 text-gold-400 font-bold text-lg">
-                            HP
-                        </span>
+                        <img src="{{ asset('images/logo-hotel-president-icon.jpg') }}" alt="Hôtel Président"
+                             class="h-10 w-10 rounded-full object-cover shadow">
                         <span class="text-navy-800 font-semibold text-xl tracking-wide">
                             Hôtel Président
                         </span>
