@@ -168,7 +168,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 // === MODULE ACHATS & FOURNISSEURS (admin + manager) ===
 Route::middleware(['auth', 'role:admin,manager'])->group(function () {
-    Route::resource('suppliers', SupplierController::class);
     // Fournisseurs (CRUD classique)
     Route::resource('suppliers', SupplierController::class);
 
@@ -208,8 +207,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/work-orders/{workOrder}/reservations/{reservation}/withdraw', [PartReservationController::class, 'withdraw'])->name('work-orders.reservations.withdraw');
     Route::delete('/work-orders/{workOrder}/reservations/{reservation}', [PartReservationController::class, 'cancel'])->name('work-orders.reservations.cancel');
 });
-
-Route::resource('skills', SkillController::class)->except(['show']);
-Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 
 require __DIR__.'/auth.php';
