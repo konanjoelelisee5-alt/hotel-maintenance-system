@@ -1,0 +1,57 @@
+# Blueprint Render : démo gratuite de l'application (voir DEPLOY-DEMO-RENDER.md).
+# Les valeurs marquées `sync: false` sont demandées dans le tableau de bord
+# Render : elles ne sont jamais écrites dans le dépôt.
+services:
+  - type: web
+    # L'adresse publique en découle (nom.onrender.com) : suffixe peu devinable
+    # car les comptes de démo ont un mot de passe connu.
+    name: hp-maintenance-demo-k7q2
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Hôtel Président
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      # Journaux dans la console Render, pas dans un fichier éphémère
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+      # Base de données MySQL (Aiven)
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL_CA_PEM
+        sync: false
+      # Pas de worker sur l'offre gratuite : les files sont exécutées immédiatement
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: MAIL_MAILER
+        value: log
+      # Charge les comptes et données de démo si la base est vide
+      - key: SEED_DEMO_DATA
+        value: "true"
