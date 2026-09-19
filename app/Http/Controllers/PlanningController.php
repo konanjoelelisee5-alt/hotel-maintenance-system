@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\ScheduleWorkOrderRequest;
 use App\Models\User;
 use App\Models\WorkOrder;
@@ -19,7 +20,7 @@ class PlanningController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        if ($user->role === 'technicien') {
+        if ($user->role === UserRole::Technicien) {
             return redirect()->route('planning.technician', $user);
         }
 
@@ -30,12 +31,12 @@ class PlanningController extends Controller
 
     public function byTechnician(User $technician): View
     {
-        abort_if($technician->role !== 'technicien', 404);
+        abort_if($technician->role !== UserRole::Technicien, 404);
 
         /** @var User $user */
         $user = Auth::user();
 
-        if ($user->role === 'technicien' && $user->id !== $technician->id) {
+        if ($user->role === UserRole::Technicien && $user->id !== $technician->id) {
             abort(403, 'Vous ne pouvez consulter que votre propre planning.');
         }
 
@@ -53,7 +54,7 @@ class PlanningController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        if ($user->role === 'technicien') {
+        if ($user->role === UserRole::Technicien) {
             $query->where('assigned_to', $user->id);
         } elseif ($request->filled('technician_id')) {
             $query->where('assigned_to', $request->query('technician_id'));

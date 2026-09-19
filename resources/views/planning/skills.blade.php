@@ -17,7 +17,7 @@
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         @foreach ($skills as $skill)
                             <label class="flex items-center gap-2 text-sm">
                                 <input type="checkbox" name="skills[]" value="{{ $skill->id }}"

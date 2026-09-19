@@ -28,7 +28,7 @@
                         </select>
                     </div>
 
-                    <div x-show="type === 'disponible'" class="grid grid-cols-3 gap-4">
+                    <div x-show="type === 'disponible'" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <x-input-label for="day_of_week" value="Jour" />
                             <select id="day_of_week" name="day_of_week" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -51,7 +51,7 @@
                         </div>
                     </div>
 
-                    <div x-show="type !== 'disponible'" class="grid grid-cols-2 gap-4">
+                    <div x-show="type !== 'disponible'" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="date_start" value="Du" />
                             <x-text-input id="date_start" name="date_start" type="date" class="mt-1 block w-full" />

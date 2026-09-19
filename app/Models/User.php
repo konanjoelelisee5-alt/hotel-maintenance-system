@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'role' => UserRole::class,
         ];
     }
 
@@ -43,14 +45,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
      */
     public function getRoleLabelAttribute(): string
     {
-        return match ($this->role) {
-            'admin'        => 'Administrateur',
-            'manager'      => 'Manager',
-            'technicien'   => 'Technicien',
-            'housekeeping' => 'Housekeeping',
-            'reception'    => 'Réception',
-            default        => 'Utilisateur',
-        };
+        return $this->role?->label() ?? 'Utilisateur';
     }
 
     /**
@@ -58,14 +53,18 @@ class User extends Authenticatable implements MustVerifyEmailContract
      */
     public function dashboardRoute(): string
     {
-        return match ($this->role) {
-            'admin'        => 'admin.dashboard',
-            'manager'      => 'manager.dashboard',
-            'technicien'   => 'technicien.dashboard',
-            'housekeeping' => 'housekeeping.dashboard',
-            'reception'    => 'reception.dashboard',
-            default        => 'login',
-        };
+        return $this->role?->dashboardRoute() ?? 'login';
+    }
+
+    /**
+     * Initiales affichées dans les avatars (sidebar, cloche de notifications...).
+     */
+    public function initialsOrGenerated(): string
+    {
+        $parts = preg_split('/\s+/', trim($this->name));
+        $initials = collect($parts)->filter()->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->take(2)->implode('');
+
+        return $initials !== '' ? $initials : '?';
     }
 
     // ===== Relations (Module B) =====

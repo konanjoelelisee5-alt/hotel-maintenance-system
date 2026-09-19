@@ -26,7 +26,7 @@
                         <x-input-error :messages="$errors->get('description')" class="mt-2" />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="type_id" value="Type" />
                             <select id="type_id" name="type_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
@@ -48,7 +48,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="room_id" value="Lieu (chambre / zone)" />
                             <select id="room_id" name="room_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -76,7 +76,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="assigned_to" value="Assigner à (technicien)" />
                             <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">

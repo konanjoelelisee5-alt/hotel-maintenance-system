@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\UpdateTechnicianSkillsRequest;
 use App\Models\Skill;
 use App\Models\User;
@@ -12,7 +13,7 @@ class TechnicianSkillController extends Controller
 {
     public function edit(User $technician): View
     {
-        abort_if($technician->role !== 'technicien', 404);
+        abort_if($technician->role !== UserRole::Technicien, 404);
 
         $skills = Skill::orderBy('name')->get();
 
@@ -21,7 +22,7 @@ class TechnicianSkillController extends Controller
 
     public function update(UpdateTechnicianSkillsRequest $request, User $technician): RedirectResponse
     {
-        abort_if($technician->role !== 'technicien', 404);
+        abort_if($technician->role !== UserRole::Technicien, 404);
 
         $technician->skills()->sync($request->validated('skills', []));
 

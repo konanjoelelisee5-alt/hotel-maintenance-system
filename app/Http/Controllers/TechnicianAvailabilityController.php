@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\StoreTechnicianAvailabilityRequest;
 use App\Models\TechnicianAvailability;
 use App\Models\User;
@@ -12,7 +13,7 @@ class TechnicianAvailabilityController extends Controller
 {
     public function index(User $technician): View
     {
-        abort_if($technician->role !== 'technicien', 404);
+        abort_if($technician->role !== UserRole::Technicien, 404);
 
         $availabilities = $technician->availabilities()->orderBy('day_of_week')->get();
 
@@ -21,7 +22,7 @@ class TechnicianAvailabilityController extends Controller
 
     public function store(StoreTechnicianAvailabilityRequest $request, User $technician): RedirectResponse
     {
-        abort_if($technician->role !== 'technicien', 404);
+        abort_if($technician->role !== UserRole::Technicien, 404);
 
         $technician->availabilities()->create($request->validated());
 

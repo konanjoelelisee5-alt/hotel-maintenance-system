@@ -1,5 +1,5 @@
-<div class="bg-white rounded-xl border border-slate-200">
-    <div class="px-5 py-4 border-b border-slate-100">
+<div id="status-form" class="bg-white rounded-xl border border-line">
+    <div class="px-5 py-4 border-b border-line-soft">
         <h3 class="font-semibold text-navy-900 text-sm">Changer le statut</h3>
     </div>
     <div class="p-5">

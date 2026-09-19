@@ -16,7 +16,7 @@
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="contact_person" value="Personne à contacter" />
                             <x-text-input id="contact_person" name="contact_person" type="text" class="mt-1 block w-full" :value="old('contact_person', $supplier->contact_person)" />

@@ -1,9 +1,5 @@
-<div class="bg-white rounded-xl border border-slate-200">
-    <div class="px-5 py-4 border-b border-slate-100">
-        <h3 class="font-semibold text-navy-900 text-sm">Photos / Documents</h3>
-    </div>
-
-    <div class="p-5 space-y-4">
+<x-accordion-card title="Photos / Documents">
+    <div class="space-y-4">
         @can('intervene', $workOrder)
             <form method="POST" action="{{ route('work-orders.attachments.store', $workOrder) }}"
                   enctype="multipart/form-data" class="space-y-2">
@@ -18,18 +14,18 @@
         @endcan
 
         @if ($workOrder->attachments->isEmpty())
-            <p class="text-sm text-slate-500">Aucune pièce jointe.</p>
+            <p class="text-sm text-ink-grey">Aucune pièce jointe.</p>
         @else
             <div class="grid grid-cols-2 gap-3">
                 @foreach ($workOrder->attachments as $attachment)
-                    <div class="border border-slate-200 rounded-md p-2 text-center">
+                    <div class="border border-line rounded-md p-2 text-center">
                         @if (str_starts_with($attachment->mime_type, 'image/'))
                             <a href="{{ $attachment->url }}" target="_blank">
                                 <img src="{{ $attachment->url }}" class="h-20 w-full object-cover rounded mb-1.5">
                             </a>
                         @else
                             <a href="{{ $attachment->url }}" target="_blank"
-                               class="h-20 flex items-center justify-center bg-slate-50 rounded mb-1.5 text-2xl">
+                               class="h-20 flex items-center justify-center bg-paper rounded mb-1.5 text-2xl">
                                 📄
                             </a>
                         @endif
@@ -50,4 +46,4 @@
             </div>
         @endif
     </div>
-</div>
+</x-accordion-card>

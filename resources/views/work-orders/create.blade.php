@@ -25,7 +25,7 @@
                         <x-input-error :messages="$errors->get('description')" class="mt-2" />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="type_id" value="Type" />
                             <select id="type_id" name="type_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
@@ -47,7 +47,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="room_id" value="Lieu (chambre / zone)" />
                             <select id="room_id" name="room_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -75,7 +75,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="assigned_to" value="Assigner à (technicien)" />
                             <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -96,13 +96,15 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end gap-3">
-                        <a href="{{ route('work-orders.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">
+                    {{-- Sticky au-dessus de la barre de navigation mobile pour rester visible
+                         même clavier ouvert ; redevient une simple ligne de fin de formulaire à partir de lg. --}}
+                    <div class="sticky bottom-[64px] lg:static -mx-6 lg:mx-0 px-6 lg:px-0 py-3 lg:py-0 bg-white/95 backdrop-blur lg:bg-transparent border-t border-line lg:border-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                        <a href="{{ route('work-orders.index') }}" class="text-center px-4 py-2 text-sm text-ink-grey hover:underline">
                             Annuler
                         </a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
-                            Créer l'OT
-                        </button>
+                        <x-mobile-action-button type="submit" class="sm:w-auto sm:px-6">
+                            Créer l'ordre de travail
+                        </x-mobile-action-button>
                     </div>
 
                 </form>

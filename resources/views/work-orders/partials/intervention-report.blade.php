@@ -1,5 +1,5 @@
-<div class="bg-white rounded-xl border border-slate-200">
-    <div class="px-5 py-4 border-b border-slate-100">
+<div id="report" class="bg-white rounded-xl border border-line">
+    <div class="px-5 py-4 border-b border-line-soft">
         <h3 class="font-semibold text-navy-900 text-sm">Rapport d'intervention</h3>
     </div>
 
@@ -46,10 +46,10 @@
 
             <div>
                 <x-input-label value="Signature électronique" />
-                <div class="mt-1 border border-slate-300 rounded-md bg-slate-50">
+                <div class="mt-1 border border-slate-300 rounded-md bg-paper">
                     <canvas id="signature-pad" class="w-full touch-none" height="150"></canvas>
                 </div>
-                <button type="button" id="clear-signature" class="mt-2 text-xs text-slate-500 hover:underline">
+                <button type="button" id="clear-signature" class="mt-2 text-xs text-ink-grey hover:underline">
                     Effacer la signature
                 </button>
                 <input type="hidden" name="signature" id="signature-input">

@@ -2,10 +2,10 @@
     $activeSession = $workOrder->activeSession();
 @endphp
 
-<div class="bg-white rounded-xl border border-slate-200">
-    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+<div class="bg-white rounded-xl border border-line">
+    <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between">
         <h3 class="font-semibold text-navy-900 text-sm">Suivi de l'intervention</h3>
-        <span class="text-xs text-slate-500">
+        <span class="text-xs text-ink-grey">
             Temps total : <strong class="text-slate-700">{{ $workOrder->total_worked_minutes }} min</strong>
         </span>
     </div>
@@ -14,12 +14,12 @@
         <div class="flex items-center justify-between mb-4">
             <div>
                 @if ($activeSession)
-                    <p class="text-sm text-slate-500">Intervention en cours depuis :</p>
+                    <p class="text-sm text-ink-grey">Intervention en cours depuis :</p>
                     <p class="text-2xl font-mono font-bold text-emerald-600" id="timer" data-started-at="{{ $activeSession->started_at->toIso8601String() }}">
                         00:00:00
                     </p>
                 @else
-                    <p class="text-sm text-slate-500">Aucune intervention en cours.</p>
+                    <p class="text-sm text-ink-grey">Aucune intervention en cours.</p>
                 @endif
             </div>
 
@@ -43,9 +43,9 @@
         </div>
 
         @if ($workOrder->interventionSessions->isNotEmpty())
-            <div class="border-t border-slate-100 pt-3 space-y-2">
+            <div class="border-t border-line-soft pt-3 space-y-2">
                 @foreach ($workOrder->interventionSessions as $session)
-                    <div class="text-xs text-slate-500 flex justify-between">
+                    <div class="text-xs text-ink-grey flex justify-between">
                         <span>
                             {{ $session->technician->name }} —
                             {{ $session->started_at->format('d/m/Y H:i') }}

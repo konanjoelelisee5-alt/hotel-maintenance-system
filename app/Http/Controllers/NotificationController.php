@@ -26,7 +26,15 @@ class NotificationController extends Controller
         $notification = $request->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 
-        return redirect()->route('work-orders.show', $notification->data['work_order_id']);
+        if (isset($notification->data['work_order_id'])) {
+            return redirect()->route('work-orders.show', $notification->data['work_order_id']);
+        }
+
+        if (isset($notification->data['part_id'])) {
+            return redirect()->route('parts.show', $notification->data['part_id']);
+        }
+
+        return redirect()->route('notifications.index');
     }
 
     /**

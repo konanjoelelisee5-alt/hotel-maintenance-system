@@ -16,7 +16,7 @@
             @endif
 
             <!-- Aperçu du stock -->
-            <div class="grid grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div class="bg-white p-4 shadow-sm rounded-lg">
                     <p class="text-sm text-gray-500">En stock</p>
                     <p class="text-2xl font-bold text-gray-800">{{ $part->quantity_on_hand }}</p>

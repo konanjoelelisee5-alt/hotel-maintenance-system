@@ -18,7 +18,7 @@
 
 <div class="border-t pt-4">
     <p class="text-sm font-medium text-gray-700 mb-2">Cible du plan <span class="text-gray-400 font-normal">(au moins une des deux)</span></p>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label for="room_id" value="Chambre" />
             <select id="room_id" name="room_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -43,7 +43,7 @@
 
 <div class="border-t pt-4">
     <p class="text-sm font-medium text-gray-700 mb-2">OT généré automatiquement</p>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label for="work_order_type_id" value="Type d'OT" />
             <select id="work_order_type_id" name="work_order_type_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mt-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <div>
             <x-input-label for="checklist_template_id" value="Checklist associée (optionnel)" />
             <select id="checklist_template_id" name="checklist_template_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -84,7 +84,7 @@
 
 <div class="border-t pt-4">
     <p class="text-sm font-medium text-gray-700 mb-2">Assignation automatique</p>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label for="assigned_to" value="Technicien fixe (optionnel)" />
             <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -113,7 +113,7 @@
 
 <div class="border-t pt-4">
     <p class="text-sm font-medium text-gray-700 mb-2">Récurrence</p>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
             <x-input-label for="frequency_interval" value="Tous les" />
             <x-text-input id="frequency_interval" name="frequency_interval" type="number" min="1" class="mt-1 block w-full"
@@ -138,7 +138,7 @@
         (ex. générer 3 jours à l'avance une maintenance due le 1er du mois).
     </p>
 
-    <div class="grid grid-cols-2 gap-4 mt-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <div>
             <x-input-label for="start_date" value="Date de début" />
             <x-text-input id="start_date" name="start_date" type="date" class="mt-1 block w-full"

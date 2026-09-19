@@ -52,19 +52,20 @@
             </div>
 
             <!-- Formulaire -->
-            <div class="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 bg-slate-50">
+            <div class="w-full lg:w-1/2 flex flex-col items-center justify-center p-4 sm:p-6 bg-canvas">
                 <div class="w-full max-w-sm">
 
-                    <!-- Logo visible uniquement sur mobile -->
-                    <div class="flex lg:hidden items-center justify-center gap-3 mb-8">
-                        <img src="{{ asset('images/logo-hotel-president-icon.jpg') }}" alt="Hôtel Président"
-                             class="h-10 w-10 rounded-full object-cover shadow">
-                        <span class="text-navy-800 font-semibold text-xl tracking-wide">
-                            Hôtel Président
+                    <!-- Logo + titre : visibles uniquement sur mobile (le panneau desktop a déjà son propre logo) -->
+                    <div class="flex lg:hidden flex-col items-center gap-3 mb-8">
+                        <span class="w-20 h-20 rounded-full bg-navy flex items-center justify-center shadow-sm">
+                            <span class="text-gold text-2xl font-bold">HP</span>
                         </span>
+                        <h1 class="text-navy text-[21px] font-semibold text-center leading-tight">
+                            Hôtel Président — Maintenance
+                        </h1>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                    <div class="bg-[#FAF8F4] rounded-2xl shadow-sm border border-line p-6 sm:p-8">
                         {{ $slot }}
                     </div>
 

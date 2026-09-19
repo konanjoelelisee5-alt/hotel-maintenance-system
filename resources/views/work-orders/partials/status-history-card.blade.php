@@ -1,13 +1,9 @@
-<div class="bg-white rounded-xl border border-slate-200">
-    <div class="px-5 py-4 border-b border-slate-100">
-        <h3 class="font-semibold text-navy-900 text-sm">Historique</h3>
-    </div>
-
-    <ol class="p-5 space-y-4">
+<x-accordion-card title="Historique">
+    <ol class="space-y-4">
         @forelse ($workOrder->statusHistories as $history)
-            <li class="relative pl-4 border-l-2 border-slate-200 text-sm">
-                <span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-navy-400"></span>
-                <p class="text-slate-800">
+            <li class="relative pl-4 border-l-2 border-line text-sm">
+                <span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-navy"></span>
+                <p class="text-[#3d3a33]">
                     <span class="font-medium">{{ $history->changedBy?->name ?? 'Système' }}</span>
                     @if ($history->old_status)
                         a changé le statut en <strong>{{ $history->new_status }}</strong>
@@ -15,13 +11,13 @@
                         a créé l'OT
                     @endif
                 </p>
-                <p class="text-xs text-slate-400 mt-0.5">{{ $history->created_at->format('d/m/Y H:i') }}</p>
+                <p class="text-xs text-ink-grey mt-0.5">{{ $history->created_at->format('d/m/Y H:i') }}</p>
                 @if ($history->note)
-                    <p class="text-xs text-slate-600 italic mt-1">« {{ $history->note }} »</p>
+                    <p class="text-xs text-[#6C6658] italic mt-1">« {{ $history->note }} »</p>
                 @endif
             </li>
         @empty
-            <p class="text-sm text-slate-500">Aucun historique.</p>
+            <p class="text-sm text-ink-grey">Aucun historique.</p>
         @endforelse
     </ol>
-</div>
+</x-accordion-card>

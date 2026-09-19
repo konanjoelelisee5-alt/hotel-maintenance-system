@@ -8,7 +8,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if (in_array(auth()->user()->role, ['admin', 'manager']))
+            @if (in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true))
                 <div class="flex gap-3">
                     <a href="{{ route('planning.skills.edit', $technician) }}" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-md hover:bg-gray-300">
                         Compétences
@@ -20,7 +20,9 @@
             @endif
 
             <div class="bg-white p-4 shadow-sm rounded-lg">
-                <div id="calendar"></div>
+                <div class="overflow-x-auto">
+                    <div id="calendar" class="min-w-[640px]"></div>
+                </div>
             </div>
 
         </div>

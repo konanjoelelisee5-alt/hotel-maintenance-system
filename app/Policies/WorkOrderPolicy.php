@@ -12,7 +12,7 @@ class WorkOrderPolicy
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return in_array($user->role?->value, ['admin', 'manager']);
     }
 
     /**
@@ -20,7 +20,7 @@ class WorkOrderPolicy
      */
     public function view(User $user, WorkOrder $workOrder): bool
     {
-        return match ($user->role) {
+        return match ($user->role?->value) {
             'admin', 'manager' => true,
             'technicien' => $workOrder->assigned_to === $user->id,
             'housekeeping', 'reception' => $workOrder->reported_by === $user->id,
@@ -41,7 +41,7 @@ class WorkOrderPolicy
      */
     public function update(User $user, WorkOrder $workOrder): bool
     {
-        return match ($user->role) {
+        return match ($user->role?->value) {
             'admin', 'manager' => true,
             'technicien' => $workOrder->assigned_to === $user->id,
             default => false,
@@ -53,7 +53,7 @@ class WorkOrderPolicy
      */
     public function delete(User $user, WorkOrder $workOrder): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return in_array($user->role?->value, ['admin', 'manager']);
     }
 
     /**
@@ -61,10 +61,37 @@ class WorkOrderPolicy
      */
     public function intervene(User $user, WorkOrder $workOrder): bool
     {
-        return match ($user->role) {
+        return match ($user->role?->value) {
             'admin', 'manager' => true,
             'technicien' => $workOrder->assigned_to === $user->id,
             default => false,
         };
+    }
+
+    /**
+     * Qui peut (ré)affecter un technicien / planifier l'OT.
+     * Alias de update() — noms distincts uniquement pour lisibilité des vues.
+     */
+    public function assign(User $user, WorkOrder $workOrder): bool
+    {
+        return $this->update($user, $workOrder);
+    }
+
+    /**
+     * Qui peut agir au quotidien sur l'OT (statut, commentaire, pièce, rapport...).
+     * Alias de intervene().
+     */
+    public function work(User $user, WorkOrder $workOrder): bool
+    {
+        return $this->intervene($user, $workOrder);
+    }
+
+    /**
+     * Qui peut valider/rejeter un contrôle qualité (même matrice que les routes
+     * quality-controls.* actuelles : role:admin,manager).
+     */
+    public function reviewQuality(User $user): bool
+    {
+        return in_array($user->role?->value, ['admin', 'manager']);
     }
 }

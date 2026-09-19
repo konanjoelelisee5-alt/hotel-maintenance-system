@@ -22,7 +22,7 @@
                     <x-purchase-order-status-badge :status="$purchaseOrder->status" class="text-sm" />
                 </div>
 
-                <div class="grid grid-cols-3 gap-4 text-sm text-gray-600">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
                     <div><span class="font-medium">Date commande :</span> {{ $purchaseOrder->order_date->format('d/m/Y') }}</div>
                     <div><span class="font-medium">Livraison prévue :</span> {{ $purchaseOrder->expected_delivery_date?->format('d/m/Y') ?? '—' }}</div>
                     @if ($purchaseOrder->workOrder)
@@ -66,6 +66,7 @@
 
                 <form method="POST" action="{{ route('purchase-orders.reception.store', $purchaseOrder) }}">
                     @csrf
+                    <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead>
                             <tr class="text-left text-xs text-gray-500 uppercase border-b">
@@ -99,6 +100,7 @@
                             </tr>
                         </tfoot>
                     </table>
+                    </div>
 
                     <div class="mt-4 flex justify-end">
                         <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
@@ -138,7 +140,7 @@
 
                 <form method="POST" action="{{ route('purchase-orders.invoices.store', $purchaseOrder) }}" enctype="multipart/form-data" class="mt-4 space-y-3">
                     @csrf
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input type="text" name="invoice_number" placeholder="N° facture" class="border-gray-300 rounded-md shadow-sm text-sm" required>
                         <input type="date" name="invoice_date" class="border-gray-300 rounded-md shadow-sm text-sm" required>
                         <input type="number" name="amount" step="0.01" placeholder="Montant" class="border-gray-300 rounded-md shadow-sm text-sm" required>

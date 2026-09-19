@@ -26,14 +26,14 @@
                         <x-input-label for="role" value="Rôle" />
                         <select id="role" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required
                             @if ($user->id === auth()->id()) disabled @endif>
-                            <option value="admin" @selected(old('role', $user->role) === 'admin')>Administrateur</option>
-                            <option value="manager" @selected(old('role', $user->role) === 'manager')>Manager</option>
-                            <option value="technicien" @selected(old('role', $user->role) === 'technicien')>Technicien</option>
-                            <option value="housekeeping" @selected(old('role', $user->role) === 'housekeeping')>Housekeeping</option>
-                            <option value="reception" @selected(old('role', $user->role) === 'reception')>Réception</option>
+                            <option value="admin" @selected(old('role', $user->role->value) === 'admin')>Administrateur</option>
+                            <option value="manager" @selected(old('role', $user->role->value) === 'manager')>Manager</option>
+                            <option value="technicien" @selected(old('role', $user->role->value) === 'technicien')>Technicien</option>
+                            <option value="housekeeping" @selected(old('role', $user->role->value) === 'housekeeping')>Housekeeping</option>
+                            <option value="reception" @selected(old('role', $user->role->value) === 'reception')>Réception</option>
                         </select>
                         @if ($user->id === auth()->id())
-                            <input type="hidden" name="role" value="{{ $user->role }}">
+                            <input type="hidden" name="role" value="{{ $user->role->value }}">
                             <p class="text-xs text-gray-500 mt-1">Vous ne pouvez pas modifier votre propre rôle.</p>
                         @endif
                         <x-input-error :messages="$errors->get('role')" class="mt-2" />

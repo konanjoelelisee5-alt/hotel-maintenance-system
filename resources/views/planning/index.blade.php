@@ -25,7 +25,9 @@
 
             <!-- Calendrier -->
             <div class="bg-white p-4 shadow-sm rounded-lg">
-                <div id="calendar"></div>
+                <div class="overflow-x-auto">
+                    <div id="calendar" class="min-w-[640px]"></div>
+                </div>
             </div>
 
         </div>

@@ -1,93 +1,97 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">OT #{{ $workOrder->id }}</p>
-                <h2 class="font-semibold text-xl text-navy-900 leading-tight">{{ $workOrder->title }}</h2>
-            </div>
+<x-app-layout crumb="Ordres de travail · {{ $workOrder->code() }}" page-title="{{ $workOrder->title }}" :back-route="route('work-orders.index')">
+    @if (in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true) || auth()->user()->can('update', $workOrder))
+        <x-slot:primaryAction>
             <div class="flex flex-wrap gap-2">
-                @if (in_array(auth()->user()->role, ['admin', 'manager']))
-                    <a href="{{ route('work-orders.schedule', $workOrder) }}"
-                       class="px-4 py-2 bg-navy-700 text-white text-sm font-medium rounded-md hover:bg-navy-800">
+                @if (in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true))
+                    <a href="{{ route('work-orders.schedule', $workOrder) }}" class="px-[15px] py-[9px] border-0 rounded-[9px] bg-navy text-white text-[13px] font-semibold inline-block">
                         Planifier
                     </a>
                 @endif
                 @can('update', $workOrder)
-                    <a href="{{ route('work-orders.edit', $workOrder) }}"
-                       class="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm font-medium rounded-md hover:bg-slate-50">
+                    <a href="{{ route('work-orders.edit', $workOrder) }}" class="px-[15px] py-[9px] border border-line rounded-[9px] bg-white text-[#3d3a33] text-[13px] font-semibold inline-block">
                         Modifier
                     </a>
                 @endcan
             </div>
+        </x-slot:primaryAction>
+    @endif
+
+    {{-- Bandeau statut / priorité / description --}}
+    <div class="bg-white rounded-xl border border-line p-6">
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+            <x-work-order-status-badge :status="$workOrder->status" />
+            <x-work-order-priority-badge :priority="$workOrder->priority" />
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-line-soft text-[#6C6658]">
+                {{ $workOrder->type->label }}
+            </span>
         </div>
-    </x-slot>
+        <p class="text-[#3d3a33] leading-relaxed">
+            {{ $workOrder->description ?: 'Aucune description fournie.' }}
+        </p>
+    </div>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            @if (session('success'))
-                <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-sm">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if (session('error'))
-                <div class="p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <!-- Bandeau statut / priorité / description -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6">
-                <div class="flex flex-wrap items-center gap-2 mb-4">
-                    <x-work-order-status-badge :status="$workOrder->status" />
-                    <x-work-order-priority-badge :priority="$workOrder->priority" />
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
-                        {{ $workOrder->type->label }}
-                    </span>
-                </div>
-                <p class="text-slate-700 leading-relaxed">
-                    {{ $workOrder->description ?: 'Aucune description fournie.' }}
-                </p>
+    {{-- Raccourcis d'action : sur mobile, la page ne présente plus les cartes en 2
+         colonnes toujours visibles comme sur desktop — ces boutons renvoient vers
+         chaque section plus bas (ou soumettent directement pour le chrono). --}}
+    @can('work', $workOrder)
+        @php $activeSession = $workOrder->activeSession(); @endphp
+        <div class="lg:hidden bg-white rounded-xl border border-line p-4">
+            <div class="text-[11px] font-semibold text-[#7D7768] uppercase tracking-wide mb-3">Actions</div>
+            <div class="flex flex-col gap-2">
+                @if ($activeSession)
+                    <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
+                        @csrf
+                        <x-mobile-action-button variant="primary" icon="pause">Arrêter le chrono</x-mobile-action-button>
+                    </form>
+                @else
+                    <form method="POST" action="{{ route('work-orders.sessions.start', $workOrder) }}">
+                        @csrf
+                        <x-mobile-action-button variant="primary" icon="play">Démarrer le chrono</x-mobile-action-button>
+                    </form>
+                @endif
+                <x-mobile-action-button variant="secondary" icon="status" href="#status-form">Changer le statut</x-mobile-action-button>
+                <x-mobile-action-button variant="secondary" icon="comment" href="#comments">Ajouter un commentaire</x-mobile-action-button>
+                <x-mobile-action-button variant="secondary" icon="part" href="#parts">Réserver une pièce</x-mobile-action-button>
+                <x-mobile-action-button variant="secondary" icon="report" href="#report">Rapport d'intervention</x-mobile-action-button>
             </div>
+        </div>
+    @endcan
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <!-- Colonne principale : actions et suivi -->
-                <div class="lg:col-span-2 space-y-6">
+        {{-- Colonne principale : actions et suivi --}}
+        <div class="lg:col-span-2 space-y-6">
 
-                    @can('intervene', $workOrder)
-                        @include('work-orders.partials.status-form')
-                        @include('work-orders.partials.intervention-tracking')
-                        @include('work-orders.partials.intervention-report')
-                    @endcan
+            @can('work', $workOrder)
+                @include('work-orders.partials.status-form')
+                @include('work-orders.partials.intervention-tracking')
+                @include('work-orders.partials.intervention-report')
+            @endcan
 
-                    @if (in_array(auth()->user()->role, ['admin', 'manager']))
-                        @include('work-orders.partials.quality-control')
-                    @endif
+            @can('reviewQuality', \App\Models\WorkOrder::class)
+                @include('work-orders.partials.quality-control')
+            @endcan
 
-                    @if ($workOrder->correctionRequests->isNotEmpty())
-                        @include('work-orders.partials.correction-requests')
-                    @endif
+            @if ($workOrder->correctionRequests->isNotEmpty())
+                @include('work-orders.partials.correction-requests')
+            @endif
 
-                    @include('work-orders.partials.comments')
-
-                </div>
-
-                <!-- Colonne latérale : informations et ressources -->
-                <div class="space-y-6">
-                    @include('work-orders.partials.info-card')
-
-                    @if ($workOrder->sla_policy_id)
-                        @include('work-orders.partials.sla-card')
-                    @endif
-
-                    @include('work-orders.partials.parts-card')
-                    @include('work-orders.partials.attachments-card')
-                    @include('work-orders.partials.status-history-card')
-                </div>
-
-            </div>
+            @include('work-orders.partials.comments')
 
         </div>
+
+        {{-- Colonne latérale : informations et ressources --}}
+        <div class="space-y-6">
+            @include('work-orders.partials.info-card')
+
+            @if ($workOrder->sla_policy_id)
+                @include('work-orders.partials.sla-card')
+            @endif
+
+            @include('work-orders.partials.parts-card')
+            @include('work-orders.partials.attachments-card')
+            @include('work-orders.partials.status-history-card')
+        </div>
+
     </div>
 </x-app-layout>

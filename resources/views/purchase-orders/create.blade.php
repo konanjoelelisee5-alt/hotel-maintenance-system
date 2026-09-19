@@ -32,7 +32,7 @@
                       class="space-y-6">
                     @csrf
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="supplier_id" value="Fournisseur" />
                             <select id="supplier_id" name="supplier_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="order_date" value="Date de commande" />
                             <x-text-input id="order_date" name="order_date" type="date" class="mt-1 block w-full" :value="old('order_date', now()->format('Y-m-d'))" required />

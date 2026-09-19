@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\StoreWorkOrderAttachmentRequest;
 use App\Http\Requests\StoreWorkOrderCommentRequest;
 use App\Http\Requests\StoreWorkOrderRequest;
@@ -22,23 +23,48 @@ use Illuminate\View\View;
 class WorkOrderController extends Controller
 {
     public function index(Request $request): View
-{
-        $query = WorkOrder::with(['room', 'equipment', 'assignee', 'reporter', 'type', 'priority']);
+    {
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $query = WorkOrder::visibleTo($authUser)->with(['room', 'equipment', 'assignee', 'reporter', 'type', 'priority']);
 
-        // Un technicien ne voit que ses OT assignés ; housekeeping/réception, ceux qu'ils ont signalés
-        if (Auth::user()->role === 'technicien') {
-            $query->where('assigned_to', Auth::id());
-        } elseif (in_array(Auth::user()->role, ['housekeeping', 'reception'])) {
-            $query->where('reported_by', Auth::id());
-        }
+        $q = $request->string('q')->toString();
+        $filter = $request->string('filter')->toString() ?: ($authUser->role->seesAllWorkOrders() ? 'all' : 'mine');
+        $sort = $request->string('sort')->toString() ?: 'due';
 
-        $workOrders = $query
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
-            ->when($request->filled('priority_id'), fn ($q) => $q->where('priority_id', $request->priority_id))
-            ->latest()
-            ->paginate(15);
+        $workOrders = (clone $query)
+            ->when($q !== '', fn ($qr) => $qr->where(fn ($w) => $w
+                ->where('title', 'like', "%{$q}%")
+                ->orWhereHas('room', fn ($r) => $r->where('number', 'like', "%{$q}%"))
+            ))
+            ->when($filter === 'urgent', fn ($qr) => $qr->whereHas('priority', fn ($p) => $p->where('code', 'urgente')))
+            ->when($filter === 'unassigned', fn ($qr) => $qr->whereNull('assigned_to'))
+            ->when($filter === 'late', fn ($qr) => $qr->where('sla_breached', true))
+            ->when($request->filled('status'), fn ($qr) => $qr->where('status', $request->status))
+            ->when($request->filled('priority_id'), fn ($qr) => $qr->where('priority_id', $request->priority_id))
+            ->when($sort === 'priority', fn ($qr) => $qr->join('work_order_priorities', 'work_order_priorities.id', '=', 'work_orders.priority_id')
+                ->orderBy('work_order_priorities.position')
+                ->select('work_orders.*'))
+            ->when($sort === 'created', fn ($qr) => $qr->latest('work_orders.created_at'))
+            ->when($sort === 'due', fn ($qr) => $qr->orderByRaw('CASE WHEN sla_breached THEN 0 ELSE 1 END')->orderBy('sla_resolution_due_at'))
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('work-orders.index', compact('workOrders'));
+        $sortOptions = ['due' => 'Échéance SLA', 'priority' => 'Priorité', 'created' => 'Date de création'];
+
+        $isSupervisor = $authUser->role->seesAllWorkOrders();
+        $filters = $isSupervisor
+            ? [['key' => 'all', 'label' => 'Tous'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'unassigned', 'label' => 'Non affectés'], ['key' => 'late', 'label' => 'En retard SLA']]
+            : [['key' => 'mine', 'label' => $authUser->role === UserRole::Technicien ? 'Mes ordres' : 'Mes signalements'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'all', 'label' => 'Tous']];
+
+        $stats = [
+            ['label' => 'Total', 'value' => (clone $query)->count()],
+            ['label' => 'Ouverts', 'value' => (clone $query)->open()->count()],
+            ['label' => 'Non affectés', 'value' => (clone $query)->whereNull('assigned_to')->open()->count()],
+            ['label' => 'SLA dépassé', 'value' => (clone $query)->where('sla_breached', true)->count()],
+        ];
+
+        return view('work-orders.index', compact('workOrders', 'q', 'filter', 'filters', 'stats', 'isSupervisor', 'sort', 'sortOptions'));
     }
 
     public function create(): View

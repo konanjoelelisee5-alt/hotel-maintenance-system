@@ -1,52 +1,57 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Notifications') }}
-            </h2>
-            @if (auth()->user()->unreadNotifications->isNotEmpty())
-                <form method="POST" action="{{ route('notifications.read-all') }}">
-                    @csrf
-                    <button type="submit" class="text-sm text-indigo-600 hover:underline">
-                        Tout marquer comme lu
-                    </button>
-                </form>
-            @endif
+@php
+    $dotColor = fn ($n) => match (true) {
+        str_contains($n->type, 'SlaEscalation') => 'red',
+        str_contains($n->type, 'LowStock') => 'gold',
+        str_contains($n->type, 'QualityControl') => 'amber',
+        default => 'blue',
+    };
+    $unread = $notifications->filter(fn ($n) => is_null($n->read_at));
+    $read = $notifications->filter(fn ($n) => ! is_null($n->read_at));
+@endphp
+
+<x-app-layout crumb="Mon activité" page-title="Notifications">
+    @if ($unread->isNotEmpty())
+        <x-slot:primaryAction>
+            <form method="POST" action="{{ route('notifications.read-all') }}">
+                @csrf
+                <button type="submit" class="px-[15px] py-[9px] border border-line rounded-[9px] bg-white text-navy text-[13px] font-semibold">
+                    Tout marquer lu
+                </button>
+            </form>
+        </x-slot:primaryAction>
+    @endif
+
+    @if ($notifications->isEmpty())
+        <div class="bg-white border border-line rounded-xl px-5 py-14 flex flex-col items-center gap-2 text-center">
+            <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-[#A09A8C]"><x-nav-icon name="bell" class="w-5 h-5" /></div>
+            <div class="text-[14px] font-semibold">Aucune notification</div>
+            <div class="text-[12.5px] text-ink-grey">Tu seras prévenu ici des évènements qui te concernent.</div>
         </div>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
-
-            <div class="bg-white shadow-sm rounded-lg divide-y">
-                @forelse ($notifications as $notification)
-                    <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
-                        @csrf
-                        <button type="submit" class="w-full text-left p-4 hover:bg-gray-50 flex justify-between items-start gap-4">
-                            <div>
-                                <p class="text-sm {{ $notification->read_at ? 'text-gray-500' : 'text-gray-900 font-medium' }}">
-                                    {{ $notification->data['message'] }}
-                                </p>
-                                <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
-                            </div>
-                            @unless ($notification->read_at)
-                                <span class="shrink-0 h-2 w-2 bg-blue-600 rounded-full mt-2"></span>
-                            @endunless
-                        </button>
-                    </form>
-                @empty
-                    <p class="p-6 text-sm text-gray-500 text-center">Aucune notification pour le moment.</p>
-                @endforelse
+    @else
+        @if ($unread->isNotEmpty())
+            <div>
+                <div class="text-[11px] font-semibold text-[#7D7768] uppercase tracking-wide mb-2">Non lues · {{ $unread->count() }}</div>
+                <div class="flex flex-col gap-2">
+                    @foreach ($unread as $notification)
+                        @include('notifications.partials._row', ['notification' => $notification, 'color' => $dotColor($notification), 'unread' => true])
+                    @endforeach
+                </div>
             </div>
+        @endif
 
-            <div class="mt-4">
-                {{ $notifications->links() }}
+        @if ($read->isNotEmpty())
+            <div>
+                <div class="text-[11px] font-semibold text-[#7D7768] uppercase tracking-wide mb-2 {{ $unread->isNotEmpty() ? 'mt-2' : '' }}">Plus anciennes</div>
+                <div class="flex flex-col gap-2">
+                    @foreach ($read as $notification)
+                        @include('notifications.partials._row', ['notification' => $notification, 'color' => $dotColor($notification), 'unread' => false])
+                    @endforeach
+                </div>
             </div>
+        @endif
+    @endif
 
-        </div>
+    <div class="mt-1">
+        {{ $notifications->links() }}
     </div>
 </x-app-layout>

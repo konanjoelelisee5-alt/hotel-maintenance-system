@@ -1,9 +1,5 @@
-<div class="bg-white rounded-xl border border-slate-200">
-    <div class="px-5 py-4 border-b border-slate-100">
-        <h3 class="font-semibold text-navy-900 text-sm">Pièces réservées</h3>
-    </div>
-
-    <div class="p-5 space-y-3">
+<x-accordion-card id="parts" title="Pièces réservées" :open="$workOrder->partReservations->isNotEmpty()">
+    <div class="space-y-3">
         @can('intervene', $workOrder)
             <form method="POST" action="{{ route('work-orders.reservations.store', $workOrder) }}" class="space-y-2">
                 @csrf
@@ -25,18 +21,18 @@
         @endcan
 
         @if ($workOrder->partReservations->isEmpty())
-            <p class="text-sm text-slate-500">Aucune pièce réservée pour cet OT.</p>
+            <p class="text-sm text-ink-grey">Aucune pièce réservée pour cet OT.</p>
         @else
             <div class="divide-y divide-slate-100">
                 @foreach ($workOrder->partReservations as $reservation)
                     <div class="flex justify-between items-start gap-2 py-3 first:pt-0 text-sm">
                         <div>
                             <p class="text-slate-800">{{ $reservation->part->name }}</p>
-                            <p class="text-xs text-slate-500">{{ $reservation->quantity }} {{ $reservation->part->unit }}</p>
+                            <p class="text-xs text-ink-grey">{{ $reservation->quantity }} {{ $reservation->part->unit }}</p>
                             <span class="inline-flex items-center px-2 py-0.5 mt-1 text-xs rounded-full
                                 {{ $reservation->status === 'reservee' ? 'bg-gold-100 text-gold-700' : '' }}
                                 {{ $reservation->status === 'sortie' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                {{ $reservation->status === 'annulee' ? 'bg-slate-100 text-slate-500' : '' }}">
+                                {{ $reservation->status === 'annulee' ? 'bg-slate-100 text-ink-grey' : '' }}">
                                 {{ $reservation->status_label }}
                             </span>
                         </div>
@@ -61,4 +57,4 @@
             </div>
         @endif
     </div>
-</div>
+</x-accordion-card>

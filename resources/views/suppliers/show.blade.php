@@ -15,7 +15,7 @@
                 <div class="p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
             @endif
 
-            <div class="bg-white p-6 shadow-sm rounded-lg grid grid-cols-2 gap-4 text-sm text-gray-600">
+            <div class="bg-white p-6 shadow-sm rounded-lg grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
                 <div><span class="font-medium">Contact :</span> {{ $supplier->contact_person ?? '—' }}</div>
                 <div><span class="font-medium">Téléphone :</span> {{ $supplier->phone ?? '—' }}</div>
                 <div><span class="font-medium">E-mail :</span> {{ $supplier->email ?? '—' }}</div>

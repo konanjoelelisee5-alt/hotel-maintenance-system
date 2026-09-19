@@ -16,7 +16,7 @@
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="priority" value="Priorité concernée (optionnel)" />
                             <select id="priority" name="priority" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -39,7 +39,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="response_time_minutes" value="Délai de réponse (minutes)" />
                             <x-text-input id="response_time_minutes" name="response_time_minutes" type="number" min="1" class="mt-1 block w-full" :value="old('response_time_minutes', $slaPolicy->response_time_minutes)" required />

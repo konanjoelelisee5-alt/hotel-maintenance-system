@@ -29,6 +29,7 @@
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -63,6 +64,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <div class="mt-4">{{ $suppliers->links() }}</div>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -167,6 +168,20 @@ class WorkOrder extends Model
         return $query->whereNotNull('maintenance_plan_id');
     }
 
+    /**
+     * Limite la requête aux OT que ce rôle a le droit de voir dans les listes/badges
+     * (même règle que WorkOrderController::index / WorkOrderPolicy) : admin/manager
+     * voient tout, technicien ses OT assignés, housekeeping/réception ceux qu'ils ont signalés.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return match ($user->role) {
+            UserRole::Technicien => $query->where('assigned_to', $user->id),
+            UserRole::Housekeeping, UserRole::Reception => $query->where('reported_by', $user->id),
+            default => $query,
+        };
+    }
+
     // ===== Logique métier =====
     public function activeSession()
     {
@@ -223,5 +238,64 @@ class WorkOrder extends Model
         }
 
         return $this->scheduled_at->copy()->addMinutes($this->estimated_duration_minutes);
+    }
+
+    /**
+     * Référence courte affichée dans les listes/fiches (ex. "OT-00123").
+     */
+    public function code(): string
+    {
+        return 'OT-'.str_pad((string) $this->id, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Clé de couleur sémantique (App\Support\Swatch) selon l'état du SLA.
+     */
+    public function slaColorClass(): string
+    {
+        if (is_null($this->sla_resolution_due_at)) {
+            return 'grey';
+        }
+
+        if ($this->sla_breached) {
+            return 'red';
+        }
+
+        return $this->slaProgressPercent() >= 75 ? 'amber' : 'green';
+    }
+
+    /**
+     * Pourcentage du délai SLA de résolution déjà écoulé depuis la création (0-100).
+     */
+    public function slaProgressPercent(): int
+    {
+        if (is_null($this->sla_resolution_due_at)) {
+            return 0;
+        }
+
+        if ($this->sla_breached) {
+            return 100;
+        }
+
+        $total = $this->created_at->diffInMinutes($this->sla_resolution_due_at);
+        $elapsed = $this->created_at->diffInMinutes(now());
+
+        return $total > 0 ? (int) min(100, max(0, round($elapsed / $total * 100))) : 100;
+    }
+
+    /**
+     * Libellé court du temps restant/dépassé avant l'échéance SLA de résolution.
+     */
+    public function slaRemainingLabel(): string
+    {
+        if (is_null($this->sla_resolution_due_at)) {
+            return 'Pas de SLA';
+        }
+
+        if ($this->sla_breached || $this->sla_resolution_due_at->isPast()) {
+            return 'Dépassé de '.$this->sla_resolution_due_at->locale('fr')->diffForHumans(null, true);
+        }
+
+        return $this->sla_resolution_due_at->locale('fr')->diffForHumans(null, true).' restantes';
     }
 }

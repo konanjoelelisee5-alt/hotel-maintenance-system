@@ -1,9 +1,9 @@
-<div class="bg-white rounded-xl border border-slate-200">
-    <div class="px-5 py-4 border-b border-slate-100">
+<div id="comments" class="bg-white rounded-xl border border-line">
+    <div class="px-5 py-4 border-b border-line-soft">
         <h3 class="font-semibold text-navy-900 text-sm">
             Commentaires
             @if ($workOrder->comments->isNotEmpty())
-                <span class="text-slate-400 font-normal">({{ $workOrder->comments->count() }})</span>
+                <span class="text-ink-grey font-normal">({{ $workOrder->comments->count() }})</span>
             @endif
         </h3>
     </div>
@@ -25,20 +25,20 @@
 
         <div class="space-y-4">
             @forelse ($workOrder->comments as $comment)
-                <div class="flex gap-3 {{ ! $loop->first ? 'border-t border-slate-100 pt-4' : '' }}">
+                <div class="flex gap-3 {{ ! $loop->first ? 'border-t border-line-soft pt-4' : '' }}">
                     <span class="flex items-center justify-center h-8 w-8 shrink-0 rounded-full bg-navy-100 text-navy-700 text-xs font-semibold">
                         {{ strtoupper(substr($comment->user->name, 0, 1)) }}
                     </span>
                     <div class="flex-1">
                         <div class="flex justify-between items-baseline">
                             <span class="font-medium text-sm text-slate-800">{{ $comment->user->name }}</span>
-                            <span class="text-xs text-slate-400">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
+                            <span class="text-xs text-ink-grey">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
                         </div>
                         <p class="text-sm text-slate-700 mt-1">{{ $comment->content }}</p>
                     </div>
                 </div>
             @empty
-                <p class="text-sm text-slate-500">Aucun commentaire pour le moment.</p>
+                <p class="text-sm text-ink-grey">Aucun commentaire pour le moment.</p>
             @endforelse
         </div>
     </div>
