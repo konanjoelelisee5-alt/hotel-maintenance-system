@@ -9,6 +9,17 @@ PORT="${PORT:-10000}"
 sed -ri "s/^Listen 80\$/Listen ${PORT}/" /etc/apache2/ports.conf
 sed -ri "s/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
 
+# APP_KEY : tolère les erreurs de copier-coller (espaces, guillemets, préfixe
+# "base64:" oublié) et signale clairement une clé inutilisable.
+APP_KEY="$(printf '%s' "${APP_KEY:-}" | tr -d "[:space:]\"'")"
+if printf '%s' "$APP_KEY" | grep -Eq '^[A-Za-z0-9+/]{43}=$'; then
+    APP_KEY="base64:$APP_KEY"
+fi
+export APP_KEY
+if ! printf '%s' "$APP_KEY" | grep -Eq '^base64:[A-Za-z0-9+/]{43}=$'; then
+    echo "ATTENTION : APP_KEY invalide ou absente. Attendu : base64: suivi de 44 caractères (se terminant par =)."
+fi
+
 # Certificat CA de la base MySQL (Aiven), fourni en variable d'environnement
 if [ -n "${DB_SSL_CA_PEM:-}" ]; then
     printf '%s\n' "$DB_SSL_CA_PEM" > /etc/ssl/db-ca.pem
