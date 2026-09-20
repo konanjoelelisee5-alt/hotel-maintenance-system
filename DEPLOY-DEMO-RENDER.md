@@ -89,6 +89,15 @@ Render reconstruit et redéploie automatiquement (`autoDeploy`).
 
 - **Le site affiche une erreur 500** : Render → le service → **Logs**. La ligne
   « migration impossible (base de données injoignable ?) » signale un souci Aiven.
+- **`Cannot connect to MySQL using SSL`** : le certificat `DB_SSL_CA_PEM` est mal
+  collé ou ne vient pas du bon service Aiven. Au démarrage, les logs contiennent des
+  lignes `DB-CHECK` (chercher ce mot) qui indiquent si le certificat est lisible et
+  pourquoi la connexion échoue. Le script reconstruit tout seul un certificat collé
+  sur une seule ligne. Solution de secours **pour la démo uniquement** (données
+  fictives) : ajouter la variable `DB_SSL_INSECURE` = `true` dans Render. La
+  connexion reste chiffrée mais le certificat du serveur n'est plus vérifié.
+- **`APP_KEY invalide`** dans les logs : la clé doit ressembler à `base64:` suivi de
+  44 caractères se terminant par `=`.
 - **Base éteinte par Aiven** : console Aiven → le service MySQL → **Power on**, puis
   Render → **Manual Deploy** → **Restart**.
 - **Données de démo absentes ou à moitié chargées** : vider la base

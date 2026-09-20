@@ -20,11 +20,18 @@ if ! printf '%s' "$APP_KEY" | grep -Eq '^base64:[A-Za-z0-9+/]{43}=$'; then
     echo "ATTENTION : APP_KEY invalide ou absente. Attendu : base64: suivi de 44 caractères (se terminant par =)."
 fi
 
-# Certificat CA de la base MySQL (Aiven), fourni en variable d'environnement
-if [ -n "${DB_SSL_CA_PEM:-}" ]; then
-    printf '%s\n' "$DB_SSL_CA_PEM" > /etc/ssl/db-ca.pem
+# Base MySQL : certificat CA (Aiven) fourni en variable d'environnement, puis
+# test de connexion dont le résultat détaillé apparaît dans les logs ("DB-CHECK").
+# Secours pour la démo : DB_SSL_INSECURE=true chiffre la connexion sans vérifier
+# le certificat du serveur (à n'utiliser qu'avec des données fictives).
+if [ "${DB_SSL_INSECURE:-false}" = "true" ]; then
+    echo "ATTENTION : DB_SSL_INSECURE=true : connexion chiffrée mais serveur non vérifié (démo uniquement)."
+    export MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
+    export MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=false
+elif [ -n "${DB_SSL_CA_PEM:-}" ]; then
     export MYSQL_ATTR_SSL_CA=/etc/ssl/db-ca.pem
 fi
+php /var/www/html/docker/db-check.php || true
 
 php artisan storage:link --force > /dev/null 2>&1 || true
 php artisan config:cache || echo "ATTENTION : config:cache a échoué"
