@@ -1,8 +1,8 @@
 <?php
 
-// Prépare le certificat CA MySQL à partir de DB_SSL_CA_PEM puis teste la
-// connexion à la base. Tout est écrit dans les logs de démarrage, préfixé par
-// "DB-CHECK". Aucun mot de passe ni contenu de variable n'est affiché.
+// Teste la connexion à la base avec exactement les réglages SSL que Laravel
+// utilisera (variables MYSQL_ATTR_SSL_*), et écrit le résultat dans les logs de
+// démarrage, préfixé par "DB-CHECK". Aucun mot de passe n'est affiché.
 // Ne bloque jamais le démarrage (code de sortie toujours 0).
 
 function say(string $message): void
@@ -10,45 +10,7 @@ function say(string $message): void
     echo "DB-CHECK : $message\n";
 }
 
-$target = getenv('DB_CA_TARGET') ?: '/etc/ssl/db-ca.pem';
 $caPath = getenv('MYSQL_ATTR_SSL_CA') ?: '';
-$pem = getenv('DB_SSL_CA_PEM') ?: '';
-
-if ($pem !== '' && $caPath === $target) {
-    // Le copier-coller perd souvent les retours à la ligne (tout sur une ligne,
-    // espaces à la place) : on reconstruit chaque certificat proprement.
-    preg_match_all('/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s', $pem, $found);
-
-    $certificates = [];
-    foreach ($found[1] as $body) {
-        $base64 = preg_replace('/[^A-Za-z0-9+\/=]/', '', $body);
-        if ($base64 !== '') {
-            $certificates[] = "-----BEGIN CERTIFICATE-----\n".chunk_split($base64, 64, "\n")."-----END CERTIFICATE-----\n";
-        }
-    }
-
-    if ($certificates === []) {
-        say('ATTENTION : DB_SSL_CA_PEM ne contient aucun certificat (lignes BEGIN/END CERTIFICATE introuvables).');
-    } else {
-        file_put_contents($target, implode('', $certificates));
-        foreach ($certificates as $index => $certificate) {
-            $info = openssl_x509_parse($certificate);
-            if ($info === false) {
-                say('ATTENTION : certificat CA n°'.($index + 1).' illisible (contenu incomplet ou corrompu).');
-
-                continue;
-            }
-            say(sprintf(
-                'certificat CA n°%d lisible : sujet="%s", expire le %s',
-                $index + 1,
-                $info['subject']['CN'] ?? '?',
-                date('Y-m-d', $info['validTo_time_t'])
-            ));
-        }
-    }
-} elseif ($caPath === '') {
-    say('aucun certificat CA fourni (DB_SSL_CA_PEM vide) : connexion sans chiffrement vérifié.');
-}
 
 $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 15];
 if ($caPath !== '' && is_file($caPath)) {

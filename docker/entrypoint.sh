@@ -29,7 +29,16 @@ if [ "${DB_SSL_INSECURE:-false}" = "true" ]; then
     export MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
     export MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=false
 elif [ -n "${DB_SSL_CA_PEM:-}" ]; then
-    export MYSQL_ATTR_SSL_CA=/etc/ssl/db-ca.pem
+    php /var/www/html/docker/db-ca.php || true
+    if [ -s /etc/ssl/db-ca.pem ]; then
+        export MYSQL_ATTR_SSL_CA=/etc/ssl/db-ca.pem
+    else
+        # Certificat fourni mais inutilisable : mieux vaut une connexion chiffrée
+        # non vérifiée qu'un site en erreur. À corriger en recopiant ca.pem.
+        echo "ATTENTION : certificat CA inutilisable : repli sur une connexion chiffrée SANS vérification du serveur."
+        export MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
+        export MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=false
+    fi
 fi
 php /var/www/html/docker/db-check.php || true
 
