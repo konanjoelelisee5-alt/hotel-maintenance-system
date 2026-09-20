@@ -21,7 +21,9 @@ COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
 # ---- 3. Application PHP + Apache ---------------------------------------------
-FROM php:8.3-apache
+# PHP 8.4.1 minimum : imposé par Symfony 8 dans composer.lock (composer.json
+# annonce ^8.3, mais le lock a été généré sous PHP 8.5).
+FROM php:8.4-apache
 
 COPY --from=ghcr.io/mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql bcmath gd zip exif opcache

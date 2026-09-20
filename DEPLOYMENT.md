@@ -5,7 +5,8 @@ Checklist à suivre avant et pendant le passage à l'hébergement. Compatible VP
 
 ## 1. Prérequis serveur
 
-- PHP **8.3+** avec extensions : `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`,
+- PHP **8.4.1+** (imposé par Symfony 8 dans `composer.lock`, même si `composer.json`
+  annonce `^8.3`) avec extensions : `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`,
   `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd` (ou `imagick` pour les PDF/QC)
 - MySQL 8+ (ou MariaDB 10.6+)
 - Composer 2
