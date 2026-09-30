@@ -96,8 +96,11 @@ Render reconstruit et redéploie automatiquement (`autoDeploy`).
   sur une seule ligne. Solution de secours **pour la démo uniquement** (données
   fictives) : ajouter la variable `DB_SSL_INSECURE` = `true` dans Render. La
   connexion reste chiffrée mais le certificat du serveur n'est plus vérifié.
-- **`APP_KEY invalide`** dans les logs : la clé doit ressembler à `base64:` suivi de
+- **`APP_KEY au mauvais format`** dans les logs : sans gravité, une clé valide en est
+  dérivée automatiquement au démarrage. Pour une clé propre : `base64:` suivi de
   44 caractères se terminant par `=`.
+- **`getaddrinfo ... failed`** : le nom d'hôte Aiven n'existe pas (service éteint,
+  supprimé, ou `DB_HOST` mal recopié). Vérifier dans la console Aiven.
 - **Base éteinte par Aiven** : console Aiven → le service MySQL → **Power on**, puis
   Render → **Manual Deploy** → **Restart**.
 - **Données de démo absentes ou à moitié chargées** : vider la base

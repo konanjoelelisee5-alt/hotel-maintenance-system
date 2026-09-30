@@ -15,10 +15,19 @@ APP_KEY="$(printf '%s' "${APP_KEY:-}" | tr -d "[:space:]\"'")"
 if printf '%s' "$APP_KEY" | grep -Eq '^[A-Za-z0-9+/]{43}=$'; then
     APP_KEY="base64:$APP_KEY"
 fi
-export APP_KEY
 if ! printf '%s' "$APP_KEY" | grep -Eq '^base64:[A-Za-z0-9+/]{43}=$'; then
-    echo "ATTENTION : APP_KEY invalide ou absente. Attendu : base64: suivi de 44 caractères (se terminant par =)."
+    # Clé inutilisable (ex. valeur générée par Render dans un autre format) :
+    # on en dérive une clé valide, stable tant que la variable ne change pas.
+    # Sans valeur du tout, clé aléatoire : les sessions sautent à chaque redémarrage.
+    if [ -n "$APP_KEY" ]; then
+        echo "ATTENTION : APP_KEY au mauvais format : clé valide dérivée automatiquement."
+        APP_KEY="$(php -r 'echo "base64:".base64_encode(hash("sha256", $argv[1], true));' "$APP_KEY")"
+    else
+        echo "ATTENTION : APP_KEY absente : clé aléatoire générée (sessions perdues à chaque redémarrage)."
+        APP_KEY="$(php -r 'echo "base64:".base64_encode(random_bytes(32));')"
+    fi
 fi
+export APP_KEY
 
 # Base MySQL : certificat CA (Aiven) fourni en variable d'environnement, puis
 # test de connexion dont le résultat détaillé apparaît dans les logs ("DB-CHECK").
