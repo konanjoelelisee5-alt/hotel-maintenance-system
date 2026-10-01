@@ -1,5 +1,5 @@
 @php
-    $slaClosed = in_array($workOrder->status, ['resolu', 'ferme']);
+    $slaClosed = in_array($workOrder->status, \App\Models\WorkOrder::FINISHED_STATUSES);
 @endphp
 
 <x-accordion-card title="SLA" :open="$workOrder->sla_breached">

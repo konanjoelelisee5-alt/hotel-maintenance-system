@@ -50,11 +50,39 @@ class WorkOrderPolicy
     }
 
     /**
-     * Qui peut supprimer un OT.
+     * Personne : un OT ne se supprime pas (son historique, ses temps et ses pièces
+     * comptent dans les rapports). Un OT inutile s'annule avec un motif (cf. cancel).
      */
     public function delete(User $user, WorkOrder $workOrder): bool
     {
-        return in_array($user->role?->value, ['admin', 'manager']);
+        return false;
+    }
+
+    /**
+     * Qui PILOTE l'OT (panneau « Pilotage ») : affecter, planifier, requalifier,
+     * suspendre, relancer, annuler. Les superviseurs, pas l'intervenant.
+     */
+    public function pilot(User $user, WorkOrder $workOrder): bool
+    {
+        return (bool) $user->role?->dispatchesWork();
+    }
+
+    /** Mettre en attente un OT actif, avec un motif (pièce, accès chambre...). */
+    public function suspend(User $user, WorkOrder $workOrder): bool
+    {
+        return $this->pilot($user, $workOrder) && in_array($workOrder->status, ['ouvert', 'en_cours'], true);
+    }
+
+    /** Relancer un OT mis en attente. */
+    public function resume(User $user, WorkOrder $workOrder): bool
+    {
+        return $this->pilot($user, $workOrder) && $workOrder->status === 'en_attente';
+    }
+
+    /** Annuler un OT pas encore réparé (doublon, fausse alerte), avec un motif. */
+    public function cancel(User $user, WorkOrder $workOrder): bool
+    {
+        return $this->pilot($user, $workOrder) && in_array($workOrder->status, ['ouvert', 'en_cours', 'en_attente'], true);
     }
 
     /**

@@ -140,6 +140,9 @@ class WorkOrder extends Model
         return $this->hasMany(StockMovement::class);
     }
 
+    /** Statuts où plus personne n'attend de réparation : ni retard, ni escalade SLA. */
+    public const FINISHED_STATUSES = ['resolu', 'ferme', 'annule'];
+
     // ===== Scopes =====
     public function scopeOpen(Builder $query): Builder
     {
@@ -150,7 +153,7 @@ class WorkOrder extends Model
     {
         return $query->whereNotNull('due_date')
             ->where('due_date', '<', now())
-            ->whereNotIn('status', ['resolu', 'ferme']);
+            ->whereNotIn('status', self::FINISHED_STATUSES);
     }
 
     public function scopeScheduledBetween(Builder $query, $start, $end): Builder
@@ -163,7 +166,7 @@ class WorkOrder extends Model
     {
         return $query->whereNotNull('sla_resolution_due_at')
             ->where('sla_resolution_due_at', '<', now())
-            ->whereNotIn('status', ['resolu', 'ferme']);
+            ->whereNotIn('status', self::FINISHED_STATUSES);
     }
 
     public function scopePreventive(Builder $query): Builder
@@ -235,6 +238,7 @@ class WorkOrder extends Model
             'resolu'     => 'Résolu',
             'ferme'      => 'Fermé',
             'rejete'     => 'Rejeté',
+            'annule'     => 'Annulé',
             default      => $this->status,
         };
     }

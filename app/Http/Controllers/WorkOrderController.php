@@ -132,22 +132,12 @@ class WorkOrderController extends Controller
             ->with('success', 'Ordre de travail mis à jour avec succès.');
     }
 
-    public function destroy(WorkOrder $workOrder): RedirectResponse
-    {
-        $this->authorize('delete', $workOrder);
-        foreach ($workOrder->attachments as $attachment) {
-            Storage::disk('public')->delete($attachment->file_path);
-        }
-
-        $workOrder->delete();
-
-        return redirect()->route('work-orders.index')
-            ->with('success', 'Ordre de travail supprimé avec succès.');
-    }
+    // Pas de destroy() : un OT ne se supprime pas, il s'annule (WorkOrderPilotController::cancel).
 
     public function updateStatus(UpdateWorkOrderStatusRequest $request, WorkOrder $workOrder): RedirectResponse
     {
-        $this->authorize('intervene', $workOrder);
+        // Avancement déclaré par l'intervenant ; les superviseurs pilotent ailleurs.
+        $this->authorize('perform', $workOrder);
         $oldStatus = $workOrder->status;
         $newStatus = $request->validated('status');
 

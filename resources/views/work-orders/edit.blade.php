@@ -91,16 +91,9 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center">
-                        <form method="POST" action="{{ route('work-orders.destroy', $workOrder) }}"
-                              onsubmit="return confirm('Supprimer définitivement cet OT ?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-sm text-red-600 hover:underline">
-                                Supprimer cet OT
-                            </button>
-                        </form>
-
+                    {{-- Plus de suppression : un OT inutile s'annule depuis le panneau
+                         « Pilotage » de sa fiche, avec un motif (l'historique est conservé). --}}
+                    <div class="flex justify-end items-center">
                         <div class="flex gap-3">
                             <a href="{{ route('work-orders.show', $workOrder) }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">
                                 Annuler

@@ -1,31 +1,16 @@
 <x-app-layout crumb="Ordres de travail · {{ $workOrder->code() }}" page-title="{{ $workOrder->title }}" :back-route="route('work-orders.index')">
-    @if (in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true) || auth()->user()->can('update', $workOrder))
-        <x-slot:primaryAction>
-            <div class="flex flex-wrap gap-2">
-                @if (in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true))
-                    <a href="{{ route('work-orders.schedule', $workOrder) }}" class="px-[15px] py-[9px] border-0 rounded-[9px] bg-navy text-white text-[13px] font-semibold inline-block">
-                        Planifier
-                    </a>
-                @endif
-                @can('update', $workOrder)
-                    <a href="{{ route('work-orders.edit', $workOrder) }}" class="px-[15px] py-[9px] border border-line rounded-[9px] bg-white text-[#3d3a33] text-[13px] font-semibold inline-block">
-                        Modifier
-                    </a>
-                @endcan
-                @can('takeOver', $workOrder)
-                    {{-- Le chef de maintenance répare lui-même (ex. un soir sans technicien) :
-                         il devient l'assigné, son nom figurera sur le chrono et le rapport. --}}
-                    <form method="POST" action="{{ route('work-orders.take-over', $workOrder) }}"
-                          onsubmit="return confirm('Vous charger vous-même de cette réparation ? Vous en deviendrez l\'intervenant, et le contrôle qualité sera fait par quelqu\'un d\'autre.');">
-                        @csrf
-                        <button type="submit" class="px-[15px] py-[9px] border border-line rounded-[9px] bg-white text-[#3d3a33] text-[13px] font-semibold">
-                            Je m'en charge
-                        </button>
-                    </form>
-                @endcan
-            </div>
-        </x-slot:primaryAction>
-    @endif
+    {{-- Deux fiches selon le métier : le superviseur PILOTE (panneau « Pilotage »
+         ci-dessous, qui regroupe planifier, requalifier, « je m'en charge »...),
+         l'intervenant assigné EXÉCUTE (chrono, avancement, rapport). --}}
+    @cannot('pilot', $workOrder)
+        @can('update', $workOrder)
+            <x-slot:primaryAction>
+                <a href="{{ route('work-orders.edit', $workOrder) }}" class="px-[15px] py-[9px] border border-line rounded-[9px] bg-white text-[#3d3a33] text-[13px] font-semibold inline-block">
+                    Modifier
+                </a>
+            </x-slot:primaryAction>
+        @endcan
+    @endcannot
 
     {{-- Bandeau statut / priorité / description --}}
     <div class="bg-white rounded-xl border border-line p-6">
@@ -41,34 +26,32 @@
         </p>
     </div>
 
-    {{-- Raccourcis d'action : sur mobile, la page ne présente plus les cartes en 2
-         colonnes toujours visibles comme sur desktop — ces boutons renvoient vers
-         chaque section plus bas (ou soumettent directement pour le chrono). --}}
-    @can('work', $workOrder)
+    @can('pilot', $workOrder)
+        @include('work-orders.partials.pilot-panel')
+    @endcan
+
+    {{-- Raccourcis mobiles de l'intervenant : sur téléphone, les cartes s'empilent,
+         ces boutons renvoient vers chaque section (ou démarrent le chrono). --}}
+    @can('perform', $workOrder)
         @php $activeSession = $workOrder->activeSession(); @endphp
         <div class="lg:hidden bg-white rounded-xl border border-line p-4">
-            <div class="text-[11px] font-semibold text-[#7D7768] uppercase tracking-wide mb-3">Actions</div>
+            <div class="text-[11px] font-semibold text-[#7D7768] uppercase tracking-wide mb-3">Mon intervention</div>
             <div class="flex flex-col gap-2">
-                {{-- Chrono : seulement pour la personne qui répare (assignée). --}}
-                @can('perform', $workOrder)
-                    @if ($activeSession)
-                        <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
-                            @csrf
-                            <x-mobile-action-button variant="primary" icon="pause">Arrêter le chrono</x-mobile-action-button>
-                        </form>
-                    @else
-                        <form method="POST" action="{{ route('work-orders.sessions.start', $workOrder) }}">
-                            @csrf
-                            <x-mobile-action-button variant="primary" icon="play">Démarrer le chrono</x-mobile-action-button>
-                        </form>
-                    @endif
-                @endcan
-                <x-mobile-action-button variant="secondary" icon="status" href="#status-form">Changer le statut</x-mobile-action-button>
+                @if ($activeSession)
+                    <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
+                        @csrf
+                        <x-mobile-action-button variant="primary" icon="pause">Arrêter le chrono</x-mobile-action-button>
+                    </form>
+                @else
+                    <form method="POST" action="{{ route('work-orders.sessions.start', $workOrder) }}">
+                        @csrf
+                        <x-mobile-action-button variant="primary" icon="play">Démarrer le chrono</x-mobile-action-button>
+                    </form>
+                @endif
+                <x-mobile-action-button variant="secondary" icon="status" href="#status-form">Avancement</x-mobile-action-button>
                 <x-mobile-action-button variant="secondary" icon="comment" href="#comments">Ajouter un commentaire</x-mobile-action-button>
                 <x-mobile-action-button variant="secondary" icon="part" href="#parts">Réserver une pièce</x-mobile-action-button>
-                @if (auth()->user()->can('perform', $workOrder) || $workOrder->interventionReport)
-                    <x-mobile-action-button variant="secondary" icon="report" href="#report">Rapport d'intervention</x-mobile-action-button>
-                @endif
+                <x-mobile-action-button variant="secondary" icon="report" href="#report">Rapport d'intervention</x-mobile-action-button>
             </div>
         </div>
     @endcan
@@ -78,14 +61,10 @@
         {{-- Colonne principale : actions et suivi --}}
         <div class="lg:col-span-2 space-y-6">
 
-            @can('work', $workOrder)
-                @include('work-orders.partials.status-form')
-            @endcan
-
-            {{-- Chrono et rédaction du rapport : seulement pour l'intervenant assigné.
-                 Un superviseur ne voit le rapport que s'il y en a un à lire ; le temps
-                 passé figure dans le cadre « Informations ». --}}
+            {{-- Intervenant : avancement, chrono, rapport. Un superviseur ne voit le
+                 rapport que s'il y en a un à lire ; le temps passé est dans « Informations ». --}}
             @can('perform', $workOrder)
+                @include('work-orders.partials.status-form')
                 @include('work-orders.partials.intervention-tracking')
                 @include('work-orders.partials.intervention-report')
             @elsecan('work', $workOrder)
@@ -94,10 +73,10 @@
                 @endif
             @endcan
 
-            {{-- Contrôle qualité : seulement s'il y a quelque chose à faire (OT résolu)
-                 ou à consulter (contrôles déjà passés). --}}
+            {{-- Historique des contrôles qualité (le lancement se fait depuis le
+                 panneau « Pilotage », à l'étape « Résolu »). --}}
             @can('reviewQuality', \App\Models\WorkOrder::class)
-                @if ($workOrder->status === 'resolu' || $workOrder->qualityControls->isNotEmpty())
+                @if ($workOrder->qualityControls->isNotEmpty())
                     @include('work-orders.partials.quality-control')
                 @endif
             @endcan

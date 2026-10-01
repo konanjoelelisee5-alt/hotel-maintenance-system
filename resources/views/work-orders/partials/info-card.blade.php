@@ -51,7 +51,7 @@
         @endif
         <div class="flex justify-between gap-3">
             <dt class="text-ink-grey">Échéance</dt>
-            <dd class="text-right {{ $workOrder->due_date && $workOrder->due_date->isPast() && ! in_array($workOrder->status, ['resolu', 'ferme']) ? 'text-red-600 font-semibold' : 'text-slate-800' }}">
+            <dd class="text-right {{ $workOrder->due_date && $workOrder->due_date->isPast() && ! in_array($workOrder->status, \App\Models\WorkOrder::FINISHED_STATUSES) ? 'text-red-600 font-semibold' : 'text-slate-800' }}">
                 {{ $workOrder->due_date?->format('d/m/Y H:i') ?? '—' }}
             </dd>
         </div>

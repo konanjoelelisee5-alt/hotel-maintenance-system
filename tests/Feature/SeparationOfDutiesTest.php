@@ -77,8 +77,14 @@ class SeparationOfDutiesTest extends TestCase
 
     public function test_supervisor_still_pilots_the_work_order(): void
     {
+        // Le superviseur suspend par son panneau Pilotage (motif), pas par le
+        // formulaire d'avancement de l'intervenant.
         $this->actingAs($this->chef)
-            ->patch(route('work-orders.status.update', $this->workOrder), ['status' => 'en_attente'])
+            ->patch(route('work-orders.status.update', $this->workOrder), ['status' => 'en_attente', 'note' => 'x'])
+            ->assertForbidden();
+
+        $this->actingAs($this->chef)
+            ->post(route('work-orders.suspend', $this->workOrder), ['reason' => 'Pièce commandée'])
             ->assertSessionHasNoErrors();
 
         $this->actingAs($this->chef)
@@ -98,7 +104,8 @@ class SeparationOfDutiesTest extends TestCase
             ->assertDontSee("Suivi de l'intervention", false)
             ->assertDontSee("Rapport d'intervention", false)
             ->assertDontSee('Aucun contrôle qualité')
-            ->assertSee('Changer le statut')
+            ->assertDontSee('Avancement de mon intervention')
+            ->assertSee("Pilotage de l'OT", false)
             ->assertSee("Je m'en charge", false);
 
         $this->actingAs($this->technician)->get(route('work-orders.show', $this->workOrder))
@@ -154,7 +161,8 @@ class SeparationOfDutiesTest extends TestCase
         $this->actingAs($this->chef)->get(route('quality-controls.create', $this->workOrder))->assertForbidden();
         $this->actingAs($this->chef)->post(route('quality-controls.store', $this->workOrder), [])->assertForbidden();
         $this->actingAs($this->chef)->get(route('work-orders.show', $this->workOrder))
-            ->assertSee('le contrôle qualité doit être fait par un autre');
+            ->assertSee('le contrôle revient à un autre responsable')
+            ->assertDontSee('Faire le contrôle qualité');
 
         $this->actingAs($otherAdmin)->get(route('quality-controls.create', $this->workOrder))->assertOk();
     }

@@ -82,13 +82,15 @@ class RequesterProgressNotificationTest extends TestCase
 
     public function test_direct_closure_counts_as_repaired_but_closing_after_resolution_does_not_repeat(): void
     {
-        $manager = User::factory()->manager()->create();
+        // Mise à jour par le modèle : l'observateur réagit au changement de statut
+        // quel que soit le chemin (la fermeture se fait désormais par le contrôle qualité).
+        $this->actingAs(User::factory()->manager()->create());
         $direct = $this->reported();
-        $this->actingAs($manager)->patch(route('work-orders.status.update', $direct), ['status' => 'ferme']);
+        $direct->update(['status' => 'ferme']);
         Notification::assertSentToTimes($this->agent, WorkOrderProgressNotification::class, 1);
 
         $alreadyResolved = WorkOrder::create([...$direct->only(['title', 'reported_by', 'type_id', 'priority_id']), 'status' => 'resolu']);
-        $this->actingAs($manager)->patch(route('work-orders.status.update', $alreadyResolved), ['status' => 'ferme']);
+        $alreadyResolved->update(['status' => 'ferme']);
         Notification::assertSentToTimes($this->agent, WorkOrderProgressNotification::class, 1);
     }
 

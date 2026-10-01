@@ -8,6 +8,7 @@ $colors = [
     'resolu'     => 'bg-emerald-100 text-emerald-700',
     'ferme'      => 'bg-slate-200 text-slate-600',
     'rejete'     => 'bg-red-100 text-red-700',
+    'annule'     => 'bg-slate-100 text-slate-500',
 ];
 
 $labels = [
@@ -17,6 +18,7 @@ $labels = [
     'resolu'     => 'Résolu',
     'ferme'      => 'Fermé',
     'rejete'     => 'Rejeté',
+    'annule'     => 'Annulé',
 ];
 @endphp
 

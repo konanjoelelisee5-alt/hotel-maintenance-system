@@ -4,13 +4,19 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Avancement déclaré par l'intervenant assigné : en cours, en attente, résolu.
+ * Les superviseurs (admin, manager) pilotent par leurs propres actions
+ * (suspendre, relancer, annuler : WorkOrderPilotController) et la fermeture
+ * passe uniquement par le contrôle qualité.
+ */
 class UpdateWorkOrderStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
         // Avant la validation : un non-intervenant doit recevoir un 403, pas une
         // erreur de formulaire sur le statut.
-        return $this->user()->can('intervene', $this->route('workOrder'));
+        return $this->user()->can('perform', $this->route('workOrder'));
     }
 
     public function rules(): array
@@ -18,16 +24,15 @@ class UpdateWorkOrderStatusRequest extends FormRequest
         return [
             'status' => [
                 'required',
-                'in:ouvert,en_cours,en_attente,resolu,ferme',
-                // Le technicien déclare "résolu" ; la fermeture revient au manager
-                // (ou au contrôle qualité, qui ferme l'OT de lui-même).
+                'in:en_cours,en_attente,resolu,ferme',
                 function (string $attribute, mixed $value, \Closure $fail) {
-                    if ($value === 'ferme' && ! $this->user()->role->dispatchesWork()) {
-                        $fail('Seul un manager peut fermer un ordre de travail. Passez-le en « Résolu ».');
+                    if ($value === 'ferme') {
+                        $fail('La fermeture se fait par le contrôle qualité. Passez l\'OT en « Résolu ».');
                     }
                 },
             ],
-            'note' => ['nullable', 'string', 'max:1000'],
+            // Mettre en attente sans dire pourquoi bloque le manager : motif obligatoire.
+            'note' => ['nullable', 'required_if:status,en_attente', 'string', 'max:1000'],
         ];
     }
 
@@ -36,6 +41,7 @@ class UpdateWorkOrderStatusRequest extends FormRequest
         return [
             'status.required' => 'Le statut est obligatoire.',
             'status.in' => 'Le statut sélectionné est invalide.',
+            'note.required_if' => 'Indiquez pourquoi l\'OT est en attente (pièce, accès à la chambre…).',
         ];
     }
 }

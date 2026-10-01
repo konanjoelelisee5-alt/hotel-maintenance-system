@@ -28,6 +28,7 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDeactivationController;
 use App\Http\Controllers\WorkOrderTakeOverController;
+use App\Http\Controllers\WorkOrderPilotController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PartReservationController;
@@ -65,7 +66,8 @@ Route::middleware(['auth', 'role:reception'])->group(function () {
 // === MODULE B : GESTION DES ORDRES DE TRAVAIL (OT) ===
 Route::middleware('auth')->group(function () {
 
-    Route::resource('work-orders', WorkOrderController::class);
+    // Pas de destroy : un OT s'annule (motif tracé), il ne se supprime pas.
+    Route::resource('work-orders', WorkOrderController::class)->except(['destroy']);
 
     Route::patch('/work-orders/{workOrder}/status', [WorkOrderController::class, 'updateStatus'])
         ->name('work-orders.status.update');
@@ -101,6 +103,10 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
     Route::post('/work-orders/{workOrder}/schedule', [PlanningController::class, 'storeSchedule'])->name('work-orders.schedule.store');
     // « Je m'en charge » : l'admin/manager devient l'intervenant de l'OT.
     Route::post('/work-orders/{workOrder}/take-over', WorkOrderTakeOverController::class)->name('work-orders.take-over');
+    // Panneau « Pilotage » : suspendre, relancer, annuler (avec motif).
+    Route::post('/work-orders/{workOrder}/suspend', [WorkOrderPilotController::class, 'suspend'])->name('work-orders.suspend');
+    Route::post('/work-orders/{workOrder}/resume', [WorkOrderPilotController::class, 'resume'])->name('work-orders.resume');
+    Route::post('/work-orders/{workOrder}/cancel', [WorkOrderPilotController::class, 'cancel'])->name('work-orders.cancel');
 
     Route::get('/planning/technicien/{technician}/disponibilites', [TechnicianAvailabilityController::class, 'index'])->name('planning.availabilities.index');
     Route::post('/planning/technicien/{technician}/disponibilites', [TechnicianAvailabilityController::class, 'store'])->name('planning.availabilities.store');

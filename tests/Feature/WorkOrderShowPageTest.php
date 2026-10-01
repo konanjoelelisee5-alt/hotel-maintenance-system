@@ -89,7 +89,8 @@ class WorkOrderShowPageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Climatiseur en panne');
-        $response->assertSee('Contrôle qualité');
+        $response->assertSee("Pilotage de l'OT", false);
+        $response->assertSee('Contrôles qualité');
         $response->assertSee('Demandes de correction');
         $response->assertSee('Filtre climatiseur');
         $response->assertSee('Merci de vérifier rapidement.');
@@ -102,8 +103,10 @@ class WorkOrderShowPageTest extends TestCase
         $response = $this->actingAs($workOrder->assignee)->get(route('work-orders.show', $workOrder));
 
         $response->assertOk();
-        $response->assertSee('Changer le statut');
+        $response->assertSee('Avancement de mon intervention');
         $response->assertSee("Rapport d'intervention", false);
+        // Le panneau de pilotage est réservé aux superviseurs.
+        $response->assertDontSee("Pilotage de l'OT", false);
         // Le contrôle qualité est réservé admin/manager : un technicien ne doit pas voir ce bloc.
         $response->assertDontSee('Démarrer un contrôle qualité');
     }
@@ -116,7 +119,8 @@ class WorkOrderShowPageTest extends TestCase
 
         $response->assertOk();
         // Le rapporteur (housekeeping) voit l'OT mais ne peut pas intervenir dessus.
-        $response->assertDontSee('Changer le statut');
+        $response->assertDontSee('Avancement de mon intervention');
+        $response->assertDontSee("Pilotage de l'OT", false);
         $response->assertDontSee('Démarrer');
     }
 

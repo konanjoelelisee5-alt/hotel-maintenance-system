@@ -107,14 +107,16 @@ class HousekeepingAccessTest extends TestCase
         $this->assertSame('resolu', $workOrder->fresh()->status);
     }
 
-    public function test_manager_can_close(): void
+    public function test_manager_cannot_close_through_status_form(): void
     {
+        // La fermeture passe uniquement par le contrôle qualité ; le formulaire
+        // d'avancement est réservé à l'intervenant assigné.
         $workOrder = $this->workOrder(['status' => 'resolu']);
 
         $this->actingAs(User::factory()->manager()->create())
             ->patch(route('work-orders.status.update', $workOrder), ['status' => 'ferme'])
-            ->assertSessionHasNoErrors();
-        $this->assertSame('ferme', $workOrder->fresh()->status);
+            ->assertForbidden();
+        $this->assertSame('resolu', $workOrder->fresh()->status);
     }
 
     // ===== KPI =====

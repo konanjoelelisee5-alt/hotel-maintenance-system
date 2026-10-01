@@ -31,7 +31,7 @@ class CheckWorkOrderSla extends Command
         $rules = EscalationRule::where('is_active', true)->get();
 
         // On ne s'intéresse qu'aux OT encore actifs (pas déjà résolus/fermés)
-        $activeWorkOrders = WorkOrder::whereNotIn('status', ['resolu', 'ferme'])
+        $activeWorkOrders = WorkOrder::whereNotIn('status', WorkOrder::FINISHED_STATUSES)
             ->whereNotNull('sla_resolution_due_at')
             ->get();
 
