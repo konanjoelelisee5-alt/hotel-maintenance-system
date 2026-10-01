@@ -89,6 +89,43 @@ class AdminDashboardTest extends TestCase
         $this->actingAs($admin)->get(route('admin.dashboard'))->assertDontSee('Alertes système');
     }
 
+    // ===== Pilotage manager : mêmes indicateurs de décision =====
+
+    public function test_manager_indicators_match_their_tabs_and_ignore_settled_work(): void
+    {
+        $manager = User::factory()->manager()->create();
+        $this->makeWorkOrder('ouvert', 'urgente');
+        $this->makeWorkOrder('ferme', 'urgente', ['sla_breached' => true]);
+        $this->makeWorkOrder('resolu');
+        $this->makeWorkOrder('en_attente');
+
+        $response = $this->actingAs($manager)->get(route('manager.dashboard'))->assertOk();
+        $pulse = collect($response->viewData('pulse'));
+        $tabs = collect($response->viewData('filters'))->pluck('key');
+
+        $byFilter = $pulse->whereNotNull('filter')->mapWithKeys(fn ($p) => [$p['filter'] => $p['value']]);
+        $this->assertSame(1, $byFilter['urgent']);
+        $this->assertSame(0, $byFilter['late']);
+        $this->assertSame(1, $byFilter['to_review']);
+        $this->assertSame(1, $byFilter['waiting']);
+        foreach ($byFilter->keys() as $filter) {
+            $this->assertContains($filter, $tabs);
+        }
+
+        // La carte stock ne filtre pas la file : elle mène à la page des pièces.
+        $this->assertSame(route('parts.index'), $pulse->firstWhere('label', 'Stock sous le seuil')['url']);
+    }
+
+    public function test_manager_review_tab_has_its_own_title(): void
+    {
+        $this->makeWorkOrder('resolu');
+
+        $this->actingAs(User::factory()->manager()->create())
+            ->get(route('manager.dashboard', ['filter' => 'to_review']))
+            ->assertSee('Ordres à contrôler')
+            ->assertSee('OT resolu moyenne');
+    }
+
     public function test_recent_activity_leaves_out_logins(): void
     {
         $admin = User::factory()->admin()->create(['phone' => '0700000000']);

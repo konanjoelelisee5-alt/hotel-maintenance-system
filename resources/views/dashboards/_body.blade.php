@@ -2,8 +2,8 @@
     $dashboardRoute = auth()->user()->dashboardRoute();
     $dotColor = function (string $label) {
         return match (true) {
-            str_contains($label, 'Urgent'), str_contains($label, 'SLA dépassés'), str_contains($label, 'Urgentes') => 'bg-red',
-            str_contains($label, 'Non affect'), str_contains($label, 'attente'), str_contains($label, 'Blocages'), str_contains($label, 'Pièces à retirer'), str_contains($label, 'Problèmes qualité') => 'bg-gold',
+            str_contains($label, 'Urgent'), str_contains($label, 'Urgences'), str_contains($label, 'SLA dépassés'), str_contains($label, 'En retard'), str_contains($label, 'Urgentes') => 'bg-red',
+            str_contains($label, 'Non affect'), str_contains($label, 'attente'), str_contains($label, 'Stock'), str_contains($label, 'Pièces à retirer'), str_contains($label, 'Problèmes qualité') => 'bg-gold',
             str_contains($label, 'En cours'), str_contains($label, 'Contrôle qualité'), str_contains($label, 'Temps saisi') => 'bg-amber',
             str_contains($label, 'Respect'), str_contains($label, 'Terminés'), str_contains($label, 'Résolus'), str_contains($label, 'Clôturées'), str_contains($label, 'actifs') => 'bg-green',
             default => 'bg-blue',
@@ -39,8 +39,8 @@
             :value="$p['value']"
             :sub="$p['sub']"
             :color="str_replace('bg-', '', $dotColor($p['label']))"
-            :href="route($dashboardRoute, ['filter' => $p['filter']])"
-            :active="$filter === $p['filter']"
+            :href="$p['url'] ?? route($dashboardRoute, ['filter' => $p['filter']])"
+            :active="$p['filter'] !== null && $filter === $p['filter']"
         />
     @endforeach
 </div>
@@ -52,7 +52,7 @@
         <div class="flex items-center gap-3 flex-wrap px-[18px] py-[15px] border-b border-line-soft">
             <div class="flex flex-col gap-0.5">
                 <div class="text-[14.5px] font-semibold">
-                    {{ match($filter) { 'urgent' => 'Ordres urgents', 'unassigned' => 'Ordres non affectés', 'late' => 'Ordres en retard SLA', 'mine' => 'Mes ordres', default => 'Tous les ordres' } }}
+                    {{ match($filter) { 'urgent' => 'Ordres urgents', 'unassigned' => 'Ordres non affectés', 'late' => 'Ordres en retard SLA', 'to_review' => 'Ordres à contrôler', 'waiting' => 'Ordres en attente', 'mine' => 'Mes ordres', default => 'Tous les ordres' } }}
                 </div>
                 <div class="text-[11.5px] text-ink-grey">{{ $queue->count() }} ordre(s) affiché(s) · triés par urgence SLA</div>
             </div>

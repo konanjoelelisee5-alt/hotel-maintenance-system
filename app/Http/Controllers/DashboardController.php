@@ -13,7 +13,6 @@ use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
-use App\Models\WorkOrderQualityControl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -125,12 +124,15 @@ class DashboardController extends Controller
                 ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'filter' => 'to_review'],
                 ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'filter' => 'waiting'],
             ],
+            // Mêmes indicateurs de décision que l'admin (chacun ouvre son onglet), plus
+            // le stock, que le manager réapprovisionne : cette carte-là ouvre la page Pièces.
             UserRole::Manager => [
-                ['label' => 'Ordres urgents', 'value' => (clone $mine())->whereHas('priority', $urgent)->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
-                ['label' => 'Non affectés', 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'à répartir maintenant', 'filter' => 'unassigned'],
-                ['label' => 'En cours', 'value' => (clone $mine())->where('status', 'en_cours')->count(), 'sub' => 'techniciens en poste', 'filter' => 'all'],
-                ['label' => 'Contrôle qualité', 'value' => WorkOrderQualityControl::where('status', 'en_attente')->count(), 'sub' => 'à vérifier', 'filter' => 'all'],
-                ['label' => 'Blocages stock', 'value' => $this->lowStockCount(), 'sub' => 'sous le seuil', 'filter' => 'all'],
+                ['label' => 'Urgences ouvertes', 'value' => $this->filteredQueue($user, 'urgent')->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
+                ['label' => 'Non affectés', 'value' => $this->filteredQueue($user, 'unassigned')->count(), 'sub' => 'à répartir maintenant', 'filter' => 'unassigned'],
+                ['label' => 'En retard SLA', 'value' => $this->filteredQueue($user, 'late')->count(), 'sub' => 'délai dépassé', 'filter' => 'late'],
+                ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'filter' => 'to_review'],
+                ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'filter' => 'waiting'],
+                ['label' => 'Stock sous le seuil', 'value' => $this->lowStockCount(), 'sub' => 'pièces à commander', 'filter' => null, 'url' => route('parts.index')],
             ],
             UserRole::Technicien => [
                 ['label' => 'Mes ordres du jour', 'value' => (clone $mine())->whereDate('scheduled_at', today())->count(), 'sub' => "aujourd'hui", 'filter' => 'mine'],
