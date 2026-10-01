@@ -143,14 +143,17 @@ document.addEventListener('click', (event) => {
         return;
     }
 
+    // Un « Annuler » qui est un lien (vers la liste, en page complète) ferme seulement la fenêtre.
     if (event.target.closest('#remote-modal [data-modal-close]')) {
+        event.preventDefault();
         close();
     }
 });
 
 document.addEventListener('submit', (event) => {
+    // defaultPrevented : la question « Êtes-vous sûr ? » (onsubmit) a reçu « Annuler ».
     const form = event.target.closest('#remote-modal form');
-    if (form) {
+    if (form && !event.defaultPrevented) {
         event.preventDefault();
         submit(form);
     }

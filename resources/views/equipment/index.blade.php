@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Équipements') }}</h2>
-            <a href="{{ route('equipment.create') }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">+ Nouvel équipement</a>
+            <a href="{{ route('equipment.create') }}" data-modal class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">+ Nouvel équipement</a>
         </div>
     </x-slot>
 

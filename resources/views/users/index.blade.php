@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Utilisateurs') }}</h2>
-            <a href="{{ route('users.create') }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
+            <a href="{{ route('users.create') }}" data-modal class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
                 + Nouvel utilisateur
             </a>
         </div>
@@ -70,7 +70,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm">
-                                    <a href="{{ route('users.edit', $user) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Modifier</a>
+                                    <a href="{{ route('users.edit', $user) }}" data-modal class="text-indigo-600 hover:text-indigo-900 mr-3">Modifier</a>
                                     @if ($user->is_active && $user->id !== auth()->id())
                                         {{-- Écran intermédiaire : ses OT en cours doivent d'abord être confiés à quelqu'un. --}}
                                         <a href="{{ route('users.deactivate', $user) }}" class="text-red-600 hover:underline">Désactiver</a>

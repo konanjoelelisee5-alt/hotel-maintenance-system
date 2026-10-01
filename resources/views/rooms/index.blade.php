@@ -3,8 +3,8 @@
         <div class="flex flex-wrap justify-between items-center gap-3">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Lieux') }}</h2>
             <div class="flex gap-2">
-                <a href="{{ route('rooms.create') }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">+ Chambre</a>
-                <a href="{{ route('rooms.create', ['type' => 'espace_commun']) }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-50">+ Espace commun</a>
+                <a href="{{ route('rooms.create') }}" data-modal class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">+ Chambre</a>
+                <a href="{{ route('rooms.create', ['type' => 'espace_commun']) }}" data-modal class="px-4 py-2 bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-50">+ Espace commun</a>
             </div>
         </div>
     </x-slot>

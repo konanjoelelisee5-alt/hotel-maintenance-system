@@ -80,6 +80,77 @@ class ModalWindowTest extends TestCase
         $this->assertSame(0, WorkOrder::count());
     }
 
+    // ===== Ajouts rapides et utilisateurs =====
+
+    public static function quickAddPages(): array
+    {
+        return [
+            'lieu' => ['rooms.index', 'rooms.create', 'Nouveau lieu'],
+            'équipement' => ['equipment.index', 'equipment.create', 'Nouvel équipement'],
+            'fournisseur' => ['suppliers.index', 'suppliers.create', 'Nouveau fournisseur'],
+            'pièce' => ['parts.index', 'parts.create', 'Nouvelle pièce'],
+            'compétence' => ['skills.index', 'skills.create', 'Nouvelle compétence'],
+            "type d'OT" => ['work-order-types.index', 'work-order-types.create', "Nouveau type d'OT"],
+            'priorité' => ['work-order-priorities.index', 'work-order-priorities.create', 'Nouvelle priorité'],
+            'utilisateur' => ['users.index', 'users.create', 'Nouvel utilisateur'],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('quickAddPages')]
+    public function test_quick_add_opens_in_a_window_and_keeps_its_full_page(string $index, string $create, string $title): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->get(route($index))
+            ->assertSee('href="'.route($create).'" data-modal', false);
+
+        $fragment = $this->actingAs($admin)->get(route($create), self::MODAL)
+            ->assertOk()
+            ->assertSee($title)
+            ->assertSee('data-modal-close', false)
+            ->getContent();
+        $this->assertStringNotContainsString('<html', $fragment);
+
+        $this->actingAs($admin)->get(route($create))->assertOk()->assertSee('<html', false)->assertSee($title);
+    }
+
+    public function test_room_created_from_the_window_leads_to_its_page(): void
+    {
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->post(route('rooms.store'), ['type' => 'chambre', 'number' => '512', 'floor' => '5', 'status' => 'disponible'], self::MODAL + ['Accept' => 'application/json']);
+
+        $room = \App\Models\Room::where('number', '512')->firstOrFail();
+        $response->assertOk()->assertExactJson(['redirect' => route('rooms.show', $room)]);
+    }
+
+    public function test_user_edit_opens_in_a_window(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->technicien()->create(['name' => 'Yao Konan']);
+
+        $this->actingAs($admin)->get(route('users.index'))
+            ->assertSee('href="'.route('users.edit', $user).'" data-modal', false);
+
+        $fragment = $this->actingAs($admin)->get(route('users.edit', $user), self::MODAL)
+            ->assertOk()
+            ->assertSee('Modifier Yao Konan')
+            ->assertSee('Réinitialiser le mot de passe')
+            ->getContent();
+        $this->assertStringNotContainsString('<html', $fragment);
+        $this->assertStringNotContainsString('shadow-sm rounded-lg', $fragment);
+    }
+
+    public function test_account_window_still_asks_for_the_password_first(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->forgetPasswordConfirmation();
+
+        // La fenêtre reçoit l'adresse de la page de confirmation et s'y rend.
+        $this->actingAs($admin)->get(route('users.create'), self::MODAL)
+            ->assertOk()
+            ->assertExactJson(['redirect' => route('password.confirm')]);
+    }
+
     public function test_normal_form_submission_still_redirects(): void
     {
         $this->actingAs(User::factory()->manager()->create())

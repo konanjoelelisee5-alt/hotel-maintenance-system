@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Fournisseurs') }}
             </h2>
-            <a href="{{ route('suppliers.create') }}"
+            <a href="{{ route('suppliers.create') }}" data-modal
                class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
                 + Nouveau fournisseur
             </a>

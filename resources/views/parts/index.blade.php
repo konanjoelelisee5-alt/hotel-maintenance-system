@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Pièces & Stock') }}</h2>
-            <a href="{{ route('parts.create') }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
+            <a href="{{ route('parts.create') }}" data-modal class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
                 + Nouvelle pièce
             </a>
         </div>
