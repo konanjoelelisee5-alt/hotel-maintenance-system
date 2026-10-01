@@ -48,6 +48,26 @@ class MaintenancePlanAutomationTest extends TestCase
         ], $overrides));
     }
 
+    // ===== Bouton « Générer un OT maintenant » =====
+
+    public function test_generate_now_button_opens_the_new_work_order(): void
+    {
+        $plan = $this->makePlan();
+
+        $this->actingAs($this->admin)->get(route('maintenance-plans.show', $plan))->assertOk();
+
+        $response = $this->actingAs($this->admin)
+            ->from(route('maintenance-plans.show', $plan))
+            ->post(route('maintenance-plans.generate', $plan));
+
+        $workOrder = WorkOrder::where('maintenance_plan_id', $plan->id)->firstOrFail();
+        $response->assertRedirect(route('work-orders.show', $workOrder));
+
+        $this->actingAs($this->admin)->get(route('work-orders.show', $workOrder))
+            ->assertOk()
+            ->assertSee('généré manuellement');
+    }
+
     public function test_next_due_at_defaults_to_start_date_on_creation(): void
     {
         $plan = $this->makePlan(['start_date' => '2026-01-15']);
