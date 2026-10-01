@@ -73,13 +73,14 @@ class WorkOrderController extends Controller
 
     public function create(): View
     {
-        $rooms = Room::orderBy('number')->get();
-        $equipments = Equipment::orderBy('name')->get();
+        // Lieux et équipements hors service ne sont plus proposés.
+        $roomGroups = Room::groupedForSelect();
+        $equipments = Equipment::forSelect();
         $technicians = User::where('role', 'technicien')->orderBy('name')->get();
         $types = WorkOrderType::where('is_active', true)->orderBy('position')->get();
         $priorities = WorkOrderPriority::where('is_active', true)->orderBy('position')->get();
 
-        return view('work-orders.create', compact('rooms', 'equipments', 'technicians', 'types', 'priorities'));
+        return view('work-orders.create', compact('roomGroups', 'equipments', 'technicians', 'types', 'priorities'));
     }
 
     public function store(StoreWorkOrderRequest $request): RedirectResponse
@@ -130,13 +131,14 @@ class WorkOrderController extends Controller
     public function edit(WorkOrder $workOrder): View
     {
         $this->authorize('update', $workOrder);
-        $rooms = Room::orderBy('number')->get();
-        $equipments = Equipment::orderBy('name')->get();
+        // Le lieu / l'équipement actuel reste proposé même s'il est passé hors service.
+        $roomGroups = Room::groupedForSelect($workOrder->room_id);
+        $equipments = Equipment::forSelect($workOrder->equipment_id);
         $technicians = User::where('role', 'technicien')->orderBy('name')->get();
         $types = WorkOrderType::where('is_active', true)->orderBy('position')->get();
         $priorities = WorkOrderPriority::where('is_active', true)->orderBy('position')->get();
 
-        return view('work-orders.edit', compact('workOrder', 'rooms', 'equipments', 'technicians', 'types', 'priorities'));
+        return view('work-orders.edit', compact('workOrder', 'roomGroups', 'equipments', 'technicians', 'types', 'priorities'));
     }
 
     public function update(UpdateWorkOrderRequest $request, WorkOrder $workOrder): RedirectResponse

@@ -20,20 +20,15 @@
     <p class="text-sm font-medium text-gray-700 mb-2">Cible du plan <span class="text-gray-400 font-normal">(au moins une des deux)</span></p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-            <x-input-label for="room_id" value="Chambre" />
-            <select id="room_id" name="room_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                <option value="">-- Aucune --</option>
-                @foreach ($rooms as $room)
-                    <option value="{{ $room->id }}" @selected($value('room_id') == $room->id)>Chambre {{ $room->number }}</option>
-                @endforeach
-            </select>
+            <x-input-label for="room_id" value="Lieu" />
+            @include('rooms.partials.room-select', ['selected' => $value('room_id'), 'placeholder' => '-- Aucun --'])
         </div>
         <div>
             <x-input-label for="equipment_id" value="Équipement" />
             <select id="equipment_id" name="equipment_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                 <option value="">-- Aucun --</option>
                 @foreach ($equipments as $equipment)
-                    <option value="{{ $equipment->id }}" @selected($value('equipment_id') == $equipment->id)>{{ $equipment->name }}</option>
+                    <option value="{{ $equipment->id }}" @selected($value('equipment_id') == $equipment->id)>{{ $equipment->label }}</option>
                 @endforeach
             </select>
         </div>

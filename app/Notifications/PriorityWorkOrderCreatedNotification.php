@@ -46,7 +46,7 @@ class PriorityWorkOrderCreatedNotification extends Notification
     private function location(): string
     {
         return match (true) {
-            (bool) $this->workOrder->room => 'Chambre '.$this->workOrder->room->number,
+            (bool) $this->workOrder->room => $this->workOrder->room->label,
             (bool) $this->workOrder->equipment => $this->workOrder->equipment->name,
             default => 'Lieu non précisé',
         };

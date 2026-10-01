@@ -38,6 +38,8 @@ class Navigation
                 'adminTitle' => 'Administration',
                 'admin' => [
                     ['label' => 'Utilisateurs', 'route' => 'users.index'],
+                    ['label' => 'Lieux', 'route' => 'rooms.index'],
+                    ['label' => 'Équipements', 'route' => 'equipment.index'],
                     ['label' => 'Compétences', 'route' => 'skills.index'],
                     ['label' => 'Types OT', 'route' => 'work-order-types.index'],
                     ['label' => 'Priorités', 'route' => 'work-order-priorities.index'],
@@ -58,6 +60,8 @@ class Navigation
                 ],
                 'adminTitle' => 'Ressources',
                 'admin' => [
+                    ['label' => 'Lieux', 'route' => 'rooms.index'],
+                    ['label' => 'Équipements', 'route' => 'equipment.index'],
                     ['label' => 'Pièces & stock', 'route' => 'parts.index'],
                     ['label' => 'Fournisseurs & achats', 'route' => 'purchase-orders.index'],
                     ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index'],

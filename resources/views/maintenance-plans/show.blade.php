@@ -31,7 +31,7 @@
             <div class="bg-white p-6 shadow-sm rounded-lg grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
                 <div>
                     <div class="text-gray-400 uppercase text-xs mb-1">Cible</div>
-                    <div class="text-gray-900">{{ $maintenancePlan->equipment?->name ?? ($maintenancePlan->room ? 'Chambre ' . $maintenancePlan->room->number : '—') }}</div>
+                    <div class="text-gray-900">{{ $maintenancePlan->equipment?->name ?? ($maintenancePlan->room?->label ?? '—') }}</div>
                 </div>
                 <div>
                     <div class="text-gray-400 uppercase text-xs mb-1">Type d'OT généré</div>

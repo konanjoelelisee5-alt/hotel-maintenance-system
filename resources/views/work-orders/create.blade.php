@@ -49,15 +49,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <x-input-label for="room_id" value="Lieu (chambre / zone)" />
-                            <select id="room_id" name="room_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                <option value="">-- Aucun --</option>
-                                @foreach ($rooms as $room)
-                                    <option value="{{ $room->id }}" @selected(old('room_id') == $room->id)>
-                                        {{ $room->number }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-input-label for="room_id" value="Lieu (chambre ou espace commun)" />
+                            @include('rooms.partials.room-select', ['selected' => old('room_id'), 'placeholder' => '-- Aucun --'])
                             <x-input-error :messages="$errors->get('room_id')" class="mt-2" />
                         </div>
 
@@ -67,7 +60,7 @@
                                 <option value="">-- Aucun --</option>
                                 @foreach ($equipments as $equipment)
                                     <option value="{{ $equipment->id }}" @selected(old('equipment_id') == $equipment->id)>
-                                        {{ $equipment->name }}
+                                        {{ $equipment->label }}
                                     </option>
                                 @endforeach
                             </select>

@@ -213,7 +213,7 @@ class DashboardController extends Controller
                 'title' => $user->role === UserRole::Reception ? 'Chambres avec demande active' : 'État de mes chambres',
                 'sub' => 'à annoncer au client',
                 'items' => WorkOrder::visibleTo($user)->open()->with('room')->limit(5)->get()
-                    ->map(fn (WorkOrder $w) => ['name' => 'Chambre '.($w->room?->number ?? '—'), 'meta' => $w->status_label, 'pct' => $w->slaProgressPercent(), 'color' => $w->slaColorClass()]),
+                    ->map(fn (WorkOrder $w) => ['name' => $w->room?->label ?? '—', 'meta' => $w->status_label, 'pct' => $w->slaProgressPercent(), 'color' => $w->slaColorClass()]),
             ],
             UserRole::Admin => [
                 'title' => 'Santé du SLA',
@@ -261,7 +261,7 @@ class DashboardController extends Controller
                 },
                 'items' => WorkOrder::visibleTo($user)->with('room', 'assignee', 'reporter')->latest()->limit(4)->get()
                     ->map(fn (WorkOrder $w) => [
-                        'label' => 'Chambre '.($w->room?->number ?? '—').' — '.$w->title,
+                        'label' => ($w->room?->label ?? '—').' — '.$w->title,
                         // Le responsable a besoin de savoir quel agent a signalé.
                         'meta' => $w->code().' · '.($user->isDepartmentHead() ? ($w->reporter?->name ?? '—').' · ' : '').($w->assignee?->name ?? $w->status_label),
                         'color' => $w->slaColorClass(),
@@ -285,7 +285,7 @@ class DashboardController extends Controller
                     )
                     ->concat(
                         MaintenancePlan::active()->where('next_due_at', '<=', now()->addDays(7))->with('equipment', 'room')->take(2)->get()
-                            ->map(fn (MaintenancePlan $p) => ['label' => 'Maintenance « '.$p->name.' » à générer', 'meta' => ($p->equipment?->name ?? $p->room?->number ?? 'préventif').' · '.$p->next_due_at->format('d/m'), 'color' => 'blue'])
+                            ->map(fn (MaintenancePlan $p) => ['label' => 'Maintenance « '.$p->name.' » à générer', 'meta' => ($p->equipment?->name ?? $p->room?->label ?? 'préventif').' · '.$p->next_due_at->format('d/m'), 'color' => 'blue'])
                     )->values(),
             ],
         };

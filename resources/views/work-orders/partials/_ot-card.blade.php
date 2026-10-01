@@ -15,7 +15,7 @@
     </div>
 
     <div class="flex items-center justify-between gap-2 mt-1.5 text-[13px] text-[#6C6658]">
-        <span class="truncate">Chambre {{ $w->room?->number ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</span>
+        <span class="truncate">{{ $w->room?->label ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</span>
         @if ($w->assignee)
             <span class="flex items-center gap-1.5 flex-shrink-0">
                 <span class="w-5 h-5 rounded-full bg-gold flex items-center justify-center text-[9px] font-bold text-navy">{{ $w->assignee->initialsOrGenerated() }}</span>

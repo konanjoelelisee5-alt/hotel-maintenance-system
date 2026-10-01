@@ -110,7 +110,7 @@
                                             <a href="{{ route('work-orders.show', $w) }}" class="text-[14.5px] font-semibold text-navy hover:underline">{{ $w->title }}</a>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-semibold whitespace-nowrap" style="background-color: {{ $w->priority->color }}18; color: {{ $w->priority->color }};">{{ $w->priority->label }}</span>
                                         </div>
-                                        <div class="text-[13px] text-[#6C6658] mt-0.5">Chambre {{ $w->room?->number ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</div>
+                                        <div class="text-[13px] text-[#6C6658] mt-0.5">{{ $w->room?->label ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</div>
                                     </td>
                                     <td class="px-3 py-4 align-middle whitespace-nowrap">
                                         <x-work-order-status-badge :status="$w->status" />

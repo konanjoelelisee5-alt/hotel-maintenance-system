@@ -118,6 +118,27 @@ class DatabaseSeeder extends Seeder
         Room::factory()->count(30)->create();
 
         \App\Models\Equipment::factory()->count(40)->create();
+
+        // Espaces communs d'un hôtel et leurs équipements : une grande partie des
+        // pannes (chaudière, pompe de piscine, ascenseur) ne concerne aucune chambre.
+        $commonAreas = [
+            ['CHAUF', 'Chaufferie', 'Sous-sol', [['Chaudière principale', 'Chaudière'], ['Ballon d\'eau chaude 1000 L', 'Chauffe-eau']]],
+            ['CUIS', 'Cuisine', 'Rez-de-chaussée', [['Chambre froide positive', 'Chambre froide'], ['Four mixte', 'Four'], ['Hotte d\'extraction', 'Ventilation']]],
+            ['PISC', 'Piscine', 'Extérieur', [['Pompe de filtration', 'Pompe'], ['Électrolyseur au sel', 'Traitement de l\'eau']]],
+            ['HALL', 'Hall d\'accueil', 'Rez-de-chaussée', [['Porte automatique', 'Porte'], ['Climatisation centrale du hall', 'Climatiseur']]],
+            ['ASC', 'Ascenseurs', 'Tous étages', [['Ascenseur clients A', 'Ascenseur'], ['Ascenseur service', 'Ascenseur']]],
+            ['BUAN', 'Buanderie', 'Sous-sol', [['Lave-linge industriel 1', 'Lave-linge'], ['Séchoir industriel', 'Séchoir']]],
+            ['REST', 'Restaurant', 'Rez-de-chaussée', [['Climatisation du restaurant', 'Climatiseur']]],
+            ['PARK', 'Parking', 'Extérieur', [['Barrière d\'entrée', 'Barrière'], ['Éclairage du parking', 'Éclairage']]],
+        ];
+
+        foreach ($commonAreas as [$code, $name, $floor, $equipment]) {
+            $area = Room::create(['type' => Room::TYPE_COMMON_AREA, 'number' => $code, 'name' => $name, 'floor' => $floor]);
+
+            foreach ($equipment as [$equipmentName, $type]) {
+                $area->equipment()->create(['name' => $equipmentName, 'type' => $type]);
+            }
+        }
     }
 
     private function seedSlaAndEscalation(): void

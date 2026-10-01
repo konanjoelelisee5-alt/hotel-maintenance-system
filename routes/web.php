@@ -14,6 +14,8 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseOrderReceptionController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\CorrectionRequestController;
 use App\Http\Controllers\QualityControlController;
 use App\Http\Controllers\EscalationRuleController;
@@ -204,6 +206,13 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
     Route::resource('parts', PartController::class)->except(['destroy'])->parameters(['parts' => 'part']);
     Route::delete('/parts/{part}', [PartController::class, 'destroy'])->name('parts.destroy');
     Route::post('/parts/{part}/movements', [StockMovementController::class, 'store'])->name('parts.movements.store');
+});
+
+// === LIEUX & ÉQUIPEMENTS (admin + manager) ===
+// Pas de suppression réelle : destroy() met hors service et garde l'historique.
+Route::middleware(['auth', 'role:admin,manager'])->group(function () {
+    Route::resource('rooms', RoomController::class);
+    Route::resource('equipment', EquipmentController::class);
 });
 
 // Réservation accessible à tous les rôles opérant sur les OT

@@ -59,7 +59,7 @@ class MaintenancePlanController extends Controller
     {
         return view('maintenance-plans.edit', [
             'maintenancePlan' => $maintenancePlan,
-            ...$this->formData(),
+            ...$this->formData($maintenancePlan),
         ]);
     }
 
@@ -105,11 +105,12 @@ class MaintenancePlanController extends Controller
             ->with('success', "Ordre de travail #{$workOrder->id} généré manuellement à partir de ce plan.");
     }
 
-    private function formData(): array
+    private function formData(?MaintenancePlan $plan = null): array
     {
         return [
-            'rooms' => Room::orderBy('number')->get(),
-            'equipments' => Equipment::orderBy('name')->get(),
+            // Hors service masqués, sauf la cible actuelle du plan modifié.
+            'roomGroups' => Room::groupedForSelect($plan?->room_id),
+            'equipments' => Equipment::forSelect($plan?->equipment_id),
             'types' => WorkOrderType::where('is_active', true)->orderBy('position')->get(),
             'priorities' => WorkOrderPriority::where('is_active', true)->orderBy('position')->get(),
             'templates' => ChecklistTemplate::orderBy('name')->get(),

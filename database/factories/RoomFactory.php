@@ -19,4 +19,16 @@ class RoomFactory extends Factory
             'status' => fake()->randomElement(['disponible', 'disponible', 'disponible', 'occupee', 'maintenance']),
         ];
     }
+
+    /** Espace commun : code court + nom, pas d'état "occupée". */
+    public function commonArea(string $code = 'PISC', string $name = 'Piscine'): static
+    {
+        return $this->state(fn () => [
+            'type' => 'espace_commun',
+            'number' => $code,
+            'name' => $name,
+            'floor' => 'Extérieur',
+            'status' => 'disponible',
+        ]);
+    }
 }

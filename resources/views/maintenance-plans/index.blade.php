@@ -68,7 +68,7 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $plan->name }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
-                                    {{ $plan->equipment?->name ?? $plan->room?->number ?? '—' }}
+                                    {{ $plan->equipment?->name ?? $plan->room?->label ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $plan->frequency_label }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">

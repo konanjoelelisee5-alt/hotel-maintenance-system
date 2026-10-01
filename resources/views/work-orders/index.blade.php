@@ -82,7 +82,7 @@
                                     <span class="block text-[11.5px] text-ink-grey mt-0.5">{{ $w->code() }}</span>
                                 </td>
                                 <td class="px-[18px] py-3 align-top text-[13px]">
-                                    Chambre {{ $w->room?->number ?? '—' }}
+                                    {{ $w->room?->label ?? '—' }}
                                     <span class="block text-[11.5px] text-ink-grey mt-0.5">{{ $w->equipment?->name ?? '—' }}</span>
                                 </td>
                                 <td class="px-[18px] py-3 align-top text-[13px]">

@@ -5,7 +5,7 @@
     <dl class="p-5 space-y-3 text-sm">
         <div class="flex justify-between gap-3">
             <dt class="text-ink-grey">Lieu</dt>
-            <dd class="text-slate-800 font-medium text-right">{{ $workOrder->room ? 'Chambre ' . $workOrder->room->number : '—' }}</dd>
+            <dd class="text-slate-800 font-medium text-right">{{ $workOrder->room?->label ?? '—' }}</dd>
         </div>
         <div class="flex justify-between gap-3">
             <dt class="text-ink-grey">Équipement</dt>
