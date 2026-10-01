@@ -13,7 +13,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-canvas text-[#14202B]">
+<body class="font-sans antialiased bg-canvas text-[#14202B]" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
     <div class="min-h-screen flex items-stretch">
 
         {{-- Sidebar desktop --}}
@@ -31,50 +31,7 @@
                 </span>
             </div>
 
-            <nav class="flex flex-col gap-0.5">
-                <div class="text-[10.5px] tracking-wide text-[#6E8399] font-semibold uppercase px-2 pb-1.5">Opérations</div>
-                @foreach ($nav['ops'] as $item)
-                    @php $active = request()->routeIs($item['route']); @endphp
-                    <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] font-medium {{ $active ? 'bg-white/10 text-white' : 'text-[#DCE5EE] hover:bg-white/[.06]' }}">
-                        <span class="flex items-center gap-2.5">
-                            @if (! empty($item['icon']))
-                                <x-nav-icon :name="$item['icon']" class="w-4 h-4 {{ $active ? 'text-gold' : 'text-[#8FA3B8]' }}" />
-                            @else
-                                <span class="w-1.5 h-1.5 rounded-full {{ $active ? 'bg-gold' : 'bg-[#3F5D7A]' }}"></span>
-                            @endif
-                            {{ $item['label'] }}
-                        </span>
-                        @if (! empty($item['badge']))
-                            <span class="text-[11px] font-semibold text-gold">{{ $item['badge'] }}</span>
-                        @endif
-                    </a>
-                @endforeach
-            </nav>
-
-            @if (! empty($nav['admin']))
-                <nav class="flex flex-col gap-0.5">
-                    <div class="text-[10.5px] tracking-wide text-[#6E8399] font-semibold uppercase px-2 pb-1.5">{{ $nav['adminTitle'] }}</div>
-                    @foreach ($nav['admin'] as $item)
-                        @php $active = request()->routeIs($item['route']); @endphp
-                        <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium {{ $active ? 'bg-white/10 text-white' : 'text-[#B9C7D6] hover:bg-white/[.06] hover:text-white' }}">
-                            {{ $item['label'] }}
-                        </a>
-                    @endforeach
-                </nav>
-            @endif
-
-            <div class="mt-auto flex flex-col gap-2">
-                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/[.06] text-[#C3D0DE] text-[12.5px] font-medium hover:bg-white/[.12]">
-                    Mon profil
-                </a>
-                <div class="px-2.5 py-2.5 rounded-[9px] bg-white/[.06] text-[11px] text-[#9FB2C5] leading-relaxed">
-                    Connecté en tant que {{ auth()->user()->role_label }}
-                </div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="w-full text-left px-2.5 py-2 rounded-lg text-[12.5px] font-medium text-[#E7B3AE] hover:bg-white/[.06]">Se déconnecter</button>
-                </form>
-            </div>
+            @include('layouts.partials.sidebar-nav')
         </aside>
 
         {{-- Colonne principale --}}
@@ -92,6 +49,13 @@
                     <div class="text-[16px] font-semibold truncate">{{ $pageTitle }}</div>
                 </div>
                 @include('partials.notification-bell', ['dark' => true])
+                {{-- La sidebar est masquée sur téléphone : sans ce bouton, la plupart des
+                     écrans (référentiels, SLA, journal...) n'étaient atteignables que par l'URL. --}}
+                <button type="button" @click="menuOpen = true" :aria-expanded="menuOpen" aria-controls="mobile-menu"
+                        class="w-9 h-9 flex-shrink-0 rounded-lg border border-white/20 flex items-center justify-center">
+                    <x-nav-icon name="menu" class="w-5 h-5" />
+                    <span class="sr-only">Ouvrir le menu</span>
+                </button>
             </div>
 
             {{-- L'action principale de la page (ex. "+ Nouvel ordre", "Planifier") n'a de
@@ -139,10 +103,29 @@
         </div>
     </div>
 
+    {{-- Menu complet sur téléphone : même contenu que la sidebar desktop. --}}
+    <div x-show="menuOpen" x-cloak class="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="absolute inset-0 bg-black/40" @click="menuOpen = false"></div>
+        <aside id="mobile-menu" x-show="menuOpen" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+               class="absolute inset-y-0 right-0 w-[min(300px,85vw)] bg-navy text-white p-3.5 flex flex-col gap-5 overflow-y-auto">
+            <div class="flex items-center justify-between gap-2.5 px-1.5">
+                <span class="flex flex-col gap-0.5 min-w-0">
+                    <span class="text-[13.5px] font-semibold truncate">{{ auth()->user()->name }}</span>
+                    <span class="text-[11px] text-[#8FA3B8] truncate">{{ auth()->user()->role_label }}</span>
+                </span>
+                <button type="button" @click="menuOpen = false" class="w-9 h-9 flex-shrink-0 rounded-lg border border-white/20 flex items-center justify-center">
+                    <x-nav-icon name="close" class="w-4 h-4" />
+                    <span class="sr-only">Fermer le menu</span>
+                </button>
+            </div>
+            @include('layouts.partials.sidebar-nav')
+        </aside>
+    </div>
+
     {{-- Barre de navigation mobile --}}
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line flex gap-0.5 px-2.5 py-1.5">
         @foreach ($bottomNav as $item)
-            @php $active = request()->routeIs($item['route']); @endphp
+            @php $active = request()->routeIs(\Illuminate\Support\Str::beforeLast($item['route'], '.').'.*'); @endphp
             <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-[10px] {{ $active ? 'bg-paper' : '' }}">
                 <span class="w-1 h-1 rounded-full {{ $active ? 'bg-gold' : 'bg-transparent' }}"></span>
                 <x-nav-icon :name="$item['icon'] ?? 'home'" class="w-5 h-5 {{ $active ? 'text-navy' : 'text-[#A8A296]' }}" />
