@@ -1,4 +1,5 @@
-<x-form-page title="Nouvelle priorité">
+<x-form-page title="Nouvelle priorité" crumb="Référentiels" icon="flag"
+             subtitle="Niveau d'urgence, avec sa couleur et son rang dans les listes.">
     <form method="POST" action="{{ route('work-order-priorities.store') }}" class="space-y-4">
         @csrf
 

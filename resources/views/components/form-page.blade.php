@@ -1,12 +1,13 @@
-@props(['title', 'card' => true])
+@props(['title', 'card' => true, 'crumb' => null, 'icon' => null, 'subtitle' => null])
 
 {{-- Formulaire affiché en page complète, ou dans une fenêtre quand il est ouvert par un
      lien [data-modal] (en-tête X-Modal, cf. resources/js/modal.js). Le formulaire est le
      même dans les deux cas ; ses liens « Annuler » marqués data-modal-close ferment la
-     fenêtre au lieu de changer de page. --}}
+     fenêtre au lieu de changer de page. crumb / icon / subtitle habillent l'en-tête
+     de la fenêtre. --}}
 @if (request()->hasHeader(\App\Http\Middleware\HandleModalRequests::HEADER))
-    <x-modal-panel :title="$title">
-        <div class="pb-5 space-y-6">
+    <x-modal-panel :title="$title" :crumb="$crumb" :icon="$icon" :subtitle="$subtitle">
+        <div class="space-y-6">
             {{ $slot }}
         </div>
     </x-modal-panel>

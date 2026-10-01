@@ -123,11 +123,14 @@
     </div>
 
     {{-- Fenêtre (modale) des liens [data-modal], remplie par resources/js/modal.js.
-         Plein écran sur téléphone, centrée sur ordinateur. --}}
-    <div id="remote-modal" class="hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-labelledby="remote-modal-title">
-        <div data-modal-close class="absolute inset-0 bg-black/40"></div>
+         Téléphone : feuille qui monte du bas ; ordinateur : fenêtre centrée en haut d'écran.
+         Animations : resources/css/app.css (#remote-modal[data-state]). --}}
+    <div id="remote-modal" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start sm:justify-center sm:px-6 sm:pt-[7vh]"
+         data-state="closed" role="dialog" aria-modal="true" aria-labelledby="remote-modal-title">
+        <div data-modal-close data-modal-overlay class="absolute inset-0 bg-navy-dark/55 backdrop-blur-[3px]"></div>
         <div data-modal-content
-             class="relative h-full sm:h-auto sm:max-h-[calc(100dvh-6rem)] sm:mt-12 sm:mx-auto w-full sm:max-w-2xl bg-white sm:rounded-xl shadow-xl overflow-y-auto"></div>
+             class="relative w-full sm:max-w-[680px] max-h-[94dvh] sm:max-h-[86dvh] bg-white rounded-t-2xl sm:rounded-2xl border border-line
+                    shadow-[0_28px_70px_-18px_rgba(11,27,44,.55)] overflow-y-auto overscroll-contain"></div>
     </div>
 
     {{-- Barre de navigation mobile --}}

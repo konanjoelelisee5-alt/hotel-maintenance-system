@@ -1,6 +1,8 @@
 @if (request()->hasHeader(\App\Http\Middleware\HandleModalRequests::HEADER))
     {{-- Ouvert depuis un bouton « + Nouvel ordre » : seulement le contenu de la fenêtre. --}}
-    <x-modal-panel title="Nouvel ordre de travail">
+    <x-modal-panel title="Nouvel ordre de travail" crumb="Ordres de travail" icon="clipboard"
+                   subtitle="Décrivez le problème et où il se trouve : il part aussitôt vers la maintenance.">
+
         @include('work-orders.partials.create-form', ['inModal' => true])
     </x-modal-panel>
 @else

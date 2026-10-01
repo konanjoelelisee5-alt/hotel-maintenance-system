@@ -1,4 +1,5 @@
-<x-form-page title="Nouveau fournisseur">
+<x-form-page title="Nouveau fournisseur" crumb="Stock & achats" icon="truck"
+             subtitle="Société à qui passer les bons de commande de pièces.">
     <form method="POST" action="{{ route('suppliers.store') }}" class="space-y-4">
         @csrf
 

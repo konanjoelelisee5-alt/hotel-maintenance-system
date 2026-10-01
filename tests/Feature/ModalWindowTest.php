@@ -134,8 +134,12 @@ class ModalWindowTest extends TestCase
         $fragment = $this->actingAs($admin)->get(route('users.edit', $user), self::MODAL)
             ->assertOk()
             ->assertSee('Modifier Yao Konan')
-            ->assertSee('Réinitialiser le mot de passe')
+            ->assertSee('Administration · Utilisateurs')
+            ->assertSee('class="modal-form', false)
+            ->assertSee('Réinitialiser')
             ->getContent();
+        // Mot de passe en tête, avant le formulaire du compte (pas sous le pied collant).
+        $this->assertLessThan(strpos($fragment, 'name="name"'), strpos($fragment, 'Mot de passe'));
         $this->assertStringNotContainsString('<html', $fragment);
         $this->assertStringNotContainsString('shadow-sm rounded-lg', $fragment);
     }

@@ -1,4 +1,5 @@
-<x-form-page title="Nouvel utilisateur">
+<x-form-page title="Nouvel utilisateur" crumb="Administration" icon="users"
+             subtitle="Compte d'un employé : son rôle définit ce qu'il voit et peut faire.">
     <form method="POST" action="{{ route('users.store') }}" class="space-y-4">
         @csrf
 

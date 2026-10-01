@@ -1,4 +1,5 @@
-<x-form-page title="Nouveau type d'OT">
+<x-form-page title="Nouveau type d'OT" crumb="Référentiels" icon="tag"
+             subtitle="Nature d'intervention proposée à la création d'un ordre de travail.">
     <form method="POST" action="{{ route('work-order-types.store') }}" class="space-y-4">
         @csrf
 

@@ -86,7 +86,8 @@
 
     {{-- Page : collé au-dessus de la barre de navigation mobile pour rester visible
          clavier ouvert ; fenêtre : collé en bas de la fenêtre. --}}
-    <div class="sticky {{ $inModal ? 'bottom-0 -mx-5 px-5 py-4' : 'bottom-[64px] lg:static -mx-6 lg:mx-0 px-6 lg:px-0 py-3 lg:py-0 lg:bg-transparent lg:border-0' }} bg-white/95 backdrop-blur border-t border-line flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+    {{-- Dans la fenêtre, le pied est mis en forme par .modal-form (resources/css/app.css). --}}
+    <div class="{{ $inModal ? '' : 'sticky bottom-[64px] lg:static -mx-6 lg:mx-0 px-6 lg:px-0 py-3 lg:py-0 bg-white/95 backdrop-blur lg:bg-transparent border-t border-line lg:border-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3' }}">
         @if ($inModal)
             <button type="button" data-modal-close class="text-center px-4 py-2 text-sm text-ink-grey hover:underline">
                 Annuler

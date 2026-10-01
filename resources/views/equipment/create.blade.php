@@ -1,4 +1,5 @@
-<x-form-page title="Nouvel équipement">
+<x-form-page title="Nouvel équipement" crumb="Référentiels" icon="wrench"
+             subtitle="Appareil suivi par la maintenance : son historique de pannes s'y rattachera.">
     <form method="POST" action="{{ route('equipment.store') }}" class="space-y-6">
         @csrf
         @include('equipment._form')

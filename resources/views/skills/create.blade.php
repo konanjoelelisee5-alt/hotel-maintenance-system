@@ -1,4 +1,5 @@
-<x-form-page title="Nouvelle compétence">
+<x-form-page title="Nouvelle compétence" crumb="Référentiels" icon="star"
+             subtitle="Savoir-faire d'un technicien (plomberie, climatisation...), utilisé pour l'affectation.">
     <form method="POST" action="{{ route('skills.store') }}" class="space-y-4">
         @csrf
 

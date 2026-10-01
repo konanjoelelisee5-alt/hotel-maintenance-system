@@ -1,4 +1,5 @@
-<x-form-page title="Nouvelle pièce">
+<x-form-page title="Nouvelle pièce" crumb="Stock & achats" icon="part"
+             subtitle="Article du magasin : quantité, seuil d'alerte et coût.">
     <form method="POST" action="{{ route('parts.store') }}" class="space-y-4">
         @csrf
 

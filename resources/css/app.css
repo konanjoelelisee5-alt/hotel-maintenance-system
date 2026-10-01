@@ -4,3 +4,128 @@
 
 /* Alpine : éléments masqués tant qu'Alpine n'a pas démarré (ex. menu mobile). */
 [x-cloak] { display: none !important; }
+
+/* ==========================================================================
+   Fenêtres (modales) — resources/js/modal.js, components/modal-panel.blade.php
+   ========================================================================== */
+
+/* Ouverture / fermeture : fondu du voile ; la fenêtre monte du bas sur téléphone
+   (feuille), apparaît en léger zoom sur ordinateur. */
+#remote-modal [data-modal-overlay] {
+    transition: opacity 200ms ease;
+}
+#remote-modal [data-modal-content] {
+    transition: transform 260ms cubic-bezier(.2, .8, .2, 1), opacity 200ms ease;
+}
+#remote-modal[data-state="closed"] [data-modal-overlay] {
+    opacity: 0;
+}
+#remote-modal[data-state="closed"] [data-modal-content] {
+    opacity: 0;
+    transform: translateY(100%);
+}
+@media (min-width: 640px) {
+    #remote-modal[data-state="closed"] [data-modal-content] {
+        transform: translateY(12px) scale(.97);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    #remote-modal [data-modal-overlay],
+    #remote-modal [data-modal-content] {
+        transition: none;
+    }
+}
+
+/* Chargement : lignes grisées animées le temps que le formulaire arrive. */
+.modal-skeleton span {
+    @apply block rounded-md bg-line-soft animate-pulse;
+}
+
+/* Le jeton CSRF (champ caché) ouvre le formulaire : sans ceci, l'espacement vertical
+   (space-y) décalerait le premier vrai champ comme s'il suivait un élément visible. */
+.modal-form form > input[type="hidden"] + :not(input[type="hidden"]) {
+    margin-top: 0;
+}
+
+/* Champs : mêmes formes que la refonte (rayon 9 px, filet beige, focus navy). */
+.modal-form label:not(:has(input)) {
+    @apply block text-[12px] font-semibold uppercase tracking-wide text-[#6C6658] mb-1.5;
+}
+.modal-form label:has(input[type="checkbox"]) {
+    @apply inline-flex items-center gap-2.5 text-[14px] font-medium text-[#14202B] cursor-pointer;
+}
+.modal-form :is(input[type="text"], input[type="email"], input[type="password"], input[type="number"],
+    input[type="date"], input[type="datetime-local"], input[type="tel"], input[type="search"], select, textarea) {
+    @apply block w-full mt-0 px-3.5 py-2.5 rounded-[9px] border border-line bg-white text-[14px] text-[#14202B]
+        shadow-none placeholder:text-ink-grey transition focus:border-navy focus:ring-2 focus:ring-navy/15 focus:outline-none;
+}
+.modal-form select {
+    @apply pr-10; /* place pour la flèche de la liste */
+}
+.modal-form :is(input, select, textarea):disabled {
+    @apply bg-paper text-ink-grey cursor-not-allowed;
+}
+.modal-form input[type="checkbox"] {
+    @apply w-[18px] h-[18px] rounded-[5px] border-line text-navy focus:ring-navy/20;
+}
+/* Choix exclusifs (ex. Chambre / Espace commun) : pastilles, la choisie en navy. */
+.modal-form label:has(input[type="radio"]) {
+    @apply inline-flex items-center gap-2.5 h-[42px] px-4 rounded-[9px] border border-line bg-white
+        text-[14px] font-medium text-[#4A4639] cursor-pointer transition hover:bg-paper;
+}
+.modal-form label:has(input[type="radio"]:checked) {
+    @apply border-navy bg-[#EAF0F6] text-navy font-semibold;
+}
+.modal-form input[type="radio"] {
+    @apply w-4 h-4 border-line text-navy focus:ring-navy/20;
+}
+.modal-form input[type="color"] {
+    @apply block w-20 h-[42px] p-1 rounded-[9px] border border-line bg-white cursor-pointer;
+}
+/* Plus spécifique que la règle des champs ci-dessus, sinon le filet beige l'emporte. */
+.modal-form :is(input, select, textarea)[aria-invalid="true"] {
+    @apply border-red bg-[#FFFBFA] focus:border-red focus:ring-red/15;
+}
+.modal-form p.text-xs {
+    @apply text-[12px] text-ink-grey mt-1.5;
+}
+.modal-form ul.text-sm, .modal-form p[data-modal-error] {
+    @apply text-[12.5px] font-medium text-red mt-1.5;
+}
+/* Bandeau en tête du formulaire : résumé des erreurs, droits, réseau. */
+.modal-form [data-modal-banner] {
+    @apply flex items-start gap-2.5 mb-6 px-4 py-3 rounded-[10px] bg-[#FBE4E1] border border-red/25
+        text-[13px] font-medium leading-snug text-[#8A1F16];
+}
+.modal-form [data-modal-banner] svg {
+    @apply w-[18px] h-[18px] flex-shrink-0 mt-px text-red;
+}
+.modal-form h3 {
+    @apply text-[14px] font-semibold text-navy;
+}
+
+/* Boutons hors pied (ex. « Réinitialiser le mot de passe ») : bouton secondaire. */
+.modal-form button[type="submit"] {
+    @apply inline-flex items-center justify-center gap-2 h-[40px] px-4 rounded-[9px] border border-line bg-white
+        text-[13px] font-semibold text-[#3d3a33] shadow-none transition hover:bg-paper disabled:opacity-60;
+}
+
+/* Pied de formulaire (la ligne qui porte le bouton d'envoi) : collé en bas de la
+   fenêtre, « Annuler » discret à gauche du bouton principal navy. */
+.modal-form form > div:has(> button[type="submit"]) {
+    @apply sticky bottom-0 z-10 -mx-6 mt-8 px-6 py-4 flex flex-row items-center justify-end gap-2
+        border-t border-line bg-paper/95 backdrop-blur;
+    width: auto;
+}
+.modal-form form > div:has(> button[type="submit"]) > button[type="submit"] {
+    @apply w-auto h-[42px] px-5 border-0 bg-navy text-white text-[13.5px] hover:bg-navy-light;
+}
+.modal-form form > div:has(> button[type="submit"]) > [data-modal-close] {
+    @apply inline-flex items-center h-[42px] px-4 rounded-[9px] text-[13.5px] font-semibold text-[#4A4639]
+        no-underline hover:bg-line-soft hover:no-underline transition;
+}
+
+/* Envoi en cours : petit cercle qui tourne dans le bouton. */
+.modal-spinner {
+    @apply inline-block w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin;
+}

@@ -1,4 +1,5 @@
-<x-form-page title="Nouveau lieu">
+<x-form-page title="Nouveau lieu" crumb="Référentiels" icon="building"
+             subtitle="Chambre ou espace commun : il pourra être choisi dans les ordres de travail.">
     <form method="POST" action="{{ route('rooms.store') }}" class="space-y-6">
         @csrf
         @include('rooms._form')
