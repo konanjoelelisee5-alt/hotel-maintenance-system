@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contracts\PhoneAlertSender;
 use App\Services\PhoneAlerts\LogPhoneAlertSender;
+use App\Support\SchedulerHealth;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // État des tâches automatiques, affiché sur la supervision admin.
+        View::composer('dashboards.admin', fn ($view) => $view->with('schedulerHealth', SchedulerHealth::report()));
+
         // Politique de mot de passe renforcée en production (comptes admin/manager/technicien
         // ayant accès aux données de l'hôtel) ; on reste sur le minimum Laravel en local/tests
         // pour ne pas gêner le développement.

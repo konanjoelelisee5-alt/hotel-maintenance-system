@@ -46,6 +46,10 @@ services:
       # Pas de worker sur l'offre gratuite : les files sont exécutées immédiatement
       - key: QUEUE_CONNECTION
         value: sync
+      # Planificateur lancé dans le conteneur (SLA, escalades, OT préventifs).
+      # Il s'arrête quand Render met le service en veille : voir DEPLOY-DEMO-RENDER.md.
+      - key: RUN_SCHEDULER
+        value: "true"
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_SECURE_COOKIE

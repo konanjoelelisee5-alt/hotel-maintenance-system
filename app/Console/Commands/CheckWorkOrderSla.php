@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\WorkOrder;
 use App\Notifications\SlaEscalationNotification;
 use App\Support\OnCall;
+use App\Support\SchedulerHealth;
 use Illuminate\Console\Command;
 
 class CheckWorkOrderSla extends Command
@@ -46,6 +47,8 @@ class CheckWorkOrderSla extends Command
         }
 
         $this->info("Vérification terminée. {$triggeredCount} escalade(s) déclenchée(s).");
+
+        SchedulerHealth::record('sla');
     }
 
     /**

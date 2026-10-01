@@ -191,6 +191,24 @@
                     @endforelse
                 </div>
             </section>
+
+            {{-- Une tâche automatique arrêtée ne se voit nulle part ailleurs :
+                 plus d'escalade ni d'OT préventif, sans aucun message d'erreur. --}}
+            <section class="bg-white border border-line rounded-xl px-6 py-5">
+                <h2 class="text-[17px] font-semibold text-navy mb-3">Tâches automatiques</h2>
+                <div class="flex flex-col gap-3">
+                    @foreach ($schedulerHealth as $task)
+                        @php($color = ['ok' => 'green', 'late' => 'amber', 'never' => 'red'][$task['state']])
+                        <div class="flex items-start gap-3">
+                            <span class="w-[7px] h-[7px] rounded-full mt-[7px] flex-shrink-0 {{ \App\Support\Swatch::bg($color) }}"></span>
+                            <span class="flex flex-col gap-0.5 min-w-0">
+                                <span class="text-[13.5px] leading-snug">{{ $task['label'] }}</span>
+                                <span class="text-[12px] {{ $task['state'] === 'ok' ? 'text-ink-grey' : \App\Support\Swatch::text($color).' font-medium' }}">{{ $task['text'] }}</span>
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
         </div>
     </div>
 

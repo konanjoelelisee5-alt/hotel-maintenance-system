@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\MaintenancePlan;
+use App\Support\SchedulerHealth;
 use Illuminate\Console\Command;
 
 class GeneratePreventiveWorkOrders extends Command
@@ -38,6 +39,8 @@ class GeneratePreventiveWorkOrders extends Command
         }
 
         $this->info("Terminé : {$generated} ordre(s) de travail généré(s) automatiquement.");
+
+        SchedulerHealth::record('preventive');
 
         return self::SUCCESS;
     }

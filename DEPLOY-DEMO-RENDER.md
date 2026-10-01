@@ -92,6 +92,28 @@ git push
 
 Render reconstruit et redéploie automatiquement (`autoDeploy`).
 
+## Tâches automatiques (SLA, escalades, maintenance préventive)
+
+Le conteneur lance le planificateur Laravel en arrière-plan (`RUN_SCHEDULER=true`) :
+- vérification des délais SLA et escalades toutes les 15 minutes ;
+- génération des OT préventifs chaque jour à 5 h.
+
+**Limite de l'offre gratuite** : Render **met le service en veille après environ
+15 minutes sans visite**. Le planificateur est alors arrêté, et ne repart qu'à la
+visite suivante. Pendant la veille, aucune escalade n'est envoyée.
+
+Pour que la démo continue de tourner, faire appeler l'adresse `https://<service>.onrender.com/up`
+toutes les 10 minutes par un service de surveillance gratuit (UptimeRobot,
+cron-job.org…). Avec un seul service, on reste sous les 750 h mensuelles gratuites.
+
+Le tableau de bord admin, encadré **« Tâches automatiques »**, indique l'heure du
+dernier passage de chaque tâche. « Jamais exécutée » ou « En retard » signifie que le
+planificateur ne tourne pas.
+
+Pour une **vraie mise en service à l'hôtel**, il faut un hébergement qui ne se met
+jamais en veille (offre payante, ou serveur de l'hôtel avec une tâche cron
+`* * * * * php artisan schedule:run`).
+
 ## Dépannage
 
 - **Le site affiche une erreur 500** : Render → le service → **Logs**. La ligne

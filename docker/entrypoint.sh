@@ -72,4 +72,19 @@ fi
 # Les commandes artisan ci-dessus tournent en root : rendre le stockage à Apache
 chown -R www-data:www-data storage bootstrap/cache
 
+# Planificateur (vérification des SLA toutes les 15 min, OT préventifs à 5 h) :
+# sans lui, aucune escalade ne part. Lancé en arrière-plan sous l'utilisateur
+# d'Apache (pas de fichiers root dans storage/), et relancé s'il s'arrête.
+# Le tableau de bord admin ("Tâches automatiques") montre s'il tourne vraiment.
+if [ "${RUN_SCHEDULER:-true}" = "true" ]; then
+    echo "Planificateur : démarrage en arrière-plan (schedule:work)."
+    su www-data -s /bin/sh -c '
+        while true; do
+            php artisan schedule:work
+            echo "ATTENTION : le planificateur s est arrete, redemarrage dans 10 s."
+            sleep 10
+        done
+    ' &
+fi
+
 exec apache2-foreground
