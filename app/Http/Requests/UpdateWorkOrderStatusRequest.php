@@ -8,13 +8,25 @@ class UpdateWorkOrderStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // Avant la validation : un non-intervenant doit recevoir un 403, pas une
+        // erreur de formulaire sur le statut.
+        return $this->user()->can('intervene', $this->route('workOrder'));
     }
 
     public function rules(): array
     {
         return [
-            'status' => ['required', 'in:ouvert,en_cours,en_attente,resolu,ferme'],
+            'status' => [
+                'required',
+                'in:ouvert,en_cours,en_attente,resolu,ferme',
+                // Le technicien déclare "résolu" ; la fermeture revient au manager
+                // (ou au contrôle qualité, qui ferme l'OT de lui-même).
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if ($value === 'ferme' && ! $this->user()->role->dispatchesWork()) {
+                        $fail('Seul un manager peut fermer un ordre de travail. Passez-le en « Résolu ».');
+                    }
+                },
+            ],
             'note' => ['nullable', 'string', 'max:1000'],
         ];
     }

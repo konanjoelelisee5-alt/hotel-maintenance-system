@@ -50,4 +50,13 @@ enum UserRole: string
     {
         return $this === self::Admin || $this === self::Manager;
     }
+
+    /**
+     * Rôles qui pilotent le flux : affecter un technicien, fixer l'échéance, fermer un OT.
+     * Les services demandeurs (housekeeping, réception) signalent, ils ne dispatchent pas.
+     */
+    public function dispatchesWork(): bool
+    {
+        return $this === self::Admin || $this === self::Manager;
+    }
 }

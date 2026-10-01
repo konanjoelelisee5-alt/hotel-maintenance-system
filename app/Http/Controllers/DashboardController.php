@@ -141,7 +141,7 @@ class DashboardController extends Controller
                     ? ['label' => "Signalements de l'équipe", 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'filter' => 'all']
                     : ['label' => 'Mes signalements', 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'filter' => 'mine'],
                 ['label' => "En attente d'affectation", 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'non affectés', 'filter' => 'unassigned'],
-                ['label' => 'Résolus cette semaine', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->where('updated_at', '>=', now()->subWeek())->count(), 'sub' => 'clôturés', 'filter' => 'mine'],
+                ['label' => 'Résolus cette semaine', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->where('completed_at', '>=', now()->subWeek())->count(), 'sub' => 'clôturés', 'filter' => 'mine'],
                 ['label' => 'Chambres suivies', 'value' => (clone $mine())->distinct('room_id')->count('room_id'), 'sub' => 'avec signalement', 'filter' => 'mine'],
             ],
             UserRole::Reception => [

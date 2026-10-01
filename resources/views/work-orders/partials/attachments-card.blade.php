@@ -18,8 +18,15 @@
         @else
             <div class="grid grid-cols-2 gap-3">
                 @foreach ($workOrder->attachments as $attachment)
-                    <div class="border border-line rounded-md p-2 text-center">
-                        @if (str_starts_with($attachment->mime_type, 'image/'))
+                    @php $isAudio = str_starts_with($attachment->mime_type, 'audio/'); @endphp
+                    <div class="border border-line rounded-md p-2 text-center {{ $isAudio ? 'col-span-2' : '' }}">
+                        @if ($isAudio)
+                            {{-- Message vocal du signalement rapide : sur toute la largeur pour un lecteur utilisable. --}}
+                            <div class="flex items-center gap-2 bg-paper rounded p-2 mb-1.5">
+                                <span class="text-xl">🎤</span>
+                                <audio controls preload="metadata" src="{{ $attachment->url }}" class="w-full h-9"></audio>
+                            </div>
+                        @elseif (str_starts_with($attachment->mime_type, 'image/'))
                             <a href="{{ $attachment->url }}" target="_blank">
                                 <img src="{{ $attachment->url }}" class="h-20 w-full object-cover rounded mb-1.5">
                             </a>

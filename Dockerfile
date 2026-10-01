@@ -28,6 +28,10 @@ FROM php:8.4-apache
 COPY --from=ghcr.io/mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql bcmath gd zip exif opcache
 
+# L'image officielle n'a pas de php.ini : 2 Mo par fichier par défaut, trop peu pour
+# un message vocal + une photo du signalement rapide (limite applicative : 10 Mo chacun).
+RUN printf '%s\n' 'upload_max_filesize=12M' 'post_max_size=30M' > /usr/local/etc/php/conf.d/uploads.ini
+
 ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

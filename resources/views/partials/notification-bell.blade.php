@@ -7,6 +7,7 @@
         str_contains($n->type, 'SlaEscalation') => 'bg-red',
         str_contains($n->type, 'LowStock') => 'bg-gold',
         str_contains($n->type, 'QualityControl') => 'bg-amber',
+        str_contains($n->type, 'WorkOrderProgress') => 'bg-green',
         default => 'bg-blue',
     };
 @endphp

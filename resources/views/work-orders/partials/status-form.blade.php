@@ -12,7 +12,9 @@
                 <option value="en_cours" @selected($workOrder->status === 'en_cours')>En cours</option>
                 <option value="en_attente" @selected($workOrder->status === 'en_attente')>En attente</option>
                 <option value="resolu" @selected($workOrder->status === 'resolu')>Résolu</option>
-                <option value="ferme" @selected($workOrder->status === 'ferme')>Fermé</option>
+                @if (auth()->user()->role->dispatchesWork())
+                    <option value="ferme" @selected($workOrder->status === 'ferme')>Fermé</option>
+                @endif
             </select>
 
             <input type="text" name="note" placeholder="Note (optionnel)"

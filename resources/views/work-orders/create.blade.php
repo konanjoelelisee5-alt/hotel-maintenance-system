@@ -68,6 +68,7 @@
                         </div>
                     </div>
 
+                    @if (auth()->user()->role->dispatchesWork())
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="assigned_to" value="Assigner à (technicien)" />
@@ -88,6 +89,7 @@
                             <x-input-error :messages="$errors->get('due_date')" class="mt-2" />
                         </div>
                     </div>
+                    @endif
 
                     {{-- Sticky au-dessus de la barre de navigation mobile pour rester visible
                          même clavier ouvert ; redevient une simple ligne de fin de formulaire à partir de lg. --}}

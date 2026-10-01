@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuickReportController;
 use App\Http\Controllers\TechnicianAvailabilityController;
 use App\Http\Controllers\TechnicianSkillController;
 use App\Http\Controllers\WorkOrderController;
@@ -78,10 +79,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderController::class, 'destroyAttachment'])
         ->name('work-orders.attachments.destroy');
 
+    // Signalement rapide (pictogrammes + message vocal) pour le personnel d'étage.
+    Route::get('/signaler', [QuickReportController::class, 'create'])->name('quick-reports.create');
+    Route::post('/signaler', [QuickReportController::class, 'store'])->name('quick-reports.store');
+    Route::get('/signaler/{workOrder}/envoye', [QuickReportController::class, 'sent'])->name('quick-reports.sent');
+
 });
 
 // === MODULE C : PLANIFICATION & ORDONNANCEMENT ===
-Route::middleware('auth')->group(function () {
+// Les services demandeurs (housekeeping, réception) n'y ont pas accès : le flux
+// d'évènements exposerait tous les OT planifiés de l'hôtel.
+Route::middleware(['auth', 'role:admin,manager,technicien'])->group(function () {
     Route::get('/planning', [PlanningController::class, 'index'])->name('planning.index');
     Route::get('/planning/technicien/{technician}', [PlanningController::class, 'byTechnician'])->name('planning.technician');
     Route::get('/planning/events', [PlanningController::class, 'events'])->name('planning.events');

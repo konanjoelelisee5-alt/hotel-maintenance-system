@@ -78,6 +78,7 @@ class Navigation
             ],
             UserRole::Housekeeping => [
                 'ops' => [
+                    ['label' => 'Signaler un problème', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                     ['label' => $user->isDepartmentHead() ? "Signalements de l'équipe" : 'Mes signalements', 'route' => $user->dashboardRoute(), 'badge' => $openCount(), 'icon' => 'home'],
                     ['label' => 'Historique', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ],
@@ -110,7 +111,8 @@ class Navigation
                 $profile,
             ],
             UserRole::Housekeeping => [
-                ['label' => 'Signalements', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                ['label' => 'Signaler', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                 ['label' => 'Mes OT', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 $profile,
             ],

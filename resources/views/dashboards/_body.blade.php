@@ -18,10 +18,13 @@
         <div class="bg-navy rounded-xl p-5 flex flex-col gap-3">
             <div>
                 <h2 class="text-white font-semibold text-[17px] leading-snug">Un problème dans une chambre ?</h2>
-                <p class="text-[#B9C7D6] text-[13px] mt-1 leading-relaxed">Chambre, type de problème, description courte — ça part directement vers la maintenance.</p>
+                <p class="text-[#B9C7D6] text-[13px] mt-1 leading-relaxed">Touchez une image, parlez dans le micro : ça part directement vers la maintenance.</p>
             </div>
-            <a href="{{ route('work-orders.create') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 h-[46px] rounded-lg bg-gold text-navy font-semibold text-[14px]">
-                Signaler un problème
+            <a href="{{ route('quick-reports.create') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-5 h-[58px] rounded-lg bg-gold text-navy font-bold text-[16px]">
+                <span class="text-2xl">🎤</span> Signaler un problème
+            </a>
+            <a href="{{ route('work-orders.create') }}" class="self-center sm:self-start text-[12.5px] text-[#B9C7D6] underline">
+                ou remplir le formulaire détaillé
             </a>
         </div>
     @endif
