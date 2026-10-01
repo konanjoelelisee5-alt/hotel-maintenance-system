@@ -18,6 +18,7 @@ class SchedulerHealth
     public const TASKS = [
         'sla' => ['label' => 'Vérification des délais SLA', 'every' => 15],
         'preventive' => ['label' => 'Génération des OT préventifs', 'every' => 24 * 60],
+        'guest_returns' => ['label' => 'Alerte réception avant le retour des clients', 'every' => 15],
     ];
 
     public static function record(string $task): void

@@ -114,6 +114,8 @@ class RoomBlockTest extends TestCase
 
         Notification::assertSentToTimes($this->reception, GuestRoomAtRiskNotification::class, 1);
         $this->assertNotNull($late->fresh()->reception_alerted_at);
+        // Suivie dans l'encadré « Tâches automatiques » du tableau de bord admin.
+        $this->assertNotNull(\App\Support\SchedulerHealth::lastRun('guest_returns'));
     }
 
     // ===== Cycle du blocage =====

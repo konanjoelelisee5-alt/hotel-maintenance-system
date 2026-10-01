@@ -6,6 +6,7 @@ use App\Enums\RoomOccupancy;
 use App\Models\WorkOrder;
 use App\Notifications\GuestRoomAtRiskNotification;
 use App\Support\ReceptionDesk;
+use App\Support\SchedulerHealth;
 use Illuminate\Console\Command;
 
 /**
@@ -34,6 +35,8 @@ class WatchGuestReturns extends Command
         $atRisk->each(fn (WorkOrder $w) => ReceptionDesk::alertGuestAtRisk($w, GuestRoomAtRiskNotification::DEADLINE));
 
         $this->info("{$atRisk->count()} chambre(s) signalée(s) à la réception.");
+
+        SchedulerHealth::record('guest_returns');
 
         return self::SUCCESS;
     }
