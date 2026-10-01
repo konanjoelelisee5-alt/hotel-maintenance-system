@@ -19,7 +19,8 @@ class UserController extends Controller
     public function index(Request $request): View
     {
         $users = User::query()
-            ->when($request->filled('role'), fn ($q) => $q->where('role', $request->role))
+            ->when($request->role === 'department_head', fn ($q) => $q->where('is_department_head', true))
+            ->when($request->filled('role') && $request->role !== 'department_head', fn ($q) => $q->where('role', $request->role))
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
             ->orderBy('name')
             ->paginate(15);
@@ -38,6 +39,7 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', 'in:admin,manager,technicien,housekeeping,reception'],
+            'is_department_head' => ['nullable', 'boolean'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -45,6 +47,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
+            'is_department_head' => $this->departmentHeadFlag($request, $validated['role']),
             'password' => Hash::make($validated['password']),
             'email_verified_at' => now(),
         ]);
@@ -65,10 +68,12 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'role' => ['required', 'in:admin,manager,technicien,housekeeping,reception'],
+            'is_department_head' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
+        $validated['is_department_head'] = $this->departmentHeadFlag($request, $validated['role']);
 
         $losesAdmin = $validated['role'] !== UserRole::Admin->value || ! $validated['is_active'];
 
@@ -88,8 +93,19 @@ class UserController extends Controller
 
         $oldRole = $user->role;
         $wasActive = $user->is_active;
+        $wasHead = $user->is_department_head;
 
         $user->update($validated);
+
+        if ($wasHead !== $user->is_department_head) {
+            ActivityLog::record(
+                'user.department_head_changed',
+                $user->is_department_head
+                    ? "{$user->name} désigné(e) responsable du service {$user->role->label()}"
+                    : "{$user->name} n'est plus responsable de service",
+                $user,
+            );
+        }
 
         if ($oldRole !== $user->role) {
             ActivityLog::record(
@@ -126,6 +142,15 @@ class UserController extends Controller
         ActivityLog::record('user.deactivated', "Désactivation de l'utilisateur {$user->name}", $user);
 
         return back()->with('success', 'Utilisateur désactivé.');
+    }
+
+    /**
+     * Le statut de responsable n'existe que pour les services qui en ont un : on le
+     * remet à faux pour les autres rôles (ex. une responsable HK promue manager).
+     */
+    private function departmentHeadFlag(Request $request, string $role): bool
+    {
+        return $request->boolean('is_department_head') && UserRole::from($role)->hasDepartmentHead();
     }
 
     /**

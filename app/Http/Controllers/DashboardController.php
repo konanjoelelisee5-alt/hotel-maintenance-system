@@ -102,7 +102,7 @@ class DashboardController extends Controller
         return [
             ['key' => 'mine', 'label' => $user->role === UserRole::Technicien ? 'Mes ordres' : 'Mes signalements'],
             ['key' => 'urgent', 'label' => 'Urgents'],
-            ['key' => 'all', 'label' => 'Tous'],
+            ['key' => 'all', 'label' => $user->isDepartmentHead() ? "Toute l'équipe" : 'Tous'],
         ];
     }
 
@@ -137,13 +137,15 @@ class DashboardController extends Controller
                 ['label' => 'Pièces à retirer', 'value' => PartReservation::whereIn('work_order_id', (clone $mine())->pluck('id'))->where('status', 'reservee')->count(), 'sub' => 'réservées', 'filter' => 'mine'],
             ],
             UserRole::Housekeeping => [
-                ['label' => 'Mes signalements', 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'filter' => 'mine'],
+                $user->isDepartmentHead()
+                    ? ['label' => "Signalements de l'équipe", 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'filter' => 'all']
+                    : ['label' => 'Mes signalements', 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'filter' => 'mine'],
                 ['label' => "En attente d'affectation", 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'non affectés', 'filter' => 'unassigned'],
                 ['label' => 'Résolus cette semaine', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->where('updated_at', '>=', now()->subWeek())->count(), 'sub' => 'clôturés', 'filter' => 'mine'],
                 ['label' => 'Chambres suivies', 'value' => (clone $mine())->distinct('room_id')->count('room_id'), 'sub' => 'avec signalement', 'filter' => 'mine'],
             ],
             UserRole::Reception => [
-                ['label' => 'Demandes en cours', 'value' => (clone $mine())->open()->count(), 'sub' => 'signalées par la réception', 'filter' => 'mine'],
+                ['label' => 'Demandes en cours', 'value' => (clone $mine())->open()->count(), 'sub' => $user->isDepartmentHead() ? "signalées par l'équipe" : 'signalées par la réception', 'filter' => $user->isDepartmentHead() ? 'all' : 'mine'],
                 ['label' => 'Urgentes', 'value' => (clone $mine())->open()->whereHas('priority', $urgent)->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
                 ['label' => 'En attente client', 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'passage annoncé', 'filter' => 'unassigned'],
                 ['label' => 'Clôturées aujourd\'hui', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->whereDate('completed_at', today())->count(), 'sub' => 'réponse donnée', 'filter' => 'mine'],
@@ -170,6 +172,8 @@ class DashboardController extends Controller
         $query = WorkOrder::visibleTo($user);
 
         match ($filter) {
+            // Pour un responsable, "Mes signalements" se distingue de "Toute l'équipe".
+            'mine' => $user->isDepartmentHead() ? $query->where('reported_by', $user->id) : null,
             'urgent' => $query->whereHas('priority', fn ($p) => $p->where('code', 'urgente')),
             'unassigned' => $query->whereNull('assigned_to'),
             'late' => $query->where('sla_breached', true),
@@ -186,6 +190,17 @@ class DashboardController extends Controller
     {
         [, $hours, $periodLabel] = self::PERIODS[$period];
         $since = now()->subHours($hours);
+
+        if ($user->isDepartmentHead()) {
+            return [
+                'title' => "Signalements de l'équipe",
+                'sub' => 'OT ouverts par agent',
+                'items' => User::where('role', $user->role)->where('is_active', true)
+                    ->withCount(['reportedWorkOrders as open_count' => fn ($q) => $q->open()])
+                    ->orderByDesc('open_count')->orderBy('name')->get()
+                    ->map(fn (User $agent) => ['name' => $agent->name, 'meta' => $agent->open_count.' ouvert(s)', 'pct' => min(100, $agent->open_count * 20), 'color' => $agent->open_count >= 5 ? 'red' : ($agent->open_count >= 3 ? 'amber' : 'green')]),
+            ];
+        }
 
         return match ($user->role) {
             UserRole::Technicien => [
@@ -239,9 +254,18 @@ class DashboardController extends Controller
                     )->values(),
             ],
             UserRole::Housekeeping, UserRole::Reception => [
-                'title' => $user->role === UserRole::Reception ? 'Réponses à donner au client' : 'Suivi de mes signalements',
-                'items' => WorkOrder::visibleTo($user)->with('room', 'assignee')->latest()->limit(4)->get()
-                    ->map(fn (WorkOrder $w) => ['label' => 'Chambre '.($w->room?->number ?? '—').' — '.$w->title, 'meta' => $w->code().' · '.($w->assignee?->name ?? $w->status_label), 'color' => $w->slaColorClass()]),
+                'title' => match (true) {
+                    $user->isDepartmentHead() => "Derniers signalements de l'équipe",
+                    $user->role === UserRole::Reception => 'Réponses à donner au client',
+                    default => 'Suivi de mes signalements',
+                },
+                'items' => WorkOrder::visibleTo($user)->with('room', 'assignee', 'reporter')->latest()->limit(4)->get()
+                    ->map(fn (WorkOrder $w) => [
+                        'label' => 'Chambre '.($w->room?->number ?? '—').' — '.$w->title,
+                        // Le responsable a besoin de savoir quel agent a signalé.
+                        'meta' => $w->code().' · '.($user->isDepartmentHead() ? ($w->reporter?->name ?? '—').' · ' : '').($w->assignee?->name ?? $w->status_label),
+                        'color' => $w->slaColorClass(),
+                    ]),
             ],
             UserRole::Admin => [
                 'title' => 'Activité récente',

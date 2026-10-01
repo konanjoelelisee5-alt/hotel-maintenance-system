@@ -22,9 +22,10 @@
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
+                    <div x-data="{ role: @js(old('role', $user->role->value)) }" class="space-y-4">
                     <div>
                         <x-input-label for="role" value="Rôle" />
-                        <select id="role" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required
+                        <select id="role" name="role" x-model="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required
                             @if ($user->id === auth()->id()) disabled @endif>
                             <option value="admin" @selected(old('role', $user->role->value) === 'admin')>Administrateur</option>
                             <option value="manager" @selected(old('role', $user->role->value) === 'manager')>Manager</option>
@@ -37,6 +38,9 @@
                             <p class="text-xs text-gray-500 mt-1">Vous ne pouvez pas modifier votre propre rôle.</p>
                         @endif
                         <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                    </div>
+
+                    @include('users.partials.department-head-field', ['checked' => old('is_department_head', $user->is_department_head)])
                     </div>
 
                     <div>

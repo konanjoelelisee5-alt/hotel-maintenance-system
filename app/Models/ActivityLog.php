@@ -17,6 +17,7 @@ class ActivityLog extends Model
      */
     private const SENSITIVE_ACTIONS = [
         'user.role_changed',
+        'user.department_head_changed',
         'user.deactivated',
         'user.reactivated',
         'user.password_reset',

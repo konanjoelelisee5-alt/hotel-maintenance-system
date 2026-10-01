@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'email',
         'password',
         'role',
+        'is_department_head',
         'is_active',
         'must_change_password',
     ];
@@ -29,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     // Miroir des valeurs par défaut des colonnes : sans cela, un modèle tout juste
     // créé aurait is_active à null en mémoire, et serait vu comme désactivé.
     protected $attributes = [
+        'is_department_head' => false,
         'is_active' => true,
         'must_change_password' => false,
     ];
@@ -43,6 +45,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_department_head' => 'boolean',
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
             'role' => UserRole::class,
@@ -68,7 +71,18 @@ class User extends Authenticatable implements MustVerifyEmailContract
      */
     public function getRoleLabelAttribute(): string
     {
-        return $this->role?->label() ?? 'Utilisateur';
+        $label = $this->role?->label() ?? 'Utilisateur';
+
+        return $this->isDepartmentHead() ? "Responsable {$label}" : $label;
+    }
+
+    /**
+     * Responsable de son service : l'indicateur n'a de sens que pour les services
+     * qui en ont un (housekeeping, réception), il est ignoré pour les autres rôles.
+     */
+    public function isDepartmentHead(): bool
+    {
+        return $this->is_department_head && (bool) $this->role?->hasDepartmentHead();
     }
 
     /**

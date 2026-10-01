@@ -36,6 +36,7 @@
                         <option value="technicien" @selected(request('role') === 'technicien')>Technicien</option>
                         <option value="housekeeping" @selected(request('role') === 'housekeeping')>Housekeeping</option>
                         <option value="reception" @selected(request('role') === 'reception')>Réception</option>
+                        <option value="department_head" @selected(request('role') === 'department_head')>Responsables de service</option>
                     </select>
                     <button type="submit" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-md hover:bg-gray-300">
                         Filtrer

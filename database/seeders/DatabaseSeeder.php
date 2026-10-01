@@ -44,9 +44,26 @@ class DatabaseSeeder extends Seeder
 
     private function seedUsers(): void
     {
+        // Organisation cible : deux admins qui se contrôlent mutuellement
+        // (chef de maintenance + responsable informatique), et des responsables
+        // de service HK / réception qui voient leur équipe sans paramétrer.
         User::factory()->admin()->create([
             'name' => 'Admin Principal',
             'email' => 'admin@hotel-test.com',
+        ]);
+        User::factory()->admin()->create([
+            'name' => 'Responsable Informatique',
+            'email' => 'informatique@hotel-test.com',
+        ]);
+        User::factory()->housekeeping()->create([
+            'name' => 'Responsable Housekeeping',
+            'email' => 'resp.housekeeping@hotel-test.com',
+            'is_department_head' => true,
+        ]);
+        User::factory()->reception()->create([
+            'name' => 'Responsable Réception',
+            'email' => 'resp.reception@hotel-test.com',
+            'is_department_head' => true,
         ]);
 
         User::factory()->manager()->create([

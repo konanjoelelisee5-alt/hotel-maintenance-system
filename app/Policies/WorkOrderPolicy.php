@@ -23,7 +23,8 @@ class WorkOrderPolicy
         return match ($user->role?->value) {
             'admin', 'manager' => true,
             'technicien' => $workOrder->assigned_to === $user->id,
-            'housekeeping', 'reception' => $workOrder->reported_by === $user->id,
+            'housekeeping', 'reception' => $workOrder->reported_by === $user->id
+                || ($user->isDepartmentHead() && $workOrder->reporter?->role === $user->role),
             default => false,
         };
     }

@@ -37,6 +37,7 @@ class WorkOrderController extends Controller
                 ->where('title', 'like', "%{$q}%")
                 ->orWhereHas('room', fn ($r) => $r->where('number', 'like', "%{$q}%"))
             ))
+            ->when($filter === 'mine' && $authUser->isDepartmentHead(), fn ($qr) => $qr->where('reported_by', $authUser->id))
             ->when($filter === 'urgent', fn ($qr) => $qr->whereHas('priority', fn ($p) => $p->where('code', 'urgente')))
             ->when($filter === 'unassigned', fn ($qr) => $qr->whereNull('assigned_to'))
             ->when($filter === 'late', fn ($qr) => $qr->where('sla_breached', true))
@@ -55,7 +56,7 @@ class WorkOrderController extends Controller
         $isSupervisor = $authUser->role->seesAllWorkOrders();
         $filters = $isSupervisor
             ? [['key' => 'all', 'label' => 'Tous'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'unassigned', 'label' => 'Non affectés'], ['key' => 'late', 'label' => 'En retard SLA']]
-            : [['key' => 'mine', 'label' => $authUser->role === UserRole::Technicien ? 'Mes ordres' : 'Mes signalements'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'all', 'label' => 'Tous']];
+            : [['key' => 'mine', 'label' => $authUser->role === UserRole::Technicien ? 'Mes ordres' : 'Mes signalements'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'all', 'label' => $authUser->isDepartmentHead() ? "Toute l'équipe" : 'Tous']];
 
         $stats = [
             ['label' => 'Total', 'value' => (clone $query)->count()],

@@ -73,7 +73,7 @@ class Navigation
             ],
             UserRole::Housekeeping => [
                 'ops' => [
-                    ['label' => 'Mes signalements', 'route' => $user->dashboardRoute(), 'badge' => $openCount(), 'icon' => 'home'],
+                    ['label' => $user->isDepartmentHead() ? "Signalements de l'équipe" : 'Mes signalements', 'route' => $user->dashboardRoute(), 'badge' => $openCount(), 'icon' => 'home'],
                     ['label' => 'Historique', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ],
                 'adminTitle' => '',

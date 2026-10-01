@@ -177,7 +177,12 @@ class WorkOrder extends Model
     {
         return match ($user->role) {
             UserRole::Technicien => $query->where('assigned_to', $user->id),
-            UserRole::Housekeeping, UserRole::Reception => $query->where('reported_by', $user->id),
+            UserRole::Housekeeping, UserRole::Reception => $user->isDepartmentHead()
+                // Responsable : ses signalements et ceux de tout son service.
+                ? $query->where(fn (Builder $q) => $q
+                    ->where('reported_by', $user->id)
+                    ->orWhereHas('reporter', fn (Builder $r) => $r->where('role', $user->role)))
+                : $query->where('reported_by', $user->id),
             default => $query,
         };
     }

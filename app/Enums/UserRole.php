@@ -39,6 +39,12 @@ enum UserRole: string
         };
     }
 
+    /** Services dont un membre peut être désigné responsable (voit les OT de son équipe). */
+    public function hasDepartmentHead(): bool
+    {
+        return $this === self::Housekeeping || $this === self::Reception;
+    }
+
     /** Rôles qui voient tous les ordres de travail plutôt qu'un sous-ensemble limité. */
     public function seesAllWorkOrders(): bool
     {

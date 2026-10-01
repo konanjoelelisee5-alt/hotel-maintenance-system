@@ -69,8 +69,15 @@ Comptes de démo (mot de passe **`password`** pour tous) :
 
 | Rôle | E-mail |
 |---|---|
-| Administrateur | `admin@hotel-test.com` |
+| Administrateur (chef de maintenance) | `admin@hotel-test.com` |
+| Administrateur (responsable informatique) | `informatique@hotel-test.com` |
 | Manager | `manager@hotel-test.com` |
+| Responsable housekeeping | `resp.housekeeping@hotel-test.com` |
+| Responsable réception | `resp.reception@hotel-test.com` |
+
+Les comptes « responsable informatique », « responsable housekeeping » et « responsable réception »
+n'existent que sur une base chargée après leur ajout. Les données de démo ne sont chargées que si la
+base est vide.
 
 **Change le mot de passe du compte que tu donnes** dès la première connexion :
 `password` est connu de tous.
