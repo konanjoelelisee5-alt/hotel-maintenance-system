@@ -43,7 +43,8 @@ class InterventionSession extends Model
 
         $this->update([
             'ended_at' => $endedAt,
-            'duration_minutes' => $this->started_at->diffInMinutes($endedAt),
+            // Minutes entières (diffInMinutes() renvoie un décimal depuis Carbon 3).
+            'duration_minutes' => (int) floor($this->started_at->diffInMinutes($endedAt)),
         ]);
     }
 }

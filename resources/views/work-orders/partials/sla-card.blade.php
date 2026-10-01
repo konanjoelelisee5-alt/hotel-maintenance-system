@@ -12,7 +12,12 @@
     </x-slot:badge>
 
     @php
-        $fmtDuration = fn (int $minutes) => sprintf('%dh%02d', intdiv(max(0, $minutes), 60), max(0, $minutes) % 60);
+        // diffInMinutes() renvoie un décimal depuis Carbon 3 : minutes entières écoulées.
+        $fmtDuration = function (float $minutes) {
+            $minutes = (int) floor(max(0, $minutes));
+
+            return sprintf('%dh%02d', intdiv($minutes, 60), $minutes % 60);
+        };
     @endphp
     @if ($workOrder->sla_resolution_due_at)
         <div class="mb-4">
