@@ -18,6 +18,16 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Les comptes de démo ont tous le mot de passe "password" : sur un vrai
+        // serveur, ils ouvriraient l'application à n'importe qui. Seule une instance
+        // déclarée démo (SEED_DEMO_DATA=true, cf. render.yaml) peut les charger.
+        if (app()->isProduction() && ! config('app.demo')) {
+            $this->command->error('Refusé : données de démo interdites en production (SEED_DEMO_DATA n\'est pas activé).');
+            $this->command->line('Pour créer le premier administrateur : php artisan admin:create <email> "<nom>"');
+
+            return;
+        }
+
         $this->command->info('Création des utilisateurs...');
         $this->seedUsers();
 

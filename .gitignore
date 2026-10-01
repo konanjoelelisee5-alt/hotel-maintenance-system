@@ -1,5 +1,7 @@
 *.log
 *.sql
+# Base SQLite créée par erreur en local (DB_DATABASE=maintenance1 lu par le pilote sqlite)
+/maintenance1
 .DS_Store
 .env
 .env.backup

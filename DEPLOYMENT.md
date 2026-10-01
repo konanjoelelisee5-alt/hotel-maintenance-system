@@ -18,7 +18,13 @@ Checklist à suivre avant et pendant le passage à l'hébergement. Compatible VP
 
 1. Créer une base MySQL dédiée + un utilisateur **avec mot de passe** (jamais `root`
    sans mot de passe comme en local).
-2. Ne jamais exécuter `db:seed` en production — il crée de fausses données de démo.
+2. Ne jamais exécuter `db:seed` en production — il crée de fausses données de démo
+   dont les comptes ont tous le mot de passe `password`. Le seeder refuse d'ailleurs
+   de tourner si `APP_ENV=production`, sauf instance de démo déclarée
+   (`SEED_DEMO_DATA=true`, à **ne jamais** mettre sur le vrai serveur).
+   Créer le premier administrateur avec :
+   `php artisan admin:create chef.maintenance@hotel.ci "Nom Prénom"`
+   (mot de passe temporaire affiché une fois, à changer à la première connexion).
 3. Exporter la structure/données réelles depuis le dev si besoin de migrer des
    données existantes, sinon partir d'une base vide et laisser les migrations
    la construire.
@@ -68,6 +74,7 @@ php artisan queue:restart   # si des jobs sont un jour mis en file
 | `MAIL_MAILER` | `smtp` (ou `ses`/`postmark`/`mailgun`) | Actuellement `log` = **aucun email n'est réellement envoyé** (reset mot de passe, alertes SLA, stock bas...) |
 | `SESSION_SECURE_COOKIE` | `true` | Nécessite HTTPS actif |
 | `LOG_LEVEL` | `error` (ou `warning`) | `debug` est trop verbeux en prod |
+| `SEED_DEMO_DATA` | absent ou `false` | `true` charge des comptes au mot de passe `password` (démo Render uniquement) |
 
 ## 5. Cron — indispensable pour l'automatisation
 

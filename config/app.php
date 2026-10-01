@@ -42,6 +42,13 @@ return [
     'debug' => (bool) env('APP_DEBUG', false),
 
     /*
+    | Instance de démonstration (comptes connus, mot de passe "password").
+    | Seule une instance déclarée démo accepte les données de démo en production.
+    */
+
+    'demo' => (bool) env('SEED_DEMO_DATA', false),
+
+    /*
     |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
