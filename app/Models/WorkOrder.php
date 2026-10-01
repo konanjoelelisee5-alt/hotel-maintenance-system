@@ -246,6 +246,17 @@ class WorkOrder extends Model
     }
 
     /**
+     * Cette personne a-t-elle travaillé sur l'OT (assignée, chrono ou rapport) ?
+     * Sert à l'empêcher d'en faire aussi le contrôle qualité.
+     */
+    public function wasExecutedBy(User $user): bool
+    {
+        return $this->assigned_to === $user->id
+            || $this->interventionReport()->where('technician_id', $user->id)->exists()
+            || $this->interventionSessions()->where('technician_id', $user->id)->exists();
+    }
+
+    /**
      * Référence courte affichée dans les listes/fiches (ex. "OT-00123").
      */
     public function code(): string

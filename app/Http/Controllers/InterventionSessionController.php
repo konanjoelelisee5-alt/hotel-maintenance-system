@@ -13,7 +13,8 @@ class InterventionSessionController extends Controller
      */
     public function start(WorkOrder $workOrder): RedirectResponse
     {
-        $this->authorize('intervene', $workOrder);
+        // Seule la personne assignée chronomètre : le temps est enregistré à son nom.
+        $this->authorize('perform', $workOrder);
         // Sécurité : on empêche de démarrer une deuxième session si une est déjà active
         if ($workOrder->activeSession()) {
             return back()->with('warning', 'Une session de travail est déjà en cours sur cet OT.');
@@ -44,7 +45,7 @@ class InterventionSessionController extends Controller
      */
     public function stop(WorkOrder $workOrder): RedirectResponse
     {
-        $this->authorize('intervene', $workOrder);
+        $this->authorize('perform', $workOrder);
         $session = $workOrder->activeSession();
 
         if (! $session) {

@@ -24,7 +24,12 @@
             </div>
 
             <div>
-                @if ($activeSession)
+                {{-- Le temps est enregistré au nom de celui qui clique : réservé à l'intervenant assigné. --}}
+                @if (auth()->user()->cannot('perform', $workOrder))
+                    <p class="text-xs text-ink-grey text-right max-w-[220px]">
+                        Chrono géré par {{ $workOrder->assignee?->name ?? "l'intervenant, une fois l'OT affecté" }}.
+                    </p>
+                @elseif ($activeSession)
                     <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700">

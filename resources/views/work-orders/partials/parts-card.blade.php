@@ -40,10 +40,13 @@
                         @can('intervene', $workOrder)
                             @if ($reservation->status === 'reservee')
                                 <div class="flex flex-col gap-1 text-xs whitespace-nowrap">
-                                    <form method="POST" action="{{ route('work-orders.reservations.withdraw', [$workOrder, $reservation]) }}">
-                                        @csrf
-                                        <button type="submit" class="text-emerald-600 hover:underline">Sortir</button>
-                                    </form>
+                                    {{-- Sortie physique du magasin : par l'intervenant assigné uniquement. --}}
+                                    @can('perform', $workOrder)
+                                        <form method="POST" action="{{ route('work-orders.reservations.withdraw', [$workOrder, $reservation]) }}">
+                                            @csrf
+                                            <button type="submit" class="text-emerald-600 hover:underline">Sortir</button>
+                                        </form>
+                                    @endcan
                                     <form method="POST" action="{{ route('work-orders.reservations.cancel', [$workOrder, $reservation]) }}">
                                         @csrf
                                         @method('DELETE')

@@ -12,6 +12,17 @@
                         Modifier
                     </a>
                 @endcan
+                @can('takeOver', $workOrder)
+                    {{-- Le chef de maintenance répare lui-même (ex. un soir sans technicien) :
+                         il devient l'assigné, son nom figurera sur le chrono et le rapport. --}}
+                    <form method="POST" action="{{ route('work-orders.take-over', $workOrder) }}"
+                          onsubmit="return confirm('Vous charger vous-même de cette réparation ? Vous en deviendrez l\'intervenant, et le contrôle qualité sera fait par quelqu\'un d\'autre.');">
+                        @csrf
+                        <button type="submit" class="px-[15px] py-[9px] border border-line rounded-[9px] bg-white text-[#3d3a33] text-[13px] font-semibold">
+                            Je m'en charge
+                        </button>
+                    </form>
+                @endcan
             </div>
         </x-slot:primaryAction>
     @endif
@@ -38,17 +49,20 @@
         <div class="lg:hidden bg-white rounded-xl border border-line p-4">
             <div class="text-[11px] font-semibold text-[#7D7768] uppercase tracking-wide mb-3">Actions</div>
             <div class="flex flex-col gap-2">
-                @if ($activeSession)
-                    <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
-                        @csrf
-                        <x-mobile-action-button variant="primary" icon="pause">Arrêter le chrono</x-mobile-action-button>
-                    </form>
-                @else
-                    <form method="POST" action="{{ route('work-orders.sessions.start', $workOrder) }}">
-                        @csrf
-                        <x-mobile-action-button variant="primary" icon="play">Démarrer le chrono</x-mobile-action-button>
-                    </form>
-                @endif
+                {{-- Chrono : seulement pour la personne qui répare (assignée). --}}
+                @can('perform', $workOrder)
+                    @if ($activeSession)
+                        <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
+                            @csrf
+                            <x-mobile-action-button variant="primary" icon="pause">Arrêter le chrono</x-mobile-action-button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('work-orders.sessions.start', $workOrder) }}">
+                            @csrf
+                            <x-mobile-action-button variant="primary" icon="play">Démarrer le chrono</x-mobile-action-button>
+                        </form>
+                    @endif
+                @endcan
                 <x-mobile-action-button variant="secondary" icon="status" href="#status-form">Changer le statut</x-mobile-action-button>
                 <x-mobile-action-button variant="secondary" icon="comment" href="#comments">Ajouter un commentaire</x-mobile-action-button>
                 <x-mobile-action-button variant="secondary" icon="part" href="#parts">Réserver une pièce</x-mobile-action-button>

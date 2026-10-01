@@ -17,7 +17,15 @@ class InterventionReportController extends Controller
      */
     public function store(StoreInterventionReportRequest $request, WorkOrder $workOrder): RedirectResponse
     {
-        $this->authorize('intervene', $workOrder);
+        // Le rapport porte le nom de son auteur : seule la personne assignée l'écrit.
+        $this->authorize('perform', $workOrder);
+
+        // Un rapport signé est un document engagé : on ne l'écrase plus. Une erreur
+        // se signale par un commentaire ou une demande de correction (contrôle qualité).
+        if ($workOrder->interventionReport?->is_signed) {
+            return redirect()->route('work-orders.show', $workOrder)
+                ->with('warning', 'Ce rapport est déjà signé : il ne peut plus être modifié. Ajoutez un commentaire si besoin.');
+        }
 
         $data = [
             'technician_id' => Auth::id(),

@@ -26,7 +26,9 @@ class PartReservationController extends Controller
 
     public function withdraw(WorkOrder $workOrder, PartReservation $reservation): RedirectResponse
     {
-        $this->authorize('intervene', $workOrder);
+        // Sortie physique du magasin : faite par celui qui répare. Réserver ou
+        // annuler (préparer le travail) reste ouvert au manager.
+        $this->authorize('perform', $workOrder);
         abort_if($reservation->work_order_id !== $workOrder->id, 404);
 
         $reservation->markAsWithdrawn();

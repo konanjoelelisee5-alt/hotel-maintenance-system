@@ -4,12 +4,39 @@
     </div>
 
     <div class="p-5">
-        @if ($workOrder->interventionReport?->is_signed)
+        @php $report = $workOrder->interventionReport; @endphp
+
+        @if ($report?->is_signed)
             <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md text-sm text-emerald-800">
-                ✓ Rapport signé par {{ $workOrder->interventionReport->signed_by_name }}
-                le {{ $workOrder->interventionReport->signed_at->format('d/m/Y à H:i') }}
+                ✓ Rapport signé par {{ $report->signed_by_name }}
+                le {{ $report->signed_at->format('d/m/Y à H:i') }}
+                — intervention réalisée par {{ $report->technician?->name ?? '—' }}. Document verrouillé.
             </div>
         @endif
+
+        {{-- Lecture seule : rapport signé (verrouillé), ou personne qui n'est pas
+             l'intervenant assigné (un superviseur ne rédige pas à sa place). --}}
+        @if ($report?->is_signed || auth()->user()->cannot('perform', $workOrder))
+            @if ($report)
+                <dl class="space-y-3 text-sm">
+                    @foreach (['Travail effectué' => $report->work_performed, 'Pièces / matériel utilisés' => $report->parts_used, 'Recommandations' => $report->recommendations] as $label => $text)
+                        @if (filled($text))
+                            <div>
+                                <dt class="text-xs font-semibold text-ink-grey uppercase">{{ $label }}</dt>
+                                <dd class="text-[#3d3a33] whitespace-pre-line mt-0.5">{{ $text }}</dd>
+                            </div>
+                        @endif
+                    @endforeach
+                    @unless ($report->is_signed)
+                        <p class="text-xs text-ink-grey">Brouillon de {{ $report->technician?->name ?? "l'intervenant" }}, pas encore signé.</p>
+                    @endunless
+                </dl>
+            @else
+                <p class="text-sm text-ink-grey">
+                    Pas encore de rapport. Il sera rédigé par {{ $workOrder->assignee?->name ?? "l'intervenant, une fois l'OT affecté" }}.
+                </p>
+            @endif
+        @else
 
         <form method="POST" action="{{ route('work-orders.report.store', $workOrder) }}" class="space-y-4">
             @csrf
@@ -61,6 +88,7 @@
                 </button>
             </div>
         </form>
+        @endif
     </div>
 </div>
 
@@ -74,6 +102,9 @@
             canvas.width = canvas.offsetWidth;
 
             let drawing = false;
+            // Un canvas vide produit quand même une image : sans ce drapeau, un simple
+            // brouillon était envoyé comme "signé" et l'OT passait en résolu.
+            let hasSignature = false;
 
             function getPosition(event) {
                 const rect = canvas.getBoundingClientRect();
@@ -95,6 +126,7 @@
                 const pos = getPosition(event);
                 ctx.lineTo(pos.x, pos.y);
                 ctx.stroke();
+                hasSignature = true;
                 event.preventDefault();
             }
 
@@ -113,10 +145,11 @@
 
             document.getElementById('clear-signature').addEventListener('click', function () {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSignature = false;
             });
 
             canvas.closest('form').addEventListener('submit', function () {
-                document.getElementById('signature-input').value = canvas.toDataURL('image/png');
+                document.getElementById('signature-input').value = hasSignature ? canvas.toDataURL('image/png') : '';
             });
         });
     </script>

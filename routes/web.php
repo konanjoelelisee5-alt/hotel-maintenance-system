@@ -26,6 +26,7 @@ use App\Http\Controllers\WorkOrderTypeController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDeactivationController;
+use App\Http\Controllers\WorkOrderTakeOverController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PartReservationController;
@@ -90,6 +91,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin,manager'])->group(function () {
     Route::get('/work-orders/{workOrder}/schedule', [PlanningController::class, 'schedule'])->name('work-orders.schedule');
     Route::post('/work-orders/{workOrder}/schedule', [PlanningController::class, 'storeSchedule'])->name('work-orders.schedule.store');
+    // « Je m'en charge » : l'admin/manager devient l'intervenant de l'OT.
+    Route::post('/work-orders/{workOrder}/take-over', WorkOrderTakeOverController::class)->name('work-orders.take-over');
 
     Route::get('/planning/technicien/{technician}/disponibilites', [TechnicianAvailabilityController::class, 'index'])->name('planning.availabilities.index');
     Route::post('/planning/technicien/{technician}/disponibilites', [TechnicianAvailabilityController::class, 'store'])->name('planning.availabilities.store');

@@ -88,11 +88,38 @@ class WorkOrderPolicy
     }
 
     /**
-     * Qui peut valider/rejeter un contrôle qualité (même matrice que les routes
-     * quality-controls.* actuelles : role:admin,manager).
+     * Qui EXÉCUTE la réparation : chrono, rapport d'intervention, signature,
+     * sortie de pièces du stock. Uniquement la personne assignée à l'OT, quel que
+     * soit son rôle : un admin ou un manager supervise, il ne travaille pas « à la
+     * place » du technicien (sinon temps, rapport et signature portent un faux nom).
+     * S'il répare lui-même, il s'assigne d'abord l'OT (cf. takeOver).
      */
-    public function reviewQuality(User $user): bool
+    public function perform(User $user, WorkOrder $workOrder): bool
     {
-        return in_array($user->role?->value, ['admin', 'manager']);
+        // "rejete" reste exécutable : c'est là que le technicien fait la correction demandée.
+        return $workOrder->assigned_to === $user->id
+            && $workOrder->status !== 'ferme';
+    }
+
+    /**
+     * Un admin ou un manager (ex. le chef de maintenance, un soir sans technicien)
+     * prend l'OT pour le réparer lui-même : son nom apparaîtra honnêtement partout.
+     */
+    public function takeOver(User $user, WorkOrder $workOrder): bool
+    {
+        return in_array($user->role?->value, ['admin', 'manager'], true)
+            && $workOrder->assigned_to !== $user->id
+            && in_array($workOrder->status, ['ouvert', 'en_cours', 'en_attente'], true);
+    }
+
+    /**
+     * Qui peut valider/rejeter un contrôle qualité : admin ou manager, mais jamais
+     * sur un OT qu'il a lui-même exécuté (séparation des tâches : celui qui fait
+     * ne contrôle pas). Sans OT : la question « a-t-il le rôle ? » seulement.
+     */
+    public function reviewQuality(User $user, ?WorkOrder $workOrder = null): bool
+    {
+        return in_array($user->role?->value, ['admin', 'manager'], true)
+            && ! $workOrder?->wasExecutedBy($user);
     }
 }

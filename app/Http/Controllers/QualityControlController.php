@@ -19,6 +19,9 @@ class QualityControlController extends Controller
 {
     public function create(WorkOrder $workOrder): View
     {
+        // Celui qui a réalisé l'intervention ne la contrôle pas lui-même.
+        $this->authorize('reviewQuality', $workOrder);
+
         $templates = ChecklistTemplate::query()
             ->where(function ($query) use ($workOrder) {
                 $query->whereNull('work_order_type')->orWhere('work_order_type', $workOrder->type->code);
@@ -30,6 +33,8 @@ class QualityControlController extends Controller
 
     public function store(StoreQualityControlRequest $request, WorkOrder $workOrder): RedirectResponse
     {
+        $this->authorize('reviewQuality', $workOrder);
+
         $qualityControl = DB::transaction(function () use ($request, $workOrder) {
             $qc = $workOrder->qualityControls()->create([
                 'checklist_template_id' => $request->validated('checklist_template_id'),
@@ -56,6 +61,8 @@ class QualityControlController extends Controller
 
     public function review(ReviewQualityControlRequest $request, WorkOrderQualityControl $qualityControl): RedirectResponse
     {
+        $this->authorize('reviewQuality', $qualityControl->workOrder);
+
         DB::transaction(function () use ($request, $qualityControl) {
             foreach ($request->validated('items', []) as $itemId => $itemData) {
                 $qualityControl->items()->where('id', $itemId)->update([
