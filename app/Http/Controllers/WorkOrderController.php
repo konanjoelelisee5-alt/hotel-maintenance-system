@@ -9,6 +9,7 @@ use App\Http\Requests\StoreWorkOrderCommentRequest;
 use App\Http\Requests\StoreWorkOrderRequest;
 use App\Http\Requests\UpdateWorkOrderRequest;
 use App\Http\Requests\UpdateWorkOrderStatusRequest;
+use App\Models\ActivityLog;
 use App\Models\Equipment;
 use App\Models\Room;
 use App\Models\User;
@@ -18,7 +19,6 @@ use App\Models\WorkOrderType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class WorkOrderController extends Controller
@@ -178,7 +178,7 @@ class WorkOrderController extends Controller
     {
         $this->authorize('intervene', $workOrder);
         foreach ($request->file('files') as $file) {
-            $path = $file->store('work-orders/' . $workOrder->id, 'public');
+            $path = $file->store('work-orders/' . $workOrder->id, FileDownloadController::DISK);
 
             $workOrder->attachments()->create([
                 'uploaded_by' => Auth::id(),
@@ -192,12 +192,19 @@ class WorkOrderController extends Controller
         return back()->with('success', 'Fichier(s) ajouté(s) avec succès.');
     }
 
+    /** Retire le fichier de la fiche ; la ligne et le fichier restent (preuve), avec une trace au journal. */
     public function destroyAttachment(WorkOrder $workOrder, \App\Models\WorkOrderAttachment $attachment): RedirectResponse
     {
-        $this->authorize('intervene', $workOrder);
-        Storage::disk('public')->delete($attachment->file_path);
+        $this->authorize('deleteAttachment', [$workOrder, $attachment]);
         $attachment->delete();
 
-        return back()->with('success', 'Fichier supprimé avec succès.');
+        ActivityLog::record(
+            'work_order.attachment_deleted',
+            "Pièce jointe « {$attachment->original_name} » retirée de l'OT {$workOrder->code()}",
+            $workOrder,
+            ['attachment_id' => $attachment->id, 'uploaded_by' => $attachment->uploaded_by],
+        );
+
+        return back()->with('success', 'Fichier retiré de la fiche.');
     }
 }

@@ -17,7 +17,7 @@ class QuickReportTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('public');
+        Storage::fake('local');
     }
 
     public function test_form_renders_with_prefilled_room(): void
@@ -55,7 +55,7 @@ class QuickReportTest extends TestCase
         $this->assertSame(1, $workOrder->statusHistories()->count());
 
         $audio = $workOrder->attachments()->where('mime_type', 'like', 'audio/%')->firstOrFail();
-        Storage::disk('public')->assertExists($audio->file_path);
+        Storage::disk('local')->assertExists($audio->file_path);
         $this->assertSame(2, $workOrder->attachments()->count());
     }
 

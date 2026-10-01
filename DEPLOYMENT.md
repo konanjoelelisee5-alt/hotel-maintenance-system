@@ -109,8 +109,11 @@ Aucune sauvegarde automatique n'existe actuellement (seulement un dump SQL fait
 
 - Dump MySQL quotidien automatisé (cron `mysqldump` + rotation, ou fonctionnalité
   de backup de l'hébergeur si disponible)
-- Copie régulière de `storage/app/public` (photos jointes aux OT, signatures
-  d'intervention) — ces fichiers ne sont pas dans la base de données
+- Copie régulière de `storage/app/private` (photos et messages vocaux joints aux OT,
+  signatures d'intervention, factures) — ces fichiers ne sont pas dans la base de
+  données. Ils ne sont plus dans `storage/app/public` : la migration
+  `move_uploaded_files_to_private_disk` les y déplace, et ils ne sont lisibles que
+  par l'application, après contrôle des droits.
 
 ## 8. Vérifications post-déploiement
 

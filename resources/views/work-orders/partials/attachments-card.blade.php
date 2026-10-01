@@ -40,9 +40,9 @@
                             {{ $attachment->original_name }}
                         </p>
 
-                        @can('intervene', $workOrder)
+                        @can('deleteAttachment', [$workOrder, $attachment])
                             <form method="POST" action="{{ route('work-orders.attachments.destroy', [$workOrder, $attachment]) }}"
-                                  onsubmit="return confirm('Supprimer ce fichier ?');">
+                                  onsubmit="return confirm('Retirer ce fichier de la fiche ? Le retrait sera noté au journal.');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-xs text-red-600 hover:underline mt-1">Supprimer</button>

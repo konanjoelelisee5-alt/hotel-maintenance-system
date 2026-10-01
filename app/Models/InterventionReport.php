@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class InterventionReport extends Model
 {
@@ -25,11 +24,6 @@ class InterventionReport extends Model
     public function technician()
     {
         return $this->belongsTo(User::class, 'technician_id');
-    }
-
-    public function getSignatureUrlAttribute(): ?string
-    {
-        return $this->signature_path ? Storage::url($this->signature_path) : null;
     }
 
     public function getIsSignedAttribute(): bool

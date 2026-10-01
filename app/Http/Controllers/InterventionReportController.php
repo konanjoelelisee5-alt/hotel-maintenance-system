@@ -82,7 +82,7 @@ class InterventionReportController extends Controller
         $fileName = 'signature-' . Str::uuid() . '.png';
         $path = 'work-orders/' . $workOrder->id . '/signatures/' . $fileName;
 
-        Storage::disk('public')->put($path, base64_decode($image));
+        Storage::disk(FileDownloadController::DISK)->put($path, base64_decode($image));
 
         return $path;
     }

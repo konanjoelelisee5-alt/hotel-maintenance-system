@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FileDownloadController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuickReportController;
@@ -79,7 +80,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/work-orders/{workOrder}/attachments', [WorkOrderController::class, 'storeAttachments'])
         ->name('work-orders.attachments.store');
 
+    // scopeBindings : la pièce jointe doit appartenir à CET OT (sinon 404), pour
+    // qu'un droit sur l'OT A ne donne pas accès aux fichiers de l'OT B.
+    Route::get('/work-orders/{workOrder}/attachments/{attachment}', [FileDownloadController::class, 'workOrderAttachment'])
+        ->scopeBindings()
+        ->name('work-orders.attachments.show');
+
     Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderController::class, 'destroyAttachment'])
+        ->scopeBindings()
         ->name('work-orders.attachments.destroy');
 
     // Signalement rapide (pictogrammes + message vocal) pour le personnel d'étage.
@@ -220,7 +228,8 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
 
     // Factures
     Route::post('/purchase-orders/{purchaseOrder}/invoices', [InvoiceController::class, 'store'])->name('purchase-orders.invoices.store');
-    Route::patch('/purchase-orders/{purchaseOrder}/invoices/{invoice}/paid', [InvoiceController::class, 'markAsPaid'])->name('purchase-orders.invoices.paid');
+    Route::patch('/purchase-orders/{purchaseOrder}/invoices/{invoice}/paid', [InvoiceController::class, 'markAsPaid'])->scopeBindings()->name('purchase-orders.invoices.paid');
+    Route::get('/purchase-orders/{purchaseOrder}/invoices/{invoice}/fichier', [FileDownloadController::class, 'invoice'])->scopeBindings()->name('purchase-orders.invoices.file');
 
 });
 

@@ -105,7 +105,7 @@ class QuickReportController extends Controller
     {
         $workOrder->attachments()->create([
             'uploaded_by' => $workOrder->reported_by,
-            'file_path' => $file->store('work-orders/'.$workOrder->id, 'public'),
+            'file_path' => $file->store('work-orders/'.$workOrder->id, FileDownloadController::DISK),
             'original_name' => $name,
             'mime_type' => $mime,
             'size' => $file->getSize(),

@@ -13,7 +13,7 @@ class InvoiceController extends Controller
         $filePath = null;
 
         if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('invoices/' . $purchaseOrder->id, 'public');
+            $filePath = $request->file('file')->store('invoices/' . $purchaseOrder->id, FileDownloadController::DISK);
         }
 
         $purchaseOrder->invoices()->create([

@@ -18,6 +18,7 @@
                         <option value="">Toutes les actions</option>
                         @foreach ([
                             'user.' => 'Utilisateurs',
+                            'work_order.' => 'Ordres de travail',
                             'sla_policy.' => 'Politiques SLA',
                             'escalation_rule.' => "Règles d'escalade",
                             'work_order_priority.' => 'Priorités',

@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderAttachment;
 
 class WorkOrderPolicy
 {
@@ -95,6 +96,17 @@ class WorkOrderPolicy
             'technicien' => $workOrder->assigned_to === $user->id,
             default => false,
         };
+    }
+
+    /**
+     * Retirer une pièce jointe : son auteur, ou un superviseur. Un technicien ne
+     * retire pas la photo prise par la gouvernante (c'est la preuve du signalement).
+     */
+    public function deleteAttachment(User $user, WorkOrder $workOrder, WorkOrderAttachment $attachment): bool
+    {
+        return $attachment->work_order_id === $workOrder->id
+            && $this->intervene($user, $workOrder)
+            && ($attachment->uploaded_by === $user->id || $user->role?->dispatchesWork());
     }
 
     /**
