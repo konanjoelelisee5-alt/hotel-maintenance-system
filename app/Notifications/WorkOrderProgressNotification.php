@@ -16,6 +16,7 @@ class WorkOrderProgressNotification extends Notification
 
     public const ASSIGNED = 'assigned';
     public const RESOLVED = 'resolved';
+    public const CANCELLED = 'cancelled';
 
     public function __construct(
         protected WorkOrder $workOrder,
@@ -39,6 +40,7 @@ class WorkOrderProgressNotification extends Notification
                 .($this->workOrder->scheduled_at ? ', passage prévu le '.$this->workOrder->scheduled_at->format('d/m à H\hi') : '')
                 .'.',
             self::RESOLVED => "✅ {$place} : réparé par {$technician}. Vous pouvez vérifier.",
+            self::CANCELLED => $this->cancelledMessage($place),
         };
 
         return [
@@ -47,5 +49,16 @@ class WorkOrderProgressNotification extends Notification
             'step' => $this->step,
             'message' => $message,
         ];
+    }
+
+    /** Le motif est noté dans l'historique par l'annulation (« Annulé : <motif> »). */
+    private function cancelledMessage(string $place): string
+    {
+        $history = $this->workOrder->statusHistories()->where('new_status', 'annule')->with('changedBy')->latest('id')->first();
+        $reason = $history?->note ? trim(preg_replace('/^Annulé\s*:\s*/u', '', $history->note)) : null;
+
+        return "❌ {$place} : signalement annulé"
+            .($history?->changedBy ? " par {$history->changedBy->name}" : '')
+            .($reason ? ". Motif : {$reason}" : '.');
     }
 }

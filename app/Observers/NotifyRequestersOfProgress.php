@@ -42,6 +42,12 @@ class NotifyRequestersOfProgress
         if ($workOrder->wasChanged('status')) {
             $old = $workOrder->getOriginal('status');
 
+            // Annulé par un superviseur (doublon, erreur...) : le demandeur doit savoir
+            // que personne ne viendra, et pourquoi.
+            if ($workOrder->status === 'annule') {
+                return WorkOrderProgressNotification::CANCELLED;
+            }
+
             // Fermé depuis "résolu" : la réparation a déjà été annoncée (et le
             // contrôle qualité prévient lui-même l'agent de la clôture).
             if ($workOrder->status === 'resolu' || ($workOrder->status === 'ferme' && $old !== 'resolu')) {

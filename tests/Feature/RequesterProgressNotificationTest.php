@@ -112,6 +112,25 @@ class RequesterProgressNotificationTest extends TestCase
         Notification::assertNotSentTo($receptionHead, WorkOrderProgressNotification::class);
     }
 
+    public function test_agent_and_head_learn_why_a_report_was_cancelled(): void
+    {
+        $manager = User::factory()->manager()->create(['name' => 'M. Yao']);
+        $workOrder = $this->reported();
+
+        // Même enchaînement que l'annulation par un superviseur : historique avec motif, puis statut.
+        $this->actingAs($manager);
+        $workOrder->statusHistories()->create(['changed_by' => $manager->id, 'old_status' => 'ouvert', 'new_status' => 'annule', 'note' => 'Annulé : doublon de l\'OT précédent']);
+        $workOrder->update(['status' => 'annule']);
+
+        $this->assertStepSentTo($this->agent, WorkOrderProgressNotification::CANCELLED);
+        $this->assertStepSentTo($this->head, WorkOrderProgressNotification::CANCELLED);
+        Notification::assertSentTo($this->agent, WorkOrderProgressNotification::class, function (WorkOrderProgressNotification $n) {
+            $message = $n->toArray($this->agent)['message'];
+
+            return str_contains($message, 'annulé par M. Yao') && str_contains($message, 'Motif : doublon de l\'OT précédent');
+        });
+    }
+
     public function test_unrelated_edits_send_nothing(): void
     {
         $workOrder = $this->reported(['assigned_to' => $this->technician->id]);
