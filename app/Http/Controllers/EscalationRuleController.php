@@ -27,7 +27,7 @@ class EscalationRuleController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'trigger_type' => ['required', 'in:reponse_proche,reponse_depassee,resolution_proche,resolution_depassee'],
             'offset_minutes' => ['required', 'integer'],
-            'notify_target' => ['required', 'in:technicien_assigne,manager,admin'],
+            'notify_target' => ['required', 'in:technicien_assigne,manager,admin,astreinte'],
         ]);
 
         EscalationRule::create($validated);
@@ -46,7 +46,7 @@ class EscalationRuleController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'trigger_type' => ['required', 'in:reponse_proche,reponse_depassee,resolution_proche,resolution_depassee'],
             'offset_minutes' => ['required', 'integer'],
-            'notify_target' => ['required', 'in:technicien_assigne,manager,admin'],
+            'notify_target' => ['required', 'in:technicien_assigne,manager,admin,astreinte'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 

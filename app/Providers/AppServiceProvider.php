@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\PhoneAlertSender;
+use App\Services\PhoneAlerts\LogPhoneAlertSender;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -12,7 +14,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Fournisseur des alertes téléphone (cf. App\Contracts\PhoneAlertSender).
+        // Seul le mode "log" existe pour l'instant ; un fournisseur réel s'ajoutera ici.
+        $this->app->bind(PhoneAlertSender::class, fn () => match (config('services.phone_alerts.driver')) {
+            default => new LogPhoneAlertSender(),
+        });
     }
 
     /**

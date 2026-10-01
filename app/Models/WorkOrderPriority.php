@@ -16,6 +16,14 @@ class WorkOrderPriority extends Model
 
     protected $casts = ['is_active' => 'boolean'];
 
+    /** Priorités assez graves pour alerter l'astreinte, y compris sur téléphone. */
+    public const ON_CALL_ALERT_CODES = ['haute', 'urgente'];
+
+    public function triggersOnCallAlert(): bool
+    {
+        return in_array($this->code, self::ON_CALL_ALERT_CODES, true);
+    }
+
     public function workOrders()
     {
         return $this->hasMany(WorkOrder::class, 'priority_id');

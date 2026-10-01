@@ -47,13 +47,17 @@ class DatabaseSeeder extends Seeder
         // Organisation cible : deux admins qui se contrôlent mutuellement
         // (chef de maintenance + responsable informatique), et des responsables
         // de service HK / réception qui voient leur équipe sans paramétrer.
+        // Le chef de maintenance est d'astreinte la nuit ; le responsable
+        // informatique ne reçoit pas les alertes de maintenance.
         User::factory()->admin()->create([
             'name' => 'Admin Principal',
             'email' => 'admin@hotel-test.com',
+            'phone' => '+2250700000001',
         ]);
         User::factory()->admin()->create([
             'name' => 'Responsable Informatique',
             'email' => 'informatique@hotel-test.com',
+            'receives_maintenance_alerts' => false,
         ]);
         User::factory()->housekeeping()->create([
             'name' => 'Responsable Housekeeping',
@@ -69,7 +73,9 @@ class DatabaseSeeder extends Seeder
         User::factory()->manager()->create([
             'name' => 'Manager Principal',
             'email' => 'manager@hotel-test.com',
+            'phone' => '+2250700000002',
         ]);
+        // Volontairement sans téléphone : la page Astreinte doit le signaler.
         User::factory()->manager()->count(2)->create();
 
         User::factory()->technicien()->count(6)->create();
@@ -143,11 +149,22 @@ class DatabaseSeeder extends Seeder
             'notify_target' => 'manager',
         ]);
 
+        // Décalage positif : 3 h APRÈS l'échéance (une valeur négative déclencherait
+        // la règle avant même que le délai soit dépassé).
         EscalationRule::create([
             'name' => 'Résolution très en retard - Admin',
             'trigger_type' => 'resolution_depassee',
-            'offset_minutes' => -180,
+            'offset_minutes' => 180,
             'notify_target' => 'admin',
+        ]);
+
+        // Filet de sécurité de l'alerte immédiate : personne n'a pris l'OT en charge
+        // dans le délai de réponse → on relance l'équipe de garde (téléphone si urgent/haut).
+        EscalationRule::create([
+            'name' => 'Réponse dépassée - Astreinte',
+            'trigger_type' => 'reponse_depassee',
+            'offset_minutes' => 0,
+            'notify_target' => 'astreinte',
         ]);
     }
 

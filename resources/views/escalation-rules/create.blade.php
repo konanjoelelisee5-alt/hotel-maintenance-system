@@ -38,6 +38,7 @@
                             <option value="technicien_assigne" @selected(old('notify_target') === 'technicien_assigne')>Technicien assigné</option>
                             <option value="manager" @selected(old('notify_target') === 'manager')>Managers</option>
                             <option value="admin" @selected(old('notify_target') === 'admin')>Administrateurs</option>
+                            <option value="astreinte" @selected(old('notify_target') === 'astreinte')>Astreinte (managers le jour, admins la nuit)</option>
                         </select>
                     </div>
 

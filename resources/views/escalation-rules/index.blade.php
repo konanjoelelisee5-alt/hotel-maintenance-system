@@ -34,7 +34,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $rule->name }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $rule->trigger_type_label }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $rule->offset_minutes }} min</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $rule->notify_target }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ $rule->notify_target_label }}</td>
                                 <td class="px-6 py-4">
                                     @if ($rule->is_active)
                                         <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Active</span>

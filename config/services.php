@@ -28,6 +28,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Alertes d'astreinte sur téléphone. "log" : écrites dans le journal (démo, gratuit).
+    'phone_alerts' => [
+        'driver' => env('PHONE_ALERTS_DRIVER', 'log'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

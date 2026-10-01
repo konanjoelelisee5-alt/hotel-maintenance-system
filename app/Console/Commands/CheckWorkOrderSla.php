@@ -2,11 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\UserRole;
 use App\Models\EscalationLog;
 use App\Models\EscalationRule;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Notifications\SlaEscalationNotification;
+use App\Support\OnCall;
 use Illuminate\Console\Command;
 
 class CheckWorkOrderSla extends Command
@@ -108,10 +110,13 @@ class CheckWorkOrderSla extends Command
      */
     private function resolveRecipients(WorkOrder $workOrder, EscalationRule $rule)
     {
+        // Managers et admins : uniquement les comptes actifs qui pilotent la maintenance
+        // (le responsable informatique, admin lui aussi, n'est pas concerné).
         return match ($rule->notify_target) {
-            'technicien_assigne' => $workOrder->assignee ? collect([$workOrder->assignee]) : collect(),
-            'manager' => User::where('role', 'manager')->get(),
-            'admin' => User::where('role', 'admin')->get(),
+            'technicien_assigne' => $workOrder->assignee?->is_active ? collect([$workOrder->assignee]) : collect(),
+            'manager' => User::maintenanceAlertRecipients(UserRole::Manager)->get(),
+            'admin' => User::maintenanceAlertRecipients(UserRole::Admin)->get(),
+            'astreinte' => OnCall::recipients(),
             default => collect(),
         };
     }

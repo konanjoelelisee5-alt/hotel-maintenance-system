@@ -20,9 +20,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'role',
         'is_department_head',
+        'receives_maintenance_alerts',
         'is_active',
         'must_change_password',
     ];
@@ -31,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     // créé aurait is_active à null en mémoire, et serait vu comme désactivé.
     protected $attributes = [
         'is_department_head' => false,
+        'receives_maintenance_alerts' => true,
         'is_active' => true,
         'must_change_password' => false,
     ];
@@ -46,6 +49,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_department_head' => 'boolean',
+            'receives_maintenance_alerts' => 'boolean',
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
             'role' => UserRole::class,
@@ -91,6 +95,25 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function dashboardRoute(): string
     {
         return $this->role?->dashboardRoute() ?? 'login';
+    }
+
+    /**
+     * Destinataire du canal "alerte téléphone" (cf. PhoneAlertChannel).
+     */
+    public function routeNotificationForPhoneAlert(): ?string
+    {
+        return $this->phone;
+    }
+
+    /**
+     * Admins et managers qui pilotent la maintenance : seuls eux reçoivent les
+     * alertes d'astreinte et d'escalade (pas le responsable informatique, par ex.).
+     */
+    public function scopeMaintenanceAlertRecipients($query, UserRole $role)
+    {
+        return $query->where('role', $role)
+            ->where('is_active', true)
+            ->where('receives_maintenance_alerts', true);
     }
 
     /**

@@ -22,7 +22,7 @@
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
-                    <div x-data="{ role: @js(old('role', $user->role->value)) }" class="space-y-4">
+                    <div x-data="{ role: @js(old('role', $user->role->value)), alerts: @js(old('_token') ? (bool) old('receives_maintenance_alerts') : $user->receives_maintenance_alerts) }" class="space-y-4">
                     <div>
                         <x-input-label for="role" value="Rôle" />
                         <select id="role" name="role" x-model="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required
@@ -41,6 +41,7 @@
                     </div>
 
                     @include('users.partials.department-head-field', ['checked' => old('is_department_head', $user->is_department_head)])
+                    @include('users.partials.alert-fields', ['phone' => old('phone', $user->phone)])
                     </div>
 
                     <div>

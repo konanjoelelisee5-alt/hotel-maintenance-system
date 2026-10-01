@@ -40,14 +40,17 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', 'in:admin,manager,technicien,housekeeping,reception'],
             'is_department_head' => ['nullable', 'boolean'],
+            ...$this->alertRules($request),
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'phone' => $this->normalizePhone($validated['phone'] ?? null),
             'role' => $validated['role'],
             'is_department_head' => $this->departmentHeadFlag($request, $validated['role']),
+            'receives_maintenance_alerts' => $this->alertFlag($request, $validated['role']),
             'password' => Hash::make($validated['password']),
             'email_verified_at' => now(),
         ]);
@@ -69,11 +72,14 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'role' => ['required', 'in:admin,manager,technicien,housekeeping,reception'],
             'is_department_head' => ['nullable', 'boolean'],
+            ...$this->alertRules($request),
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
         $validated['is_department_head'] = $this->departmentHeadFlag($request, $validated['role']);
+        $validated['receives_maintenance_alerts'] = $this->alertFlag($request, $validated['role']);
+        $validated['phone'] = $this->normalizePhone($validated['phone'] ?? null);
 
         $losesAdmin = $validated['role'] !== UserRole::Admin->value || ! $validated['is_active'];
 
@@ -94,8 +100,19 @@ class UserController extends Controller
         $oldRole = $user->role;
         $wasActive = $user->is_active;
         $wasHead = $user->is_department_head;
+        $receivedAlerts = $user->receives_maintenance_alerts;
 
         $user->update($validated);
+
+        if ($user->role->seesAllWorkOrders() && $receivedAlerts !== $user->receives_maintenance_alerts) {
+            ActivityLog::record(
+                'user.alerts_changed',
+                $user->receives_maintenance_alerts
+                    ? "{$user->name} reçoit désormais les alertes de maintenance (astreinte)"
+                    : "{$user->name} ne reçoit plus les alertes de maintenance (astreinte)",
+                $user,
+            );
+        }
 
         if ($wasHead !== $user->is_department_head) {
             ActivityLog::record(
@@ -142,6 +159,35 @@ class UserController extends Controller
         ActivityLog::record('user.deactivated', "Désactivation de l'utilisateur {$user->name}", $user);
 
         return back()->with('success', 'Utilisateur désactivé.');
+    }
+
+    /**
+     * Le téléphone est obligatoire pour qui reçoit les alertes d'astreinte :
+     * sans numéro, une alerte de nuit n'a nulle part où partir.
+     */
+    private function alertRules(Request $request): array
+    {
+        $receivesAlerts = in_array($request->role, [UserRole::Admin->value, UserRole::Manager->value], true)
+            && $request->boolean('receives_maintenance_alerts');
+
+        return [
+            'phone' => [$receivesAlerts ? 'required' : 'nullable', 'string', 'max:30', 'regex:/^\+?[0-9][0-9 .\-]{7,}$/'],
+            'receives_maintenance_alerts' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /** Sans objet hors admins/managers : on garde la valeur par défaut (vrai). */
+    private function alertFlag(Request $request, string $role): bool
+    {
+        return UserRole::from($role)->seesAllWorkOrders()
+            ? $request->boolean('receives_maintenance_alerts')
+            : true;
+    }
+
+    /** "07 07 12 34 56" et "07.07.12.34.56" sont stockés "0707123456". */
+    private function normalizePhone(?string $phone): ?string
+    {
+        return blank($phone) ? null : preg_replace('/[\s.\-]/', '', $phone);
     }
 
     /**

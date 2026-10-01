@@ -63,7 +63,7 @@ trait LogsConfigurationChanges
 
     public function logName(): string
     {
-        return (string) ($this->name ?? $this->label ?? "#{$this->id}");
+        return (string) ($this->name ?? $this->label ?? $this->key ?? "#{$this->id}");
     }
 
     private static function formatLogValue(mixed $value): string

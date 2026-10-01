@@ -28,6 +28,7 @@ use App\Http\Controllers\PartController;
 use App\Http\Controllers\PartReservationController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\MaintenancePlanController;
+use App\Http\Controllers\OnCallController;
 
 
 // === PAGE D'ACCUEIL ===
@@ -149,6 +150,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('sla-policies', SlaPolicyController::class)->except(['show']);
     Route::resource('escalation-rules', EscalationRuleController::class)->except(['show']);
+    Route::get('/on-call', [OnCallController::class, 'edit'])->name('on-call.edit');
+    Route::put('/on-call', [OnCallController::class, 'update'])->name('on-call.update');
 });
 
 // === MODULE I : REPORTING & DASHBOARD ===

@@ -43,6 +43,7 @@ class Navigation
                     ['label' => 'Priorités', 'route' => 'work-order-priorities.index'],
                     ['label' => 'Politiques SLA', 'route' => 'sla-policies.index'],
                     ['label' => 'Règles escalade', 'route' => 'escalation-rules.index'],
+                    ['label' => 'Astreinte', 'route' => 'on-call.edit'],
                     ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index'],
                     ['label' => 'Fournisseurs & achats', 'route' => 'purchase-orders.index'],
                     ['label' => "Journal d'activité", 'route' => 'activity-logs.index'],

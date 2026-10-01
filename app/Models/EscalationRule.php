@@ -25,6 +25,17 @@ class EscalationRule extends Model
         return $this->hasMany(EscalationLog::class);
     }
 
+    public function getNotifyTargetLabelAttribute(): string
+    {
+        return match ($this->notify_target) {
+            'technicien_assigne' => 'Technicien assigné',
+            'manager' => 'Managers',
+            'admin' => 'Administrateurs',
+            'astreinte' => 'Astreinte',
+            default => $this->notify_target,
+        };
+    }
+
     public function getTriggerTypeLabelAttribute(): string
     {
         return match ($this->trigger_type) {

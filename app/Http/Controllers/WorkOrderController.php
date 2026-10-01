@@ -14,7 +14,10 @@ use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
 use App\Models\WorkOrderType;
+use App\Notifications\PriorityWorkOrderCreatedNotification;
+use App\Support\OnCall;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -93,6 +96,17 @@ class WorkOrderController extends Controller
             'new_status' => 'ouvert',
             'note' => 'Création de l\'ordre de travail.',
         ]);
+
+        // Signalement grave : on prévient l'équipe d'astreinte tout de suite, sans
+        // attendre qu'un manager ouvre son tableau de bord. Fait ici (et non sur
+        // l'évènement "created" du modèle) pour ne viser que les signalements
+        // humains : les OT préventifs générés à 5 h sont planifiés, pas urgents.
+        if ($workOrder->priority?->triggersOnCallAlert()) {
+            Notification::send(
+                OnCall::recipients()->reject(fn (User $u) => $u->id === Auth::id()),
+                new PriorityWorkOrderCreatedNotification($workOrder->load('room', 'equipment', 'reporter'))
+            );
+        }
 
         return redirect()->route('work-orders.show', $workOrder)
             ->with('success', 'Ordre de travail créé avec succès.');

@@ -1,0 +1,90 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Astreinte') }}</h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            {{-- Qui est prévenu en ce moment --}}
+            <div class="bg-white p-6 shadow-sm rounded-lg">
+                <h3 class="font-semibold text-gray-800">De garde maintenant</h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ $isDayTime ? 'Journée' : 'Nuit' }} — un nouvel OT urgent ou haut est signalé immédiatement à :
+                </p>
+                <ul class="mt-3 space-y-1 text-sm">
+                    @forelse ($current as $member)
+                        <li>
+                            <strong>{{ $member->name }}</strong> ({{ $member->role_label }})
+                            @if ($member->phone)
+                                — <span class="font-mono">{{ $member->phone }}</span>
+                            @else
+                                — <span class="text-red-700 font-medium">aucun téléphone : alerte dans l'application seulement</span>
+                            @endif
+                        </li>
+                    @empty
+                        <li class="text-red-700 font-medium">
+                            Personne ! Aucun manager ni admin actif ne reçoit les alertes de maintenance.
+                            Cochez « Reçoit les alertes de maintenance » sur au moins un compte.
+                        </li>
+                    @endforelse
+                </ul>
+            </div>
+
+            {{-- Horaires --}}
+            <div class="bg-white p-6 shadow-sm rounded-lg">
+                <h3 class="font-semibold text-gray-800">Horaires</h3>
+                <form method="POST" action="{{ route('on-call.update') }}" class="mt-4 flex flex-wrap items-end gap-4">
+                    @csrf
+                    @method('PUT')
+                    <div>
+                        <x-input-label for="day_start" value="Début de journée" />
+                        <x-text-input id="day_start" name="day_start" type="time" class="mt-1" :value="old('day_start', $dayStart)" required />
+                    </div>
+                    <div>
+                        <x-input-label for="day_end" value="Fin de journée" />
+                        <x-text-input id="day_end" name="day_end" type="time" class="mt-1" :value="old('day_end', $dayEnd)" required />
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Enregistrer</button>
+                </form>
+                <x-input-error :messages="$errors->get('day_start')" class="mt-2" />
+                <x-input-error :messages="$errors->get('day_end')" class="mt-2" />
+                <p class="text-xs text-gray-500 mt-3">
+                    Tous les jours, week-end compris. Si personne n'est configuré pour une plage, l'alerte part à l'autre équipe.
+                    Filet de sécurité : la règle d'escalade « Astreinte » prévient à nouveau si l'OT n'est pas pris en charge à temps.
+                </p>
+            </div>
+
+            {{-- Équipes --}}
+            <div class="grid gap-6 md:grid-cols-2">
+                @foreach ([
+                    ["Journée ({$dayStart} – {$dayEnd})", 'Managers', $dayTeam],
+                    ["Nuit ({$dayEnd} – {$dayStart})", 'Administrateurs maintenance', $nightTeam],
+                ] as [$title, $who, $team])
+                    <div class="bg-white p-6 shadow-sm rounded-lg">
+                        <h3 class="font-semibold text-gray-800">{{ $title }}</h3>
+                        <p class="text-xs text-gray-500">{{ $who }} qui reçoivent les alertes</p>
+                        <ul class="mt-3 space-y-1 text-sm">
+                            @forelse ($team as $member)
+                                <li class="flex justify-between gap-2">
+                                    <a href="{{ route('users.edit', $member) }}" class="text-indigo-600 hover:underline">{{ $member->name }}</a>
+                                    @if ($member->phone)
+                                        <span class="font-mono text-gray-600">{{ $member->phone }}</span>
+                                    @else
+                                        <span class="text-red-700 text-xs font-medium">sans téléphone</span>
+                                    @endif
+                                </li>
+                            @empty
+                                <li class="text-amber-700">Personne — les alertes de cette plage iront à l'autre équipe.</li>
+                            @endforelse
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="text-xs text-gray-500">
+                Mode actuel des alertes téléphone : <strong>{{ config('services.phone_alerts.driver') === 'log' ? 'démonstration (écrites dans le journal, rien n\'est envoyé)' : config('services.phone_alerts.driver') }}</strong>.
+            </p>
+        </div>
+    </div>
+</x-app-layout>
