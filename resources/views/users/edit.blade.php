@@ -57,6 +57,23 @@
                     </div>
                 </form>
             </div>
+
+            @if ($user->id !== auth()->id())
+                <div class="bg-white p-6 shadow-sm rounded-lg mt-6">
+                    <h3 class="font-semibold text-gray-800">Mot de passe</h3>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Génère un mot de passe temporaire à transmettre à {{ $user->name }}.
+                        Il devra le remplacer dès sa prochaine connexion.
+                    </p>
+                    <form method="POST" action="{{ route('users.password.reset', $user) }}" class="mt-4"
+                          onsubmit="return confirm('Réinitialiser ce mot de passe ? L\'ancien ne fonctionnera plus.');">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-50">
+                            Réinitialiser le mot de passe
+                        </button>
+                    </form>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

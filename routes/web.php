@@ -99,7 +99,8 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // Pas d'auto-suppression : un compte porte l'historique des OT (signalés,
+    // assignés, rapports). Seul un admin le retire, en le désactivant.
 });
 
 // === MODULE G : CONTRÔLE QUALITÉ & VALIDATION ===
@@ -163,6 +164,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('work-order-priorities', WorkOrderPriorityController::class)->except(['show']);
     Route::resource('skills', SkillController::class)->except(['show']);
     Route::resource('users', UserController::class)->except(['show']);
+    Route::post('/users/{user}/password', [UserController::class, 'resetPassword'])->name('users.password.reset');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 });
 

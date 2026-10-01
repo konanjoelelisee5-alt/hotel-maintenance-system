@@ -23,6 +23,14 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'password',
         'role',
         'is_active',
+        'must_change_password',
+    ];
+
+    // Miroir des valeurs par défaut des colonnes : sans cela, un modèle tout juste
+    // créé aurait is_active à null en mémoire, et serait vu comme désactivé.
+    protected $attributes = [
+        'is_active' => true,
+        'must_change_password' => false,
     ];
 
     protected $hidden = [
@@ -36,8 +44,23 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'must_change_password' => 'boolean',
             'role' => UserRole::class,
         ];
+    }
+
+    /**
+     * Vrai si ce compte est le seul administrateur actif : le rétrograder ou le
+     * désactiver laisserait l'application sans personne pour la paramétrer.
+     */
+    public function isLastActiveAdmin(): bool
+    {
+        return $this->role === UserRole::Admin
+            && $this->is_active
+            && ! static::where('role', UserRole::Admin)
+                ->where('is_active', true)
+                ->whereKeyNot($this->id)
+                ->exists();
     }
 
     /**

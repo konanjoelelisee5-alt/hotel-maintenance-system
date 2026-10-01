@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
     $middleware->trustProxies(at: '*');
+    $middleware->web(append: [
+        \App\Http\Middleware\EnsureUserIsActive::class,
+        \App\Http\Middleware\EnsurePasswordIsChanged::class,
+    ]);
     $middleware->alias([
         'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,

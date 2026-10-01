@@ -17,6 +17,13 @@
             @if (session('warning'))
                 <div class="mb-4 p-4 bg-orange-100 text-orange-800 rounded-md">{{ session('warning') }}</div>
             @endif
+            @if (session('temporary_password'))
+                <div class="mb-4 p-4 bg-amber-50 border border-amber-300 text-amber-900 rounded-md text-sm">
+                    Mot de passe temporaire de <strong>{{ session('temporary_password')['name'] }}</strong> :
+                    <code class="ml-1 px-2 py-0.5 bg-white border border-amber-200 rounded font-mono text-base select-all">{{ session('temporary_password')['password'] }}</code>
+                    <p class="mt-2 text-xs">Notez-le maintenant : il ne sera plus jamais affiché. Transmettez-le en main propre, pas par un canal partagé.</p>
+                </div>
+            @endif
 
             <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
                 <form method="GET" class="flex flex-wrap gap-4">

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use App\Models\ActivityLog;
 
@@ -38,7 +41,7 @@ class UserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
@@ -46,7 +49,7 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        ActivityLog::record('user.created', "Création de l'utilisateur {$validated['name']} ({$validated['role']})", $user ?? null);
+        ActivityLog::record('user.created', "Création de l'utilisateur {$user->name} ({$user->role_label})", $user);
 
         return redirect()->route('users.index')->with('success', 'Utilisateur créé avec succès.');
     }
@@ -67,8 +70,43 @@ class UserController extends Controller
 
         $validated['is_active'] = $request->boolean('is_active');
 
+        $losesAdmin = $validated['role'] !== UserRole::Admin->value || ! $validated['is_active'];
+
+        // Le formulaire grise déjà ces champs pour son propre compte, mais seule
+        // cette vérification serveur empêche une requête forgée de les modifier.
+        if ($user->id === Auth::id() && ($validated['role'] !== $user->role->value || ! $validated['is_active'])) {
+            throw ValidationException::withMessages([
+                'role' => 'Vous ne pouvez pas modifier votre propre rôle ni désactiver votre propre compte.',
+            ]);
+        }
+
+        if ($losesAdmin && $user->isLastActiveAdmin()) {
+            throw ValidationException::withMessages([
+                'role' => "C'est le dernier administrateur actif : nommez-en un autre avant de le rétrograder ou de le désactiver.",
+            ]);
+        }
+
+        $oldRole = $user->role;
+        $wasActive = $user->is_active;
+
         $user->update($validated);
-        
+
+        if ($oldRole !== $user->role) {
+            ActivityLog::record(
+                'user.role_changed',
+                "Changement de rôle de {$user->name} : {$oldRole->label()} → {$user->role_label}",
+                $user,
+                ['from' => $oldRole->value, 'to' => $user->role->value],
+            );
+        }
+
+        if ($wasActive !== $user->is_active) {
+            ActivityLog::record(
+                $user->is_active ? 'user.reactivated' : 'user.deactivated',
+                ($user->is_active ? 'Réactivation' : 'Désactivation')." de l'utilisateur {$user->name}",
+                $user,
+            );
+        }
 
         return redirect()->route('users.index')->with('success', 'Utilisateur mis à jour.');
     }
@@ -80,9 +118,39 @@ class UserController extends Controller
             return back()->with('warning', 'Vous ne pouvez pas désactiver votre propre compte.');
         }
 
+        if ($user->isLastActiveAdmin()) {
+            return back()->with('warning', "C'est le dernier administrateur actif : il ne peut pas être désactivé.");
+        }
+
         $user->update(['is_active' => false]);
         ActivityLog::record('user.deactivated', "Désactivation de l'utilisateur {$user->name}", $user);
 
         return back()->with('success', 'Utilisateur désactivé.');
+    }
+
+    /**
+     * Attribue un mot de passe temporaire, affiché une seule fois à l'admin qui le
+     * transmet à l'employé (beaucoup n'ont pas d'e-mail fiable pour le lien Breeze).
+     * L'employé devra le remplacer à sa prochaine connexion.
+     */
+    public function resetPassword(User $user): RedirectResponse
+    {
+        if ($user->id === Auth::id()) {
+            return back()->with('warning', 'Pour votre propre compte, changez votre mot de passe depuis votre profil.');
+        }
+
+        $temporaryPassword = Str::password(10, symbols: false);
+
+        $user->forceFill([
+            'password' => Hash::make($temporaryPassword),
+            'must_change_password' => true,
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        ActivityLog::record('user.password_reset', "Réinitialisation du mot de passe de {$user->name}", $user);
+
+        return redirect()->route('users.index')
+            ->with('success', "Mot de passe de {$user->name} réinitialisé.")
+            ->with('temporary_password', ['name' => $user->name, 'password' => $temporaryPassword]);
     }
 }
