@@ -2,11 +2,10 @@
     @php
         // Les liens de la page conservent filtre et période l'un pour l'autre.
         $here = fn (array $params) => route('admin.dashboard', array_merge(['filter' => $filter, 'period' => $period], $params));
-        $kpiDot = fn (string $label) => match (true) {
-            str_contains($label, 'SLA dépassés') => 'bg-red',
-            str_contains($label, 'respect') => 'bg-green',
-            str_contains($label, 'qualité') => 'bg-gold',
-            str_contains($label, 'actifs') => 'bg-blue',
+        $kpiDot = fn (string $filter) => match ($filter) {
+            'urgent', 'late' => 'bg-red',
+            'unassigned' => 'bg-gold',
+            'to_review' => 'bg-blue',
             default => 'bg-navy',
         };
     @endphp
@@ -40,7 +39,7 @@
             @foreach ($pulse as $p)
                 <a href="{{ $here(['filter' => $p['filter']]) }}" class="flex-1 min-w-[180px] flex flex-col gap-1 px-6 py-5 hover:bg-paper transition">
                     <span class="flex items-center gap-2 text-[13px] text-[#4A4639] whitespace-nowrap">
-                        <span class="w-[7px] h-[7px] rounded-full {{ $kpiDot($p['label']) }} flex-shrink-0"></span>
+                        <span class="w-[7px] h-[7px] rounded-full {{ $kpiDot($p['filter']) }} flex-shrink-0"></span>
                         {{ $p['label'] }}
                     </span>
                     <span class="text-[30px] leading-tight font-semibold tracking-tight text-navy whitespace-nowrap">{{ $p['value'] }}</span>
@@ -57,7 +56,7 @@
             <div class="flex items-end gap-4 flex-wrap px-6 pt-5 border-b border-line">
                 <div class="flex flex-col gap-0.5 pb-3.5">
                     <h2 class="text-[17px] font-semibold text-navy">
-                        {{ match($filter) { 'urgent' => 'Ordres urgents', 'unassigned' => 'Ordres non affectés', 'late' => 'Ordres en retard SLA', default => 'Tous les ordres' } }}
+                        {{ match($filter) { 'urgent' => 'Ordres urgents', 'unassigned' => 'Ordres non affectés', 'late' => 'Ordres en retard SLA', 'to_review' => 'Ordres à contrôler', 'waiting' => 'Ordres en attente', default => 'Tous les ordres' } }}
                     </h2>
                     <div class="text-[12.5px] text-ink-grey">{{ $queue->count() }} ordre(s) affiché(s) · triés par urgence SLA</div>
                 </div>
@@ -191,6 +190,24 @@
                     @endforelse
                 </div>
             </section>
+
+            {{-- Ce que seul l'admin peut corriger (comptes, astreinte, accès). Masqué quand tout va bien. --}}
+            @if (! empty($systemAlerts))
+                <section class="bg-white border border-line rounded-xl px-6 py-5">
+                    <h2 class="text-[17px] font-semibold text-navy mb-3">Alertes système</h2>
+                    <div class="flex flex-col gap-3">
+                        @foreach ($systemAlerts as $alert)
+                            <a href="{{ $alert['url'] }}" class="flex items-start gap-3 group">
+                                <span class="w-[7px] h-[7px] rounded-full mt-[7px] flex-shrink-0 {{ \App\Support\Swatch::bg($alert['color']) }}"></span>
+                                <span class="flex flex-col gap-0.5 min-w-0">
+                                    <span class="text-[13.5px] leading-snug group-hover:underline">{{ $alert['label'] }}</span>
+                                    <span class="text-[12px] text-ink-grey">{{ $alert['meta'] }}</span>
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
 
             {{-- Une tâche automatique arrêtée ne se voit nulle part ailleurs :
                  plus d'escalade ni d'OT préventif, sans aucun message d'erreur. --}}

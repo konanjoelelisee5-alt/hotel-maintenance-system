@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
     public function admin(Request $request): View
     {
-        return $this->render('dashboards.admin', $request);
+        return $this->render('dashboards.admin', $request)->with('systemAlerts', $this->systemAlerts());
     }
 
     public function manager(Request $request): View
@@ -95,6 +95,8 @@ class DashboardController extends Controller
                 ['key' => 'urgent', 'label' => 'Urgents'],
                 ['key' => 'unassigned', 'label' => 'Non affectés'],
                 ['key' => 'late', 'label' => 'En retard SLA'],
+                ['key' => 'to_review', 'label' => 'À contrôler'],
+                ['key' => 'waiting', 'label' => 'En attente'],
                 ['key' => 'all', 'label' => 'Tous'],
             ];
         }
@@ -115,12 +117,13 @@ class DashboardController extends Controller
         $urgent = fn ($q) => $q->where('code', 'urgente');
 
         return match ($user->role) {
+            // Ce qui demande une décision maintenant ; chaque carte ouvre l'onglet qui la détaille.
             UserRole::Admin => [
-                ['label' => 'Ordres au total', 'value' => WorkOrder::count(), 'sub' => WorkOrder::open()->count().' ouverts', 'filter' => 'all'],
-                ['label' => 'SLA dépassés', 'value' => WorkOrder::where('sla_breached', true)->count(), 'sub' => 'à traiter en priorité', 'filter' => 'late'],
-                ['label' => 'Taux de respect SLA', 'value' => $this->slaComplianceRate().' %', 'sub' => 'global', 'filter' => 'all'],
-                ['label' => 'Problèmes qualité', 'value' => WorkOrderQualityControl::where('status', 'rejete')->count(), 'sub' => 'refusés', 'filter' => 'all'],
-                ['label' => 'Comptes actifs', 'value' => User::where('is_active', true)->count(), 'sub' => 'sur '.User::count(), 'filter' => 'all'],
+                ['label' => 'Urgences ouvertes', 'value' => $this->filteredQueue($user, 'urgent')->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
+                ['label' => 'Non affectés', 'value' => $this->filteredQueue($user, 'unassigned')->count(), 'sub' => 'à confier à un technicien', 'filter' => 'unassigned'],
+                ['label' => 'En retard SLA', 'value' => $this->filteredQueue($user, 'late')->count(), 'sub' => 'délai dépassé', 'filter' => 'late'],
+                ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'filter' => 'to_review'],
+                ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'filter' => 'waiting'],
             ],
             UserRole::Manager => [
                 ['label' => 'Ordres urgents', 'value' => (clone $mine())->whereHas('priority', $urgent)->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
@@ -171,12 +174,20 @@ class DashboardController extends Controller
     {
         $query = WorkOrder::visibleTo($user);
 
+        // File de travail des superviseurs : un OT déjà réparé, fermé ou annulé n'y a
+        // plus sa place, même s'il était urgent ou a dépassé son SLA à l'époque.
+        if ($user->role->seesAllWorkOrders() && in_array($filter, ['urgent', 'unassigned', 'late'], true)) {
+            $query->open();
+        }
+
         match ($filter) {
             // Pour un responsable, "Mes signalements" se distingue de "Toute l'équipe".
             'mine' => $user->isDepartmentHead() ? $query->where('reported_by', $user->id) : null,
             'urgent' => $query->whereHas('priority', fn ($p) => $p->where('code', 'urgente')),
             'unassigned' => $query->whereNull('assigned_to'),
             'late' => $query->where('sla_breached', true),
+            'to_review' => $query->where('status', 'resolu'),
+            'waiting' => $query->where('status', 'en_attente'),
             default => null,
         };
 
@@ -268,8 +279,9 @@ class DashboardController extends Controller
                     ]),
             ],
             UserRole::Admin => [
-                'title' => 'Activité récente',
-                'items' => ActivityLog::with('user')->latest('created_at')->limit(4)->get()
+                // Les connexions noieraient le reste : elles ont leur filtre dans le journal.
+                'title' => 'Activité administrative',
+                'items' => ActivityLog::with('user')->where('action', 'not like', 'auth.%')->latest('created_at')->limit(4)->get()
                     ->map(fn (ActivityLog $a) => ['label' => $a->description, 'meta' => $a->action.' · '.$a->created_at->format('H:i'), 'color' => 'blue', 'time' => $a->created_at->format('H:i'), 'who' => $a->user?->name]),
             ],
             default => [
@@ -297,12 +309,34 @@ class DashboardController extends Controller
             ->map(fn (WorkOrder $w) => ['time' => $w->scheduled_at?->format('H:i') ?? '—', 'title' => $w->title, 'who' => $w->assignee?->name ?? 'Non affecté', 'id' => $w->id]);
     }
 
-    private function slaComplianceRate(): int
+    /**
+     * Ce que seul l'administrateur peut corriger : comptes et réglages qui
+     * empêcheraient l'application de prévenir les bonnes personnes ou exposent un accès.
+     *
+     * @return array<int, array{label: string, meta: string, color: string, url: string}>
+     */
+    private function systemAlerts(): array
     {
-        $total = WorkOrder::count();
-        $breached = WorkOrder::where('sla_breached', true)->count();
+        $alerts = [];
 
-        return $total > 0 ? (int) round((1 - $breached / $total) * 100) : 100;
+        $withoutPhone = User::whereIn('role', [UserRole::Admin, UserRole::Manager])
+            ->where('is_active', true)->where('receives_maintenance_alerts', true)->whereNull('phone')->count();
+        if ($withoutPhone > 0) {
+            $alerts[] = ['label' => "{$withoutPhone} responsable(s) d'astreinte sans téléphone", 'meta' => 'Les alertes de nuit ne peuvent pas partir', 'color' => 'red', 'url' => route('on-call.edit')];
+        }
+
+        $temporary = User::where('is_active', true)->where('must_change_password', true)->count();
+        if ($temporary > 0) {
+            $alerts[] = ['label' => "{$temporary} compte(s) avec mot de passe provisoire", 'meta' => 'Pas encore remplacé par leur titulaire', 'color' => 'amber', 'url' => route('users.index')];
+        }
+
+        $failed = ActivityLog::where('action', 'auth.failed')->where('created_at', '>=', now()->subDay())->count();
+        $lockouts = ActivityLog::where('action', 'auth.lockout')->where('created_at', '>=', now()->subDay())->count();
+        if ($failed >= 5 || $lockouts > 0) {
+            $alerts[] = ['label' => "{$failed} échec(s) de connexion en 24 h".($lockouts ? ", {$lockouts} blocage(s)" : ''), 'meta' => 'Mot de passe oublié ou tentative d\'intrusion', 'color' => $lockouts ? 'red' : 'amber', 'url' => route('activity-logs.index', ['action' => 'auth.failed'])];
+        }
+
+        return $alerts;
     }
 
     private function lowStockCount(): int
