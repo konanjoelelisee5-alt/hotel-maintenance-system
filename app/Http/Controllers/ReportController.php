@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Models\WorkOrder;
@@ -25,6 +26,7 @@ class ReportController extends Controller
     public function exportCsv(Request $request): StreamedResponse
     {
         $workOrders = $this->filteredWorkOrders($request)->with(['assignee', 'room', 'priority'])->get();
+        $this->logExport('CSV', $request, $workOrders->count());
 
         $callback = function () use ($workOrders) {
             $file = fopen('php://output', 'w');
@@ -33,7 +35,7 @@ class ReportController extends Controller
             fputcsv($file, ['ID', 'Titre', 'Statut', 'Priorité', 'Assigné à', 'Créé le', 'Résolu le', 'SLA dépassé'], ';');
 
             foreach ($workOrders as $wo) {
-                fputcsv($file, [
+                fputcsv($file, array_map(self::csvCell(...), [
                     $wo->id,
                     $wo->title,
                     $wo->status_label,
@@ -42,7 +44,7 @@ class ReportController extends Controller
                     $wo->created_at->format('d/m/Y H:i'),
                     $wo->completed_at?->format('d/m/Y H:i') ?? '—',
                     $wo->sla_breached ? 'Oui' : 'Non',
-                ], ';');
+                ]), ';');
             }
 
             fclose($file);
@@ -56,10 +58,35 @@ class ReportController extends Controller
     public function exportPdf(Request $request): Response
     {
         $data = $this->buildReportData($request);
+        $this->logExport('PDF', $request, $data['totalCount']);
 
         $pdf = Pdf::loadView('reports.pdf', $data)->setPaper('a4', 'portrait');
 
         return $pdf->download('rapport-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Un titre d'OT est saisi par n'importe quel employé : « =HYPERLINK(...) » ou
+     * « =1+1 » serait exécuté comme formule par Excel à l'ouverture du CSV.
+     * L'apostrophe en tête le fait lire comme du texte.
+     */
+    private static function csvCell(mixed $value): mixed
+    {
+        return is_string($value) && preg_match('/^[=+\-@\t\r]/', $value) ? "'".$value : $value;
+    }
+
+    /** Les données qui quittent l'application (fichier envoyé, imprimé...) sont tracées. */
+    private function logExport(string $format, Request $request, int $count): void
+    {
+        $filters = array_filter($request->only(['date_from', 'date_to', 'technician_id', 'type_id']), 'filled');
+
+        ActivityLog::record(
+            'report.exported',
+            "Export {$format} du rapport des OT ({$count} ordre(s))"
+                .($filters ? ' — filtres : '.collect($filters)->map(fn ($v, $k) => "{$k}={$v}")->implode(', ') : ''),
+            null,
+            ['format' => $format, 'count' => $count, 'filters' => $filters],
+        );
     }
 
     private function filteredWorkOrders(Request $request)

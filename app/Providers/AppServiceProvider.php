@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Contracts\PhoneAlertSender;
 use App\Services\PhoneAlerts\LogPhoneAlertSender;
+use App\Support\AuthenticationAudit;
 use App\Support\SchedulerHealth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -28,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Connexions, déconnexions, échecs et blocages au journal d'activité.
+        Event::subscribe(AuthenticationAudit::class);
+
         // État des tâches automatiques, affiché sur la supervision admin.
         View::composer('dashboards.admin', fn ($view) => $view->with('schedulerHealth', SchedulerHealth::report()));
 

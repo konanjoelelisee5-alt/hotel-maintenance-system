@@ -127,9 +127,49 @@ class WorkOrderController extends Controller
     {
         $this->authorize('update', $workOrder);
         $workOrder->update($request->validated());
+        $this->logEdit($workOrder);
 
         return redirect()->route('work-orders.show', $workOrder)
             ->with('success', 'Ordre de travail mis à jour avec succès.');
+    }
+
+    /**
+     * Priorité, affectation, échéance, lieu... changent la lecture du SLA et la
+     * responsabilité de l'OT : chaque modification est tracée, en clair.
+     */
+    private function logEdit(WorkOrder $workOrder): void
+    {
+        $labels = [
+            'title' => 'titre', 'description' => 'description', 'priority_id' => 'priorité',
+            'type_id' => 'type', 'assigned_to' => 'technicien', 'due_date' => 'échéance',
+            'room_id' => 'lieu', 'equipment_id' => 'équipement',
+        ];
+        $readable = fn (string $field, mixed $value): string => match (true) {
+            $value === null || $value === '' => '(vide)',
+            $field === 'priority_id' => WorkOrderPriority::find($value)?->label ?? "#{$value}",
+            $field === 'type_id' => WorkOrderType::find($value)?->label ?? "#{$value}",
+            $field === 'assigned_to' => User::find($value)?->name ?? "#{$value}",
+            $field === 'room_id' => Room::find($value)?->label ?? "#{$value}",
+            $field === 'equipment_id' => Equipment::find($value)?->name ?? "#{$value}",
+            $field === 'description' => '(texte modifié)',
+            default => (string) $value,
+        };
+
+        $changes = collect($workOrder->getChanges())->only(array_keys($labels));
+        if ($changes->isEmpty()) {
+            return;
+        }
+        // Après save(), getOriginal() rend déjà les nouvelles valeurs : les anciennes sont ici.
+        $previous = $workOrder->getPrevious();
+
+        ActivityLog::record(
+            'work_order.updated',
+            "Modification de l'OT {$workOrder->code()} : ".$changes
+                ->map(fn ($new, $field) => "{$labels[$field]} ".$readable($field, $previous[$field] ?? null).' → '.$readable($field, $new))
+                ->implode(', '),
+            $workOrder,
+            $changes->map(fn ($new, $field) => ['from' => $previous[$field] ?? null, 'to' => $new])->all(),
+        );
     }
 
     // Pas de destroy() : un OT ne se supprime pas, il s'annule (WorkOrderPilotController::cancel).

@@ -49,11 +49,13 @@ class ActivityLog extends Model
 
     /**
      * Méthode centrale pour enregistrer une action, utilisée partout dans l'application.
+     * $actor : auteur explicite, quand l'utilisateur n'est pas (ou plus) attaché à la
+     * requête (ex. évènement de connexion, déclenché avant que la session ne le porte).
      */
-    public static function record(string $action, string $description, ?Model $subject = null, array $metadata = []): void
+    public static function record(string $action, string $description, ?Model $subject = null, array $metadata = [], ?User $actor = null): void
     {
         $log = static::create([
-            'user_id' => Auth::id(),
+            'user_id' => $actor?->id ?? Auth::id(),
             'action' => $action,
             'subject_type' => $subject ? get_class($subject) : null,
             'subject_id' => $subject?->id,
