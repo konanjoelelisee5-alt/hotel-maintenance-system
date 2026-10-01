@@ -14,28 +14,22 @@
             </div>
         @endif
 
-        {{-- Lecture seule : rapport signé (verrouillé), ou personne qui n'est pas
-             l'intervenant assigné (un superviseur ne rédige pas à sa place). --}}
-        @if ($report?->is_signed || auth()->user()->cannot('perform', $workOrder))
-            @if ($report)
-                <dl class="space-y-3 text-sm">
-                    @foreach (['Travail effectué' => $report->work_performed, 'Pièces / matériel utilisés' => $report->parts_used, 'Recommandations' => $report->recommendations] as $label => $text)
-                        @if (filled($text))
-                            <div>
-                                <dt class="text-xs font-semibold text-ink-grey uppercase">{{ $label }}</dt>
-                                <dd class="text-[#3d3a33] whitespace-pre-line mt-0.5">{{ $text }}</dd>
-                            </div>
-                        @endif
-                    @endforeach
-                    @unless ($report->is_signed)
-                        <p class="text-xs text-ink-grey">Brouillon de {{ $report->technician?->name ?? "l'intervenant" }}, pas encore signé.</p>
-                    @endunless
-                </dl>
-            @else
-                <p class="text-sm text-ink-grey">
-                    Pas encore de rapport. Il sera rédigé par {{ $workOrder->assignee?->name ?? "l'intervenant, une fois l'OT affecté" }}.
-                </p>
-            @endif
+        {{-- Lecture seule : rapport signé (verrouillé), ou superviseur qui le consulte
+             (ce bloc ne lui est montré que si un rapport existe, cf. show.blade.php). --}}
+        @if ($report && ($report->is_signed || auth()->user()->cannot('perform', $workOrder)))
+            <dl class="space-y-3 text-sm">
+                @foreach (['Travail effectué' => $report->work_performed, 'Pièces / matériel utilisés' => $report->parts_used, 'Recommandations' => $report->recommendations] as $label => $text)
+                    @if (filled($text))
+                        <div>
+                            <dt class="text-xs font-semibold text-ink-grey uppercase">{{ $label }}</dt>
+                            <dd class="text-[#3d3a33] whitespace-pre-line mt-0.5">{{ $text }}</dd>
+                        </div>
+                    @endif
+                @endforeach
+                @unless ($report->is_signed)
+                    <p class="text-xs text-ink-grey">Brouillon de {{ $report->technician?->name ?? "l'intervenant" }}, pas encore signé.</p>
+                @endunless
+            </dl>
         @else
 
         <form method="POST" action="{{ route('work-orders.report.store', $workOrder) }}" class="space-y-4">

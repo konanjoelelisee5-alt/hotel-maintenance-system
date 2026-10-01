@@ -90,16 +90,36 @@ class SeparationOfDutiesTest extends TestCase
 
     public function test_show_page_hides_execution_buttons_from_supervisor(): void
     {
+        // Pour le superviseur : pas de bloc chrono, pas de bloc rapport vide, pas de
+        // bloc contrôle qualité sans rien à faire. Seulement ce qui lui sert.
         $this->actingAs($this->chef)->get(route('work-orders.show', $this->workOrder))
             ->assertOk()
             ->assertDontSee('▶ Démarrer')
-            ->assertDontSee('Enregistrer le rapport')
-            ->assertSee('Chrono géré par Paul')
+            ->assertDontSee("Suivi de l'intervention", false)
+            ->assertDontSee("Rapport d'intervention", false)
+            ->assertDontSee('Aucun contrôle qualité')
+            ->assertSee('Changer le statut')
             ->assertSee("Je m'en charge", false);
 
         $this->actingAs($this->technician)->get(route('work-orders.show', $this->workOrder))
             ->assertSee('▶ Démarrer')
             ->assertSee('Enregistrer le rapport');
+    }
+
+    public function test_supervisor_sees_time_spent_and_existing_report_read_only(): void
+    {
+        $this->workOrder->interventionSessions()->create(['technician_id' => $this->technician->id, 'started_at' => now()->subMinutes(45), 'ended_at' => now(), 'duration_minutes' => 45]);
+        $this->actingAs($this->technician)->post(route('work-orders.report.store', $this->workOrder), [
+            'work_performed' => 'Joint remplacé sous le lavabo',
+            'signature' => '',
+        ]);
+
+        $this->actingAs($this->chef)->get(route('work-orders.show', $this->workOrder))
+            ->assertSee('Temps passé')
+            ->assertSee('45 min')
+            ->assertSee('Joint remplacé sous le lavabo')
+            ->assertSee('pas encore signé')
+            ->assertDontSee('Enregistrer le rapport');
     }
 
     // ===== « Je m'en charge » =====

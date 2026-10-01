@@ -66,7 +66,9 @@
                 <x-mobile-action-button variant="secondary" icon="status" href="#status-form">Changer le statut</x-mobile-action-button>
                 <x-mobile-action-button variant="secondary" icon="comment" href="#comments">Ajouter un commentaire</x-mobile-action-button>
                 <x-mobile-action-button variant="secondary" icon="part" href="#parts">Réserver une pièce</x-mobile-action-button>
-                <x-mobile-action-button variant="secondary" icon="report" href="#report">Rapport d'intervention</x-mobile-action-button>
+                @if (auth()->user()->can('perform', $workOrder) || $workOrder->interventionReport)
+                    <x-mobile-action-button variant="secondary" icon="report" href="#report">Rapport d'intervention</x-mobile-action-button>
+                @endif
             </div>
         </div>
     @endcan
@@ -78,12 +80,26 @@
 
             @can('work', $workOrder)
                 @include('work-orders.partials.status-form')
-                @include('work-orders.partials.intervention-tracking')
-                @include('work-orders.partials.intervention-report')
             @endcan
 
+            {{-- Chrono et rédaction du rapport : seulement pour l'intervenant assigné.
+                 Un superviseur ne voit le rapport que s'il y en a un à lire ; le temps
+                 passé figure dans le cadre « Informations ». --}}
+            @can('perform', $workOrder)
+                @include('work-orders.partials.intervention-tracking')
+                @include('work-orders.partials.intervention-report')
+            @elsecan('work', $workOrder)
+                @if ($workOrder->interventionReport)
+                    @include('work-orders.partials.intervention-report')
+                @endif
+            @endcan
+
+            {{-- Contrôle qualité : seulement s'il y a quelque chose à faire (OT résolu)
+                 ou à consulter (contrôles déjà passés). --}}
             @can('reviewQuality', \App\Models\WorkOrder::class)
-                @include('work-orders.partials.quality-control')
+                @if ($workOrder->status === 'resolu' || $workOrder->qualityControls->isNotEmpty())
+                    @include('work-orders.partials.quality-control')
+                @endif
             @endcan
 
             @if ($workOrder->correctionRequests->isNotEmpty())

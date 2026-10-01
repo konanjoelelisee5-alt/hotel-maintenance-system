@@ -19,6 +19,22 @@
             <dt class="text-ink-grey">Assigné à</dt>
             <dd class="text-slate-800 font-medium text-right">{{ $workOrder->assignee?->name ?? 'Non assigné' }}</dd>
         </div>
+        {{-- Résumé du chrono pour qui n'a pas le bloc « Suivi de l'intervention »
+             (superviseurs) : seul l'intervenant assigné chronomètre. --}}
+        @cannot('perform', $workOrder)
+            @php $activeSession = $workOrder->activeSession(); @endphp
+            @if ($activeSession || $workOrder->total_worked_minutes > 0)
+                <div class="flex justify-between gap-3">
+                    <dt class="text-ink-grey">Temps passé</dt>
+                    <dd class="text-slate-800 font-medium text-right">
+                        {{ $workOrder->total_worked_minutes }} min
+                        @if ($activeSession)
+                            <span class="block text-xs text-emerald-600 font-semibold">● intervention en cours depuis {{ $activeSession->started_at->format('H:i') }}</span>
+                        @endif
+                    </dd>
+                </div>
+            @endif
+        @endcannot
         <div class="flex justify-between gap-3">
             <dt class="text-ink-grey">Signalé par</dt>
             <dd class="text-slate-800 font-medium text-right">{{ $workOrder->reporter?->name ?? '—' }}</dd>
