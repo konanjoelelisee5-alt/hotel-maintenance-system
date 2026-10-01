@@ -43,11 +43,24 @@ class MobileNavigationTest extends TestCase
         $this->assertSame(['users.index', 'activity-logs.index'], array_column($sections->firstWhere('title', 'Administration')['items'], 'route'));
     }
 
-    public function test_manager_menu_keeps_its_two_sections(): void
+    public function test_manager_menu_is_grouped_like_the_admin_one_without_admin_screens(): void
     {
-        $sections = collect(\App\Support\Navigation::forSidebar(User::factory()->manager()->create()));
+        $manager = User::factory()->manager()->create();
+        $sections = collect(\App\Support\Navigation::forSidebar($manager));
 
-        $this->assertSame(['Opérations', 'Ressources'], $sections->pluck('title')->all());
+        $this->assertSame(['Exploitation', 'Stock & achats', 'Référentiels'], $sections->pluck('title')->all());
+
+        // Chaque entrée doit être une page que le manager a le droit d'ouvrir.
+        foreach ($sections->pluck('items')->flatten(1) as $item) {
+            $this->actingAs($manager)->get(route($item['route'], $item['params'] ?? []))->assertOk();
+        }
+    }
+
+    public function test_technician_menu_keeps_a_single_section(): void
+    {
+        $sections = collect(\App\Support\Navigation::forSidebar(User::factory()->technicien()->create()));
+
+        $this->assertSame(['Opérations'], $sections->pluck('title')->all());
     }
 
     public function test_menu_entry_stays_active_on_sub_pages(): void

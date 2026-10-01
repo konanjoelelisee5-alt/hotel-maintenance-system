@@ -64,6 +64,30 @@ class Navigation
             ];
         }
 
+        // Manager : même rangement que l'admin, limité à ce qu'il pilote (pas de comptes,
+        // ni de règles SLA / astreinte, ni de types et priorités, réservés à l'admin).
+        if ($user->role === UserRole::Manager) {
+            return [
+                self::section('Exploitation', [
+                    ['label' => 'Pilotage', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                    ['label' => 'Ordres de travail', 'route' => 'work-orders.index', 'badge' => WorkOrder::visibleTo($user)->open()->count(), 'icon' => 'clipboard'],
+                    ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
+                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building'],
+                    ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index', 'icon' => 'status'],
+                    ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
+                ]),
+                self::section('Stock & achats', [
+                    ['label' => 'Pièces & stock', 'route' => 'parts.index', 'badge' => self::lowStockCount()],
+                    ['label' => 'Bons de commande', 'route' => 'purchase-orders.index'],
+                    ['label' => 'Fournisseurs', 'route' => 'suppliers.index'],
+                ], secondary: true),
+                self::section('Référentiels', [
+                    ['label' => 'Lieux', 'route' => 'rooms.index'],
+                    ['label' => 'Équipements', 'route' => 'equipment.index'],
+                ], secondary: true),
+            ];
+        }
+
         $nav = self::legacySidebar($user);
 
         return array_values(array_filter([
@@ -78,7 +102,7 @@ class Navigation
     }
 
     /**
-     * Menus des autres rôles : une section d'opérations, plus des ressources pour le manager.
+     * Menus des rôles de terrain (technicien, housekeeping, réception) : une section d'opérations.
      *
      * @return array{ops: array, adminTitle: string, admin: array}
      */
@@ -87,23 +111,6 @@ class Navigation
         $openCount = fn () => WorkOrder::visibleTo($user)->open()->count();
 
         return match ($user->role) {
-            UserRole::Manager => [
-                'ops' => [
-                    ['label' => 'Pilotage', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
-                    ['label' => 'Ordres de travail', 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
-                    ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
-                    ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
-                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building'],
-                ],
-                'adminTitle' => 'Ressources',
-                'admin' => [
-                    ['label' => 'Lieux', 'route' => 'rooms.index'],
-                    ['label' => 'Équipements', 'route' => 'equipment.index'],
-                    ['label' => 'Pièces & stock', 'route' => 'parts.index'],
-                    ['label' => 'Fournisseurs & achats', 'route' => 'purchase-orders.index'],
-                    ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index'],
-                ],
-            ],
             UserRole::Technicien => [
                 'ops' => [
                     ['label' => 'Ma journée', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
