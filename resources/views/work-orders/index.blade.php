@@ -10,7 +10,7 @@
 <x-app-layout crumb="Espace de travail" :page-title="$title">
     @can('create', \App\Models\WorkOrder::class)
         <x-slot:primaryAction>
-            <a href="{{ route('work-orders.create') }}" class="px-[17px] py-[10px] border-0 rounded-[9px] bg-navy text-white text-[13.5px] font-semibold inline-block">
+            <a href="{{ route('work-orders.create') }}" data-modal class="px-[17px] py-[10px] border-0 rounded-[9px] bg-navy text-white text-[13.5px] font-semibold inline-block">
                 + Nouvel ordre
             </a>
         </x-slot:primaryAction>

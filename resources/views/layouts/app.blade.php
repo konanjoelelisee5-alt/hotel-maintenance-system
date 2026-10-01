@@ -122,6 +122,14 @@
         </aside>
     </div>
 
+    {{-- Fenêtre (modale) des liens [data-modal], remplie par resources/js/modal.js.
+         Plein écran sur téléphone, centrée sur ordinateur. --}}
+    <div id="remote-modal" class="hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-labelledby="remote-modal-title">
+        <div data-modal-close class="absolute inset-0 bg-black/40"></div>
+        <div data-modal-content
+             class="relative h-full sm:h-auto sm:max-h-[calc(100dvh-6rem)] sm:mt-12 sm:mx-auto w-full sm:max-w-2xl bg-white sm:rounded-xl shadow-xl overflow-y-auto"></div>
+    </div>
+
     {{-- Barre de navigation mobile --}}
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line flex gap-0.5 px-2.5 py-1.5">
         @foreach ($bottomNav as $item)

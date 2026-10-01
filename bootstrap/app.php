@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     $middleware->web(append: [
         \App\Http\Middleware\EnsureUserIsActive::class,
         \App\Http\Middleware\EnsurePasswordIsChanged::class,
+        \App\Http\Middleware\HandleModalRequests::class,
     ]);
     $middleware->alias([
         'role' => \App\Http\Middleware\EnsureUserHasRole::class,
@@ -23,7 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // expectsJson : erreurs de saisie d'un formulaire de fenêtre (resources/js/modal.js)
+        // rendues en 422 + champs en erreur, au lieu d'une redirection vers la page.
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();

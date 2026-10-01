@@ -28,7 +28,7 @@
         </div>
 
         @can('create', \App\Models\WorkOrder::class)
-            <a href="{{ route('work-orders.create') }}" class="flex-shrink-0 inline-flex items-center h-[38px] px-4 rounded-[9px] bg-navy text-white text-[13px] font-semibold whitespace-nowrap hover:bg-navy-light">+ Nouvel ordre</a>
+            <a href="{{ route('work-orders.create') }}" data-modal class="flex-shrink-0 inline-flex items-center h-[38px] px-4 rounded-[9px] bg-navy text-white text-[13px] font-semibold whitespace-nowrap hover:bg-navy-light">+ Nouvel ordre</a>
         @endcan
     </x-slot:primaryAction>
 

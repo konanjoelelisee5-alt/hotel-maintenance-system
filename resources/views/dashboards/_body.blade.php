@@ -23,7 +23,7 @@
             <a href="{{ route('quick-reports.create') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-5 h-[58px] rounded-lg bg-gold text-navy font-bold text-[16px]">
                 <span class="text-2xl">🎤</span> Signaler un problème
             </a>
-            <a href="{{ route('work-orders.create') }}" class="self-center sm:self-start text-[12.5px] text-[#B9C7D6] underline">
+            <a href="{{ route('work-orders.create') }}" data-modal class="self-center sm:self-start text-[12.5px] text-[#B9C7D6] underline">
                 ou remplir le formulaire détaillé
             </a>
         </div>
