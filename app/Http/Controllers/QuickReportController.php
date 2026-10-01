@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Actions\ReportWorkOrder;
 use App\Enums\IssueCategory;
+use App\Enums\RoomOccupancy;
 use App\Http\Requests\StoreQuickReportRequest;
 use App\Models\Room;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
 use App\Models\WorkOrderType;
+use App\Notifications\GuestRoomAtRiskNotification;
+use App\Support\ReceptionDesk;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,6 +35,7 @@ class QuickReportController extends Controller
             'commonAreas' => Room::commonAreas()->inService()->get()
                 ->map(fn (Room $r) => ['id' => $r->id, 'label' => $r->label])->sortBy('label')->values(),
             'categories' => IssueCategory::cases(),
+            'occupancies' => RoomOccupancy::cases(),
             // Pré-rempli par ?chambre=214 (QR code collé dans la chambre).
             'prefillRoom' => $request->string('chambre')->toString(),
             'maxSeconds' => StoreQuickReportRequest::MAX_AUDIO_SECONDS,
@@ -47,6 +51,11 @@ class QuickReportController extends Controller
             : Room::rooms()->where('number', $request->validated('room_number'))->first();
         $audio = $request->file('audio');
         $note = trim((string) $request->validated('note'));
+        $urgent = $request->boolean('urgent');
+        // L'occupation n'a de sens que pour une chambre.
+        $occupancy = $room && ! $room->isCommonArea()
+            ? RoomOccupancy::from($request->validated('room_occupancy'))
+            : null;
 
         $workOrder = $report->handle($request->user(), [
             'title' => $category->label().' · '.($room?->label ?? 'Parties communes')
@@ -55,8 +64,11 @@ class QuickReportController extends Controller
                 ? 'Message vocal joint : écouter l\'enregistrement dans les pièces jointes.'
                 : 'Signalement rapide sans description.'),
             'room_id' => $room?->id,
+            'room_occupancy' => $occupancy,
+            // Client sorti : la réparation doit être faite avant son retour.
+            'due_date' => $occupancy?->repairDeadline(now()),
             'type_id' => WorkOrderType::where('code', 'maintenance')->value('id'),
-            'priority_id' => WorkOrderPriority::where('code', $request->boolean('urgent') ? 'urgente' : 'moyenne')->value('id'),
+            'priority_id' => WorkOrderPriority::where('code', $urgent ? 'urgente' : 'moyenne')->value('id'),
         ]);
 
         if ($audio) {
@@ -68,6 +80,11 @@ class QuickReportController extends Controller
 
         if ($photo = $request->file('photo')) {
             $this->attach($workOrder, $photo, 'photo.'.($photo->extension() ?: 'jpg'), $photo->getMimeType() ?? 'image/jpeg');
+        }
+
+        // Panne urgente avec le client dans la chambre : la réception gère tout de suite.
+        if ($urgent && $occupancy === RoomOccupancy::ClientPresent) {
+            ReceptionDesk::alertGuestAtRisk($workOrder, GuestRoomAtRiskNotification::GUEST_INSIDE);
         }
 
         $sent = route('quick-reports.sent', $workOrder);

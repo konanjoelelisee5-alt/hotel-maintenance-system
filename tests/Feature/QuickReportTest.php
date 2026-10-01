@@ -37,7 +37,7 @@ class QuickReportTest extends TestCase
         $room = Room::create(['number' => '214', 'floor' => '2']);
 
         $response = $this->actingAs($agent)->postJson(route('quick-reports.store'), [
-            'room_number' => '214',
+            'room_number' => '214', 'room_occupancy' => 'libre',
             'category' => 'eau',
             'audio' => UploadedFile::fake()->create('message-vocal.webm', 120, 'audio/webm'),
             'photo' => UploadedFile::fake()->create('photo.jpg', 200, 'image/jpeg'),
@@ -65,7 +65,7 @@ class QuickReportTest extends TestCase
         $agent = User::factory()->housekeeping()->create();
 
         $this->actingAs($agent)->postJson(route('quick-reports.store'), [
-            'room_number' => '101', 'category' => 'electricite', 'urgent' => 1,
+            'room_number' => '101', 'category' => 'electricite', 'urgent' => 1, 'room_occupancy' => 'libre',
         ])->assertCreated();
 
         $this->assertSame('urgente', WorkOrder::where('reported_by', $agent->id)->firstOrFail()->priority->code);
@@ -128,7 +128,7 @@ class QuickReportTest extends TestCase
 
         $this->actingAs(User::factory()->housekeeping()->create())
             ->postJson(route('quick-reports.store'), [
-                'room_number' => '101', 'category' => 'tv',
+                'room_number' => '101', 'category' => 'tv', 'room_occupancy' => 'libre',
                 'audio' => UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload'),
             ])
             ->assertJsonValidationErrors(['audio']);
@@ -138,7 +138,7 @@ class QuickReportTest extends TestCase
     {
         Room::create(['number' => '101', 'floor' => '1']);
         $agent = User::factory()->housekeeping()->create();
-        $this->actingAs($agent)->postJson(route('quick-reports.store'), ['room_number' => '101', 'category' => 'clim']);
+        $this->actingAs($agent)->postJson(route('quick-reports.store'), ['room_number' => '101', 'category' => 'clim', 'room_occupancy' => 'libre']);
         $workOrder = WorkOrder::where('reported_by', $agent->id)->firstOrFail();
 
         $this->actingAs($agent)->get(route('quick-reports.sent', $workOrder))->assertOk()->assertSee('Chambre 101');
@@ -150,7 +150,7 @@ class QuickReportTest extends TestCase
         Room::create(['number' => '101', 'floor' => '1']);
         $agent = User::factory()->housekeeping()->create();
         $this->actingAs($agent)->postJson(route('quick-reports.store'), [
-            'room_number' => '101', 'category' => 'eau',
+            'room_number' => '101', 'category' => 'eau', 'room_occupancy' => 'libre',
             'audio' => UploadedFile::fake()->create('message-vocal.webm', 50, 'audio/webm'),
         ]);
         $workOrder = WorkOrder::where('reported_by', $agent->id)->firstOrFail();

@@ -27,6 +27,12 @@ class NotificationController extends Controller
         $notification = $request->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 
+        // Blocages et clients concernés : la réception ne voit pas les OT des autres
+        // services, elle est donc renvoyée vers la page des blocages.
+        if (($notification->data['target'] ?? null) === 'room-blocks') {
+            return redirect()->route('room-blocks.index');
+        }
+
         if (isset($notification->data['work_order_id'])) {
             return redirect()->route('work-orders.show', $notification->data['work_order_id']);
         }

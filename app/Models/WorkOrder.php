@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RoomOccupancy;
 use App\Enums\UserRole;
 use App\Observers\NotifyRequestersOfProgress;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -20,9 +21,12 @@ class WorkOrder extends Model
         'due_date', 'started_at', 'completed_at',
         'scheduled_at', 'estimated_duration_minutes', 'scheduled_by',
         'sla_policy_id', 'sla_response_due_at', 'sla_resolution_due_at', 'sla_breached',
+        'room_occupancy', 'reception_alerted_at',
     ];
 
     protected $casts = [
+        'room_occupancy' => RoomOccupancy::class,
+        'reception_alerted_at' => 'datetime',
         'due_date' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -43,6 +47,11 @@ class WorkOrder extends Model
     public function room()
     {
         return $this->belongsTo(Room::class);
+    }
+
+    public function roomBlocks()
+    {
+        return $this->hasMany(RoomBlock::class);
     }
 
     public function equipment()

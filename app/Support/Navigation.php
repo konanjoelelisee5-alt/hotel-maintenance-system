@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\UserRole;
 use App\Models\Part;
+use App\Models\RoomBlock;
 use App\Models\User;
 use App\Models\WorkOrder;
 
@@ -34,6 +35,7 @@ class Navigation
                     ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
                     ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
                     ['label' => 'Pièces & stock', 'route' => 'parts.index', 'badge' => self::lowStockCount(), 'icon' => 'part'],
+                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
                 ],
                 'adminTitle' => 'Administration',
                 'admin' => [
@@ -57,6 +59,7 @@ class Navigation
                     ['label' => 'Ordres de travail', 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
                     ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
                     ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
+                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building'],
                 ],
                 'adminTitle' => 'Ressources',
                 'admin' => [
@@ -81,6 +84,10 @@ class Navigation
                     ['label' => 'Signaler un problème', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                     ['label' => $user->isDepartmentHead() ? "Signalements de l'équipe" : 'Mes signalements', 'route' => $user->dashboardRoute(), 'badge' => $openCount(), 'icon' => 'home'],
                     ['label' => 'Historique', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                    // La gouvernante demande les blocages et remet les chambres en vente.
+                    ...($user->isDepartmentHead()
+                        ? [['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building']]
+                        : []),
                 ],
                 'adminTitle' => '',
                 'admin' => [],
@@ -89,6 +96,8 @@ class Navigation
                 'ops' => [
                     ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'search'],
                     ['label' => 'Demandes', 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
+                    // Badge = demandes de blocage à valider.
+                    ['label' => 'Blocages', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
                 ],
                 'adminTitle' => '',
                 'admin' => [],
@@ -134,6 +143,11 @@ class Navigation
                 $profile,
             ],
         };
+    }
+
+    private static function roomBlockCount(string $status): int
+    {
+        return RoomBlock::where('status', $status)->count();
     }
 
     private static function lowStockCount(): int

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\IssueCategory;
+use App\Enums\RoomOccupancy;
 use App\Models\Room;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -39,6 +40,8 @@ class StoreQuickReportRequest extends FormRequest
                 ->where('type', Room::TYPE_ROOM)->whereNot('status', 'hors_service')],
             'common_area_id' => ['nullable', Rule::exists('rooms', 'id')
                 ->where('type', Room::TYPE_COMMON_AREA)->whereNot('status', 'hors_service')],
+            // Pour une chambre seulement : décide de l'échéance et de qui prévenir.
+            'room_occupancy' => ['nullable', 'required_unless:common_area,1', Rule::enum(RoomOccupancy::class)],
             'urgent' => ['boolean'],
             'audio' => ['nullable', 'file', 'max:10240', 'mimetypes:'.implode(',', self::AUDIO_MIMETYPES)],
             'photo' => ['nullable', 'image', 'max:10240'],
@@ -69,6 +72,8 @@ class StoreQuickReportRequest extends FormRequest
             'category.enum' => 'Touchez une image pour dire quel est le problème.',
             'room_number.required_unless' => 'Indiquez le numéro de la chambre.',
             'room_number.exists' => 'Ce numéro de chambre n\'existe pas.',
+            'room_occupancy.required_unless' => 'Dites si un client occupe la chambre.',
+            'room_occupancy.enum' => 'Dites si un client occupe la chambre.',
             'common_area_id.exists' => 'Ce lieu n\'est plus disponible. Choisissez « Autre endroit ».',
             'audio.max' => 'Le message vocal est trop long.',
             'audio.mimetypes' => 'Le message vocal n\'a pas pu être lu. Réessayez.',

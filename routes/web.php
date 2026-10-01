@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuickReportController;
+use App\Http\Controllers\RoomBlockController;
 use App\Http\Controllers\TechnicianAvailabilityController;
 use App\Http\Controllers\TechnicianSkillController;
 use App\Http\Controllers\WorkOrderController;
@@ -85,6 +86,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/signaler', [QuickReportController::class, 'create'])->name('quick-reports.create');
     Route::post('/signaler', [QuickReportController::class, 'store'])->name('quick-reports.store');
     Route::get('/signaler/{workOrder}/envoye', [QuickReportController::class, 'sent'])->name('quick-reports.sent');
+
+    // Blocage d'une chambre à la vente : demande (gouvernante / maintenance), décision
+    // (réception), remise en vente (gouvernante). Droits dans RoomBlockPolicy.
+    Route::get('/chambres-bloquees', [RoomBlockController::class, 'index'])->name('room-blocks.index');
+    Route::post('/work-orders/{workOrder}/room-block', [RoomBlockController::class, 'store'])->name('room-blocks.store');
+    Route::post('/chambres-bloquees/{roomBlock}/accepter', [RoomBlockController::class, 'approve'])->name('room-blocks.approve');
+    Route::post('/chambres-bloquees/{roomBlock}/refuser', [RoomBlockController::class, 'refuse'])->name('room-blocks.refuse');
+    Route::post('/chambres-bloquees/{roomBlock}/remettre-en-vente', [RoomBlockController::class, 'release'])->name('room-blocks.release');
 
 });
 

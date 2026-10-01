@@ -93,6 +93,10 @@
         <div class="space-y-6">
             @include('work-orders.partials.info-card')
 
+            @if ($workOrder->room && ! $workOrder->room->isCommonArea())
+                @include('work-orders.partials.room-block-card')
+            @endif
+
             @if ($workOrder->sla_policy_id)
                 @include('work-orders.partials.sla-card')
             @endif

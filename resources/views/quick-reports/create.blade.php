@@ -9,6 +9,7 @@
         <input type="hidden" name="common_area" :value="commonArea ? 1 : 0">
         <input type="hidden" name="common_area_id" :value="commonArea && commonAreaId ? commonAreaId : ''">
         <input type="hidden" name="urgent" :value="urgent ? 1 : 0">
+        <input type="hidden" name="room_occupancy" :value="commonArea ? '' : (occupancy ?? '')">
 
         {{-- 1. Où ? --}}
         <section class="bg-white border border-line rounded-xl p-4 flex flex-col gap-3">
@@ -41,6 +42,20 @@
                 <span x-show="commonArea && commonAreaLabel" class="text-green">✓ <span x-text="commonAreaLabel"></span></span>
                 <span x-show="commonArea && !commonAreaLabel" class="text-navy">✓ Autre endroit : dites où dans le message 🎤</span>
             </p>
+            {{-- Occupation : l'application n'est pas reliée à Opera, c'est l'agent qui sait.
+                 Client sorti → réparation avant son retour ; chambre libre → blocage possible. --}}
+            <div x-show="roomKnown && !commonArea" class="flex flex-col gap-2">
+                <p class="text-[13px] font-semibold">Il y a un client ?</p>
+                <div class="grid grid-cols-2 gap-2">
+                    @foreach ($occupancies as $o)
+                        <button type="button" @click="occupancy = '{{ $o->value }}'"
+                                class="h-16 rounded-lg border-2 flex items-center justify-center gap-2 px-2 text-[13px] font-semibold leading-tight"
+                                :class="occupancy === '{{ $o->value }}' ? 'border-navy bg-[#EAF0F6] text-navy' : 'border-line'">
+                            <span class="text-2xl">{{ $o->emoji() }}</span> {{ $o->label() }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
         </section>
 
         {{-- 2. Quoi ? --}}
@@ -126,7 +141,8 @@
                 <span x-text="sending ? 'Envoi…' : 'Envoyer'"></span>
             </button>
             <p x-show="!canSend && !sending" class="max-w-xl mx-auto mt-1.5 text-center text-[12px] text-ink-grey">
-                <span x-show="!placeOk">📍 Chambre ?</span>
+                <span x-show="!commonArea && !roomKnown">📍 Chambre ?</span>
+                <span x-show="!commonArea && roomKnown && !occupancy">🛏️ Client ?</span>
                 <span x-show="!category">🔧 Problème ?</span>
                 <span x-show="recState === 'recording'">⏹️ Arrêtez l'enregistrement</span>
             </p>
@@ -177,6 +193,7 @@
                     commonAreas: config.commonAreas,
                     commonAreaId: null,
                     category: null,
+                    occupancy: null,
                     urgent: false,
                     showNote: false,
                     micSupported: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder),
@@ -192,7 +209,7 @@
                     get roomKnown() { return this.roomNumber !== '' && Object.prototype.hasOwnProperty.call(this.rooms, this.roomNumber); },
                     get roomFloor() { return this.roomKnown ? this.rooms[this.roomNumber] : null; },
                     get commonAreaLabel() { return this.commonAreas.find((a) => a.id === this.commonAreaId)?.label ?? null; },
-                    get placeOk() { return this.commonArea || this.roomKnown; },
+                    get placeOk() { return this.commonArea || (this.roomKnown && !!this.occupancy); },
                     get canSend() { return this.placeOk && !!this.category && !this.sending && this.recState !== 'recording'; },
 
                     clock(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); },

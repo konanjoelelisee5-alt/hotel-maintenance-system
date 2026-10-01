@@ -56,6 +56,17 @@ class Room extends Model
         return $this->hasMany(MaintenancePlan::class);
     }
 
+    public function blocks()
+    {
+        return $this->hasMany(RoomBlock::class);
+    }
+
+    /** Demande de blocage en cours ou blocage effectif (au plus un à la fois). */
+    public function activeBlock(): ?RoomBlock
+    {
+        return $this->blocks()->active()->latest()->first();
+    }
+
     public function isCommonArea(): bool
     {
         return $this->type === self::TYPE_COMMON_AREA;
