@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
 use App\Models\WorkOrderQualityControl;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,16 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    /**
+     * Fenêtres d'analyse proposées par le sélecteur de période (Santé du SLA).
+     * Clé d'URL => [libellé court, nombre d'heures, libellé long].
+     */
+    private const PERIODS = [
+        '24h' => ['24 h', 24, '24 dernières heures'],
+        '7d' => ['7 j', 24 * 7, '7 derniers jours'],
+        '30d' => ['30 j', 24 * 30, '30 derniers jours'],
+    ];
+
     public function admin(Request $request): View
     {
         return $this->render('dashboards.admin', $request);
@@ -55,13 +66,20 @@ class DashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
         $filter = $request->string('filter')->toString() ?: 'urgent';
+        $period = in_array($request->string('period')->toString(), array_keys(self::PERIODS), true)
+            ? $request->string('period')->toString()
+            : '7d';
+        $filters = $this->filterOptions($user);
 
         return view($view, [
             'pulse' => $this->pulse($user),
             'queue' => $this->queue($user, $filter),
             'filter' => $filter,
-            'filters' => $this->filterOptions($user),
-            'sideA' => $this->sideA($user),
+            'filters' => $filters,
+            'filterCounts' => collect($filters)->mapWithKeys(fn (array $f) => [$f['key'] => $this->filteredQueue($user, $f['key'])->count()]),
+            'period' => $period,
+            'periods' => self::PERIODS,
+            'sideA' => $this->sideA($user, $period),
             'sideB' => $this->sideB($user),
             'timeline' => $this->timeline($user),
         ]);
@@ -135,7 +153,21 @@ class DashboardController extends Controller
 
     private function queue(User $user, string $filter): Collection
     {
-        $query = WorkOrder::visibleTo($user)->with(['room', 'equipment', 'assignee', 'priority']);
+        return $this->filteredQueue($user, $filter)
+            ->with(['room', 'equipment', 'assignee', 'priority'])
+            ->orderByRaw('CASE WHEN sla_breached THEN 0 ELSE 1 END')
+            ->orderBy('sla_resolution_due_at')
+            ->limit(8)
+            ->get();
+    }
+
+    /**
+     * Ordres visibles par l'utilisateur, restreints au filtre d'onglet demandé
+     * (partagé entre la file affichée et les compteurs des onglets).
+     */
+    private function filteredQueue(User $user, string $filter): Builder
+    {
+        $query = WorkOrder::visibleTo($user);
 
         match ($filter) {
             'urgent' => $query->whereHas('priority', fn ($p) => $p->where('code', 'urgente')),
@@ -144,17 +176,17 @@ class DashboardController extends Controller
             default => null,
         };
 
-        return $query->orderByRaw('CASE WHEN sla_breached THEN 0 ELSE 1 END')
-            ->orderBy('sla_resolution_due_at')
-            ->limit(8)
-            ->get();
+        return $query;
     }
 
     /**
      * @return array{title: string, sub: string, items: Collection}
      */
-    private function sideA(User $user): array
+    private function sideA(User $user, string $period = '7d'): array
     {
+        [, $hours, $periodLabel] = self::PERIODS[$period];
+        $since = now()->subHours($hours);
+
         return match ($user->role) {
             UserRole::Technicien => [
                 'title' => 'Ma journée, heure par heure',
@@ -170,13 +202,13 @@ class DashboardController extends Controller
             ],
             UserRole::Admin => [
                 'title' => 'Santé du SLA',
-                'sub' => '7 derniers jours',
-                'items' => WorkOrderPriority::orderBy('position')->get()->map(function (WorkOrderPriority $p) {
-                    $total = WorkOrder::where('priority_id', $p->id)->where('created_at', '>=', now()->subDays(7))->count();
-                    $breached = WorkOrder::where('priority_id', $p->id)->where('created_at', '>=', now()->subDays(7))->where('sla_breached', true)->count();
+                'sub' => $periodLabel,
+                'items' => WorkOrderPriority::orderBy('position')->get()->map(function (WorkOrderPriority $p) use ($since) {
+                    $total = WorkOrder::where('priority_id', $p->id)->where('created_at', '>=', $since)->count();
+                    $breached = WorkOrder::where('priority_id', $p->id)->where('created_at', '>=', $since)->where('sla_breached', true)->count();
                     $rate = $total > 0 ? (int) round((1 - $breached / $total) * 100) : 100;
 
-                    return ['name' => 'Priorité '.mb_strtolower($p->label), 'meta' => $rate.' %', 'pct' => $rate, 'color' => $rate >= 90 ? 'green' : ($rate >= 75 ? 'amber' : 'red')];
+                    return ['name' => 'Priorité '.mb_strtolower($p->label), 'meta' => $rate.' %', 'pct' => $rate, 'color' => $rate >= 90 ? 'green' : ($rate >= 75 ? 'amber' : 'red'), 'dot' => $p->color];
                 }),
             ],
             default => [
@@ -214,7 +246,7 @@ class DashboardController extends Controller
             UserRole::Admin => [
                 'title' => 'Activité récente',
                 'items' => ActivityLog::with('user')->latest('created_at')->limit(4)->get()
-                    ->map(fn (ActivityLog $a) => ['label' => $a->description, 'meta' => $a->action.' · '.$a->created_at->format('H:i'), 'color' => 'blue']),
+                    ->map(fn (ActivityLog $a) => ['label' => $a->description, 'meta' => $a->action.' · '.$a->created_at->format('H:i'), 'color' => 'blue', 'time' => $a->created_at->format('H:i'), 'who' => $a->user?->name]),
             ],
             default => [
                 'title' => 'Blocages à décider',
