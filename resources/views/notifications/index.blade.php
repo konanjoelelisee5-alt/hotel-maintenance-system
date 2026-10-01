@@ -3,6 +3,7 @@
         str_contains($n->type, 'SlaEscalation') => 'red',
         str_contains($n->type, 'LowStock') => 'gold',
         str_contains($n->type, 'QualityControl') => 'amber',
+        str_contains($n->type, 'SensitiveAdminAction') => 'gold',
         default => 'blue',
     };
     $unread = $notifications->filter(fn ($n) => is_null($n->read_at));

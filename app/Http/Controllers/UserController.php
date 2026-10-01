@@ -49,7 +49,7 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        ActivityLog::record('user.created', "Création de l'utilisateur {$user->name} ({$user->role_label})", $user);
+        ActivityLog::record('user.created', "Création de l'utilisateur {$user->name} ({$user->role_label})", $user, ['role' => $user->role->value]);
 
         return redirect()->route('users.index')->with('success', 'Utilisateur créé avec succès.');
     }

@@ -16,8 +16,17 @@
                     </select>
                     <select name="action" class="border-gray-300 rounded-md shadow-sm text-sm">
                         <option value="">Toutes les actions</option>
-                        <option value="user." @selected(request('action') === 'user.')>Utilisateurs</option>
-                        <option value="quality_control." @selected(request('action') === 'quality_control.')>Contrôle qualité</option>
+                        @foreach ([
+                            'user.' => 'Utilisateurs',
+                            'sla_policy.' => 'Politiques SLA',
+                            'escalation_rule.' => "Règles d'escalade",
+                            'work_order_priority.' => 'Priorités',
+                            'work_order_type.' => "Types d'OT",
+                            'skill.' => 'Compétences',
+                            'quality_control.' => 'Contrôle qualité',
+                        ] as $prefix => $label)
+                            <option value="{{ $prefix }}" @selected(request('action') === $prefix)>{{ $label }}</option>
+                        @endforeach
                     </select>
                     <button type="submit" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-md hover:bg-gray-300">
                         Filtrer

@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsConfigurationChanges;
 use Illuminate\Database\Eloquent\Model;
 
 class SlaPolicy extends Model
 {
+    use LogsConfigurationChanges;
+
+    const LOG_PREFIX = 'sla_policy';
+    const LOG_LABEL = 'la politique SLA';
+
     protected $fillable = [
         'name', 'priority', 'work_order_type',
         'response_time_minutes', 'resolution_time_minutes', 'is_active',

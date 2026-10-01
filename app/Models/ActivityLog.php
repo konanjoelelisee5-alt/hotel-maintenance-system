@@ -2,11 +2,29 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Notifications\SensitiveAdminActionNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 class ActivityLog extends Model
 {
+    /**
+     * Actions dont les autres administrateurs sont prévenus (contrôle mutuel).
+     * Un "*" final couvre toutes les actions d'un préfixe.
+     */
+    private const SENSITIVE_ACTIONS = [
+        'user.role_changed',
+        'user.deactivated',
+        'user.reactivated',
+        'user.password_reset',
+        'user.admin_recovered',
+        'sla_policy.*',
+        'escalation_rule.*',
+    ];
+
     protected $fillable = [
         'user_id', 'action', 'subject_type', 'subject_id',
         'description', 'metadata', 'ip_address',
@@ -31,7 +49,7 @@ class ActivityLog extends Model
      */
     public static function record(string $action, string $description, ?Model $subject = null, array $metadata = []): void
     {
-        static::create([
+        $log = static::create([
             'user_id' => Auth::id(),
             'action' => $action,
             'subject_type' => $subject ? get_class($subject) : null,
@@ -40,5 +58,29 @@ class ActivityLog extends Model
             'metadata' => $metadata,
             'ip_address' => request()?->ip(),
         ]);
+
+        if ($log->isSensitive()) {
+            $log->notifyOtherAdmins();
+        }
+    }
+
+    public function isSensitive(): bool
+    {
+        // La création d'un compte n'est sensible que si elle crée un administrateur.
+        if ($this->action === 'user.created') {
+            return ($this->metadata['role'] ?? null) === UserRole::Admin->value;
+        }
+
+        return Str::is(self::SENSITIVE_ACTIONS, $this->action);
+    }
+
+    private function notifyOtherAdmins(): void
+    {
+        $admins = User::where('role', UserRole::Admin)
+            ->where('is_active', true)
+            ->when($this->user_id, fn ($q) => $q->whereKeyNot($this->user_id))
+            ->get();
+
+        Notification::send($admins, new SensitiveAdminActionNotification($this));
     }
 }

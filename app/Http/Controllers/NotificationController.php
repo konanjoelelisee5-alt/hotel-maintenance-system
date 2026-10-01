@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -32,6 +33,10 @@ class NotificationController extends Controller
 
         if (isset($notification->data['part_id'])) {
             return redirect()->route('parts.show', $notification->data['part_id']);
+        }
+
+        if (isset($notification->data['activity_log_id']) && $request->user()->role === UserRole::Admin) {
+            return redirect()->route('activity-logs.index');
         }
 
         return redirect()->route('notifications.index');

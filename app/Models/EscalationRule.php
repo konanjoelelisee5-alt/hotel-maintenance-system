@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsConfigurationChanges;
 use Illuminate\Database\Eloquent\Model;
 
 class EscalationRule extends Model
 {
+    use LogsConfigurationChanges;
+
+    const LOG_PREFIX = 'escalation_rule';
+    const LOG_LABEL = "la règle d'escalade";
+
     protected $fillable = [
         'name', 'trigger_type', 'offset_minutes', 'notify_target', 'is_active',
     ];
