@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ActiveTechnician;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateWorkOrderRequest extends FormRequest
@@ -18,7 +19,8 @@ class UpdateWorkOrderRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'room_id' => ['nullable', 'exists:rooms,id'],
             'equipment_id' => ['nullable', 'exists:equipment,id'],
-            'assigned_to' => ['nullable', 'exists:users,id'],
+            // L'assigné actuel reste accepté même s'il est parti entre-temps.
+            'assigned_to' => ['nullable', new ActiveTechnician(allowedId: $this->route('work_order')?->assigned_to)],
             'type_id' => ['required', 'exists:work_order_types,id'],
             'priority_id' => ['required', 'exists:work_order_priorities,id'],
             'due_date' => ['nullable', 'date'],

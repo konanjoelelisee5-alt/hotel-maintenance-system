@@ -24,7 +24,7 @@ class PlanningController extends Controller
             return redirect()->route('planning.technician', $user);
         }
 
-        $technicians = User::where('role', 'technicien')->orderBy('name')->get();
+        $technicians = User::activeTechnicians()->get();
 
         return view('planning.index', compact('technicians'));
     }
@@ -78,10 +78,7 @@ class PlanningController extends Controller
 
     public function schedule(WorkOrder $workOrder): View
     {
-        $technicians = User::where('role', 'technicien')
-            ->with('skills')
-            ->orderBy('name')
-            ->get();
+        $technicians = User::activeTechnicians()->with('skills')->get();
 
         return view('planning.schedule', compact('workOrder', 'technicians'));
     }

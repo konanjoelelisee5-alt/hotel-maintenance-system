@@ -106,6 +106,17 @@ class User extends Authenticatable implements MustVerifyEmailContract
     }
 
     /**
+     * Techniciens à qui l'on peut confier du travail. Avec $keepId, garde aussi
+     * l'assigné actuel d'un OT même s'il a quitté l'hôtel (affichage d'un vieil OT).
+     */
+    public function scopeActiveTechnicians($query, ?int $keepId = null)
+    {
+        return $query->where('role', UserRole::Technicien)
+            ->where(fn ($q) => $q->where('is_active', true)->when($keepId, fn ($q) => $q->orWhereKey($keepId)))
+            ->orderBy('name');
+    }
+
+    /**
      * Admins et managers qui pilotent la maintenance : seuls eux reçoivent les
      * alertes d'astreinte et d'escalade (pas le responsable informatique, par ex.).
      */

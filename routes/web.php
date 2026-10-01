@@ -25,6 +25,7 @@ use App\Http\Controllers\WorkOrderPriorityController;
 use App\Http\Controllers\WorkOrderTypeController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserDeactivationController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PartReservationController;
@@ -170,6 +171,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('skills', SkillController::class)->except(['show']);
     Route::resource('users', UserController::class)->except(['show']);
     Route::post('/users/{user}/password', [UserController::class, 'resetPassword'])->name('users.password.reset');
+    // Départ d'un employé : réaffectation de ses OT puis désactivation.
+    Route::get('/users/{user}/deactivate', [UserDeactivationController::class, 'create'])->name('users.deactivate');
+    Route::post('/users/{user}/deactivate', [UserDeactivationController::class, 'store'])->name('users.deactivate.store');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 });
 

@@ -76,7 +76,7 @@ class WorkOrderController extends Controller
         // Lieux et équipements hors service ne sont plus proposés.
         $roomGroups = Room::groupedForSelect();
         $equipments = Equipment::forSelect();
-        $technicians = User::where('role', 'technicien')->orderBy('name')->get();
+        $technicians = User::activeTechnicians()->get();
         $types = WorkOrderType::where('is_active', true)->orderBy('position')->get();
         $priorities = WorkOrderPriority::where('is_active', true)->orderBy('position')->get();
 
@@ -134,7 +134,7 @@ class WorkOrderController extends Controller
         // Le lieu / l'équipement actuel reste proposé même s'il est passé hors service.
         $roomGroups = Room::groupedForSelect($workOrder->room_id);
         $equipments = Equipment::forSelect($workOrder->equipment_id);
-        $technicians = User::where('role', 'technicien')->orderBy('name')->get();
+        $technicians = User::activeTechnicians($workOrder->assigned_to)->get();
         $types = WorkOrderType::where('is_active', true)->orderBy('position')->get();
         $priorities = WorkOrderPriority::where('is_active', true)->orderBy('position')->get();
 

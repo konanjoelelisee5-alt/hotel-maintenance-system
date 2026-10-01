@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DeactivateUser;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -97,6 +98,15 @@ class UserController extends Controller
             ]);
         }
 
+        // Décocher « Compte actif » sur quelqu'un qui a encore des OT en cours les
+        // rendrait orphelins : on enregistre le reste, puis on passe par l'écran
+        // de réaffectation, qui fera la désactivation.
+        $mustReassign = $user->is_active && ! $validated['is_active']
+            && $user->assignedWorkOrders()->open()->exists();
+        if ($mustReassign) {
+            $validated['is_active'] = true;
+        }
+
         $oldRole = $user->role;
         $wasActive = $user->is_active;
         $wasHead = $user->is_department_head;
@@ -141,10 +151,15 @@ class UserController extends Controller
             );
         }
 
+        if ($mustReassign) {
+            return redirect()->route('users.deactivate', $user)
+                ->with('warning', "Modifications enregistrées. {$user->name} a encore des ordres de travail en cours : confiez-les à quelqu'un pour terminer la désactivation.");
+        }
+
         return redirect()->route('users.index')->with('success', 'Utilisateur mis à jour.');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(User $user, DeactivateUser $deactivate): RedirectResponse
     {
         // Sécurité : on empêche un admin de se désactiver lui-même par erreur
         if ($user->id === Auth::id()) {
@@ -155,8 +170,13 @@ class UserController extends Controller
             return back()->with('warning', "C'est le dernier administrateur actif : il ne peut pas être désactivé.");
         }
 
-        $user->update(['is_active' => false]);
-        ActivityLog::record('user.deactivated', "Désactivation de l'utilisateur {$user->name}", $user);
+        // Du travail en cours : il faut d'abord choisir qui le reprend.
+        if ($user->assignedWorkOrders()->open()->exists()) {
+            return redirect()->route('users.deactivate', $user);
+        }
+
+        // Même chemin que l'écran de départ (plans préventifs, chronomètre, journal).
+        $deactivate->handle($user, null);
 
         return back()->with('success', 'Utilisateur désactivé.');
     }

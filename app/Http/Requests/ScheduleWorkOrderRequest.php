@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ActiveTechnician;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ScheduleWorkOrderRequest extends FormRequest
@@ -14,7 +15,7 @@ class ScheduleWorkOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'assigned_to' => ['required', 'exists:users,id'],
+            'assigned_to' => ['required', new ActiveTechnician()],
             'scheduled_at' => ['required', 'date'],
             'estimated_duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
         ];
