@@ -40,8 +40,9 @@
                     </div>
 
                     <div>
-                        <x-input-label for="password" value="Mot de passe" />
+                        <x-input-label for="password" value="Mot de passe provisoire" />
                         <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" required />
+                        <p class="text-xs text-gray-500 mt-1">L'employé devra le remplacer par un mot de passe personnel à sa première connexion.</p>
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
 

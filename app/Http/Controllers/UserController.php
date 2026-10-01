@@ -53,6 +53,8 @@ class UserController extends Controller
             'is_department_head' => $this->departmentHeadFlag($request, $validated['role']),
             'receives_maintenance_alerts' => $this->alertFlag($request, $validated['role']),
             'password' => Hash::make($validated['password']),
+            // Choisi par l'admin, donc connu de deux personnes : à remplacer à la 1re connexion.
+            'must_change_password' => true,
             'email_verified_at' => now(),
         ]);
 
@@ -111,8 +113,24 @@ class UserController extends Controller
         $wasActive = $user->is_active;
         $wasHead = $user->is_department_head;
         $receivedAlerts = $user->receives_maintenance_alerts;
+        $oldIdentity = $user->only(['name', 'email']);
 
         $user->update($validated);
+
+        // L'e-mail sert à se connecter et à recevoir le lien « mot de passe oublié » :
+        // le changer en silence permettrait de s'approprier le compte d'un collègue.
+        $identityChanges = collect($oldIdentity)
+            ->filter(fn ($old, $field) => $old !== $user->{$field})
+            ->map(fn ($old, $field) => ['from' => $old, 'to' => $user->{$field}]);
+        if ($identityChanges->isNotEmpty()) {
+            ActivityLog::record(
+                'user.identity_changed',
+                "Modification de l'identité de {$user->name} : "
+                    .$identityChanges->map(fn ($c, $field) => ($field === 'email' ? 'e-mail' : 'nom')." {$c['from']} → {$c['to']}")->implode(', '),
+                $user,
+                [...$identityChanges->all(), 'target_role' => $oldRole->value],
+            );
+        }
 
         if ($user->role->seesAllWorkOrders() && $receivedAlerts !== $user->receives_maintenance_alerts) {
             ActivityLog::record(

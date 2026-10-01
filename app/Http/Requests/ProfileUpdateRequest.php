@@ -26,6 +26,21 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            // Changer d'e-mail redirige « mot de passe oublié » : une session restée
+            // ouverte ne doit pas suffire, on redemande le mot de passe actuel.
+            'current_password' => [
+                Rule::requiredIf(fn () => $this->input('email') !== $this->user()->email),
+                'nullable',
+                'current_password',
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'current_password.required' => 'Saisissez votre mot de passe actuel pour changer d\'adresse e-mail.',
+            'current_password.current_password' => 'Mot de passe incorrect.',
         ];
     }
 }

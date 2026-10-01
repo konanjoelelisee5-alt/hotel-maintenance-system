@@ -112,6 +112,7 @@ return [
     |
     */
 
-    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    // 15 min (et non 3 h) : ne protège que la gestion des comptes, cf. routes/web.php.
+    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 900),
 
 ];

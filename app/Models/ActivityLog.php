@@ -74,6 +74,11 @@ class ActivityLog extends Model
             return ($this->metadata['role'] ?? null) === UserRole::Admin->value;
         }
 
+        // Nom / e-mail : sensible pour un compte administrateur (prise de compte possible).
+        if ($this->action === 'user.identity_changed') {
+            return ($this->metadata['target_role'] ?? null) === UserRole::Admin->value;
+        }
+
         return Str::is(self::SENSITIVE_ACTIONS, $this->action);
     }
 

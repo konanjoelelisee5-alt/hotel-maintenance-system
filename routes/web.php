@@ -203,11 +203,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('work-order-types', WorkOrderTypeController::class)->except(['show']);
     Route::resource('work-order-priorities', WorkOrderPriorityController::class)->except(['show']);
     Route::resource('skills', SkillController::class)->except(['show']);
-    Route::resource('users', UserController::class)->except(['show']);
-    Route::post('/users/{user}/password', [UserController::class, 'resetPassword'])->name('users.password.reset');
-    // Départ d'un employé : réaffectation de ses OT puis désactivation.
-    Route::get('/users/{user}/deactivate', [UserDeactivationController::class, 'create'])->name('users.deactivate');
-    Route::post('/users/{user}/deactivate', [UserDeactivationController::class, 'store'])->name('users.deactivate.store');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+    // Comptes et accès : mot de passe de l'admin redemandé (15 min de validité), sur
+    // les écrans ET sur les envois — une session restée ouverte ne suffit pas à
+    // créer un administrateur, changer un e-mail ou réinitialiser un mot de passe.
+    Route::middleware('password.confirm')->group(function () {
+        Route::resource('users', UserController::class)->except(['index', 'show']);
+        Route::post('/users/{user}/password', [UserController::class, 'resetPassword'])->name('users.password.reset');
+        // Départ d'un employé : réaffectation de ses OT puis désactivation.
+        Route::get('/users/{user}/deactivate', [UserDeactivationController::class, 'create'])->name('users.deactivate');
+        Route::post('/users/{user}/deactivate', [UserDeactivationController::class, 'store'])->name('users.deactivate.store');
+    });
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 });
 
