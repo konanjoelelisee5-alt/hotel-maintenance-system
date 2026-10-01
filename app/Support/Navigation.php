@@ -21,38 +21,72 @@ use App\Models\WorkOrder;
 class Navigation
 {
     /**
-     * @return array{ops: array, adminTitle: string, admin: array}
+     * Sections de la sidebar, dans l'ordre. "secondary" : entrées plus discrètes, sans icône
+     * (référentiels et réglages, consultés moins souvent que l'exploitation).
+     *
+     * @return array<int, array{title: string, secondary: bool, items: array}>
      */
     public static function forSidebar(User $user): array
+    {
+        // Admin : sections par nature (le quotidien, le stock, les données de référence,
+        // les règles automatiques, puis comptes et sécurité) plutôt qu'une liste à plat.
+        if ($user->role === UserRole::Admin) {
+            return [
+                self::section('Exploitation', [
+                    ['label' => 'Supervision', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                    ['label' => 'Ordres de travail', 'route' => 'work-orders.index', 'badge' => WorkOrder::visibleTo($user)->open()->count(), 'icon' => 'clipboard'],
+                    ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
+                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
+                    ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index', 'icon' => 'status'],
+                    ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
+                ]),
+                self::section('Stock & achats', [
+                    ['label' => 'Pièces & stock', 'route' => 'parts.index', 'badge' => self::lowStockCount()],
+                    ['label' => 'Bons de commande', 'route' => 'purchase-orders.index'],
+                    ['label' => 'Fournisseurs', 'route' => 'suppliers.index'],
+                ], secondary: true),
+                self::section('Référentiels', [
+                    ['label' => 'Lieux', 'route' => 'rooms.index'],
+                    ['label' => 'Équipements', 'route' => 'equipment.index'],
+                    ['label' => "Types d'OT", 'route' => 'work-order-types.index'],
+                    ['label' => 'Priorités', 'route' => 'work-order-priorities.index'],
+                    ['label' => 'Compétences', 'route' => 'skills.index'],
+                ], secondary: true),
+                self::section('Alertes & SLA', [
+                    ['label' => 'Politiques SLA', 'route' => 'sla-policies.index'],
+                    ['label' => "Règles d'escalade", 'route' => 'escalation-rules.index'],
+                    ['label' => 'Astreinte', 'route' => 'on-call.edit'],
+                ], secondary: true),
+                self::section('Administration', [
+                    ['label' => 'Utilisateurs', 'route' => 'users.index'],
+                    ['label' => "Journal d'activité", 'route' => 'activity-logs.index'],
+                ], secondary: true),
+            ];
+        }
+
+        $nav = self::legacySidebar($user);
+
+        return array_values(array_filter([
+            self::section('Opérations', $nav['ops']),
+            $nav['admin'] ? self::section($nav['adminTitle'], $nav['admin'], secondary: true) : null,
+        ]));
+    }
+
+    private static function section(string $title, array $items, bool $secondary = false): array
+    {
+        return ['title' => $title, 'secondary' => $secondary, 'items' => $items];
+    }
+
+    /**
+     * Menus des autres rôles : une section d'opérations, plus des ressources pour le manager.
+     *
+     * @return array{ops: array, adminTitle: string, admin: array}
+     */
+    private static function legacySidebar(User $user): array
     {
         $openCount = fn () => WorkOrder::visibleTo($user)->open()->count();
 
         return match ($user->role) {
-            UserRole::Admin => [
-                'ops' => [
-                    ['label' => 'Supervision', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
-                    ['label' => 'Ordres de travail', 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
-                    ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
-                    ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
-                    ['label' => 'Pièces & stock', 'route' => 'parts.index', 'badge' => self::lowStockCount(), 'icon' => 'part'],
-                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
-                ],
-                'adminTitle' => 'Administration',
-                'admin' => [
-                    ['label' => 'Utilisateurs', 'route' => 'users.index'],
-                    ['label' => 'Lieux', 'route' => 'rooms.index'],
-                    ['label' => 'Équipements', 'route' => 'equipment.index'],
-                    ['label' => 'Compétences', 'route' => 'skills.index'],
-                    ['label' => 'Types OT', 'route' => 'work-order-types.index'],
-                    ['label' => 'Priorités', 'route' => 'work-order-priorities.index'],
-                    ['label' => 'Politiques SLA', 'route' => 'sla-policies.index'],
-                    ['label' => 'Règles escalade', 'route' => 'escalation-rules.index'],
-                    ['label' => 'Astreinte', 'route' => 'on-call.edit'],
-                    ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index'],
-                    ['label' => 'Fournisseurs & achats', 'route' => 'purchase-orders.index'],
-                    ['label' => "Journal d'activité", 'route' => 'activity-logs.index'],
-                ],
-            ],
             UserRole::Manager => [
                 'ops' => [
                     ['label' => 'Pilotage', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
@@ -139,7 +173,7 @@ class Navigation
             UserRole::Admin => [
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
-                ['label' => 'Comptes', 'route' => 'users.index', 'icon' => 'users'],
+                ['label' => 'Utilisateurs', 'route' => 'users.index', 'icon' => 'users'],
                 $profile,
             ],
         };

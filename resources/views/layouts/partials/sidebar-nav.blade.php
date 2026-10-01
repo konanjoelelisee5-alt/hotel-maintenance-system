@@ -2,37 +2,36 @@
      Une entrée reste active sur ses sous-pages (users.index → users.edit, users.create...). --}}
 @php $isActive = fn (array $item) => request()->routeIs(\Illuminate\Support\Str::beforeLast($item['route'], '.').'.*'); @endphp
 
-<nav class="flex flex-col gap-0.5">
-    <div class="text-[10.5px] tracking-wide text-[#6E8399] font-semibold uppercase px-2 pb-1.5">Opérations</div>
-    @foreach ($nav['ops'] as $item)
-        @php $active = $isActive($item); @endphp
-        <a href="{{ route($item['route'], $item['params'] ?? []) }}" @if ($active) aria-current="page" @endif class="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] font-medium {{ $active ? 'bg-white/10 text-white' : 'text-[#DCE5EE] hover:bg-white/[.06]' }}">
-            <span class="flex items-center gap-2.5">
-                @if (! empty($item['icon']))
-                    <x-nav-icon :name="$item['icon']" class="w-4 h-4 {{ $active ? 'text-gold' : 'text-[#8FA3B8]' }}" />
-                @else
-                    <span class="w-1.5 h-1.5 rounded-full {{ $active ? 'bg-gold' : 'bg-[#3F5D7A]' }}"></span>
-                @endif
-                {{ $item['label'] }}
-            </span>
-            @if (! empty($item['badge']))
-                <span class="text-[11px] font-semibold text-gold">{{ $item['badge'] }}</span>
-            @endif
-        </a>
-    @endforeach
-</nav>
-
-@if (! empty($nav['admin']))
-    <nav class="flex flex-col gap-0.5">
-        <div class="text-[10.5px] tracking-wide text-[#6E8399] font-semibold uppercase px-2 pb-1.5">{{ $nav['adminTitle'] }}</div>
-        @foreach ($nav['admin'] as $item)
+@foreach ($nav as $section)
+    <nav class="flex flex-col gap-0.5" aria-label="{{ $section['title'] }}">
+        <div class="text-[10.5px] tracking-wide text-[#6E8399] font-semibold uppercase px-2 pb-1.5">{{ $section['title'] }}</div>
+        @foreach ($section['items'] as $item)
             @php $active = $isActive($item); @endphp
-            <a href="{{ route($item['route'], $item['params'] ?? []) }}" @if ($active) aria-current="page" @endif class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium {{ $active ? 'bg-white/10 text-white' : 'text-[#B9C7D6] hover:bg-white/[.06] hover:text-white' }}">
-                {{ $item['label'] }}
-            </a>
+            @if ($section['secondary'])
+                <a href="{{ route($item['route'], $item['params'] ?? []) }}" @if ($active) aria-current="page" @endif class="flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium {{ $active ? 'bg-white/10 text-white' : 'text-[#B9C7D6] hover:bg-white/[.06] hover:text-white' }}">
+                    {{ $item['label'] }}
+                    @if (! empty($item['badge']))
+                        <span class="text-[11px] font-semibold text-gold">{{ $item['badge'] }}</span>
+                    @endif
+                </a>
+            @else
+                <a href="{{ route($item['route'], $item['params'] ?? []) }}" @if ($active) aria-current="page" @endif class="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] font-medium {{ $active ? 'bg-white/10 text-white' : 'text-[#DCE5EE] hover:bg-white/[.06]' }}">
+                    <span class="flex items-center gap-2.5">
+                        @if (! empty($item['icon']))
+                            <x-nav-icon :name="$item['icon']" class="w-4 h-4 {{ $active ? 'text-gold' : 'text-[#8FA3B8]' }}" />
+                        @else
+                            <span class="w-1.5 h-1.5 rounded-full {{ $active ? 'bg-gold' : 'bg-[#3F5D7A]' }}"></span>
+                        @endif
+                        {{ $item['label'] }}
+                    </span>
+                    @if (! empty($item['badge']))
+                        <span class="text-[11px] font-semibold text-gold">{{ $item['badge'] }}</span>
+                    @endif
+                </a>
+            @endif
         @endforeach
     </nav>
-@endif
+@endforeach
 
 <div class="mt-auto flex flex-col gap-2">
     <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/[.06] text-[#C3D0DE] text-[12.5px] font-medium hover:bg-white/[.12]">
