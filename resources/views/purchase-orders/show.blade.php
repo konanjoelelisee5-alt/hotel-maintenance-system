@@ -82,8 +82,8 @@
                                 <tr class="border-b">
                                     <td class="py-3">{{ $item->description }}</td>
                                     <td class="py-3 text-right">{{ $item->quantity }}</td>
-                                    <td class="py-3 text-right">{{ number_format($item->unit_price, 2) }} €</td>
-                                    <td class="py-3 text-right">{{ number_format($item->subtotal, 2) }} €</td>
+                                    <td class="py-3 text-right">{{ \App\Support\Money::format($item->unit_price) }}</td>
+                                    <td class="py-3 text-right">{{ \App\Support\Money::format($item->subtotal) }}</td>
                                     <td class="py-3 text-right">
                                         <input type="number" name="received[{{ $item->id }}]" min="0" max="{{ $item->quantity }}"
                                                value="{{ $item->received_quantity }}"
@@ -95,7 +95,7 @@
                         <tfoot>
                             <tr>
                                 <td colspan="3" class="py-3 text-right font-medium">Total</td>
-                                <td class="py-3 text-right font-medium">{{ number_format($purchaseOrder->total_amount, 2) }} €</td>
+                                <td class="py-3 text-right font-medium">{{ \App\Support\Money::format($purchaseOrder->total_amount) }}</td>
                                 <td></td>
                             </tr>
                         </tfoot>
@@ -118,7 +118,7 @@
                     <div class="flex justify-between items-center border-b py-3 text-sm">
                         <div>
                             <span class="font-medium">{{ $invoice->invoice_number }}</span> —
-                            {{ number_format($invoice->amount, 2) }} € —
+                            {{ \App\Support\Money::format($invoice->amount) }} —
                             {{ $invoice->invoice_date->format('d/m/Y') }}
                             @if ($invoice->file_path)
                                 <a href="{{ $invoice->file_url }}" target="_blank" class="text-indigo-600 hover:underline ml-2">📄 Voir</a>
@@ -143,7 +143,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input type="text" name="invoice_number" placeholder="N° facture" class="border-gray-300 rounded-md shadow-sm text-sm" required>
                         <input type="date" name="invoice_date" class="border-gray-300 rounded-md shadow-sm text-sm" required>
-                        <input type="number" name="amount" step="0.01" placeholder="Montant" class="border-gray-300 rounded-md shadow-sm text-sm" required>
+                        <input type="number" name="amount" step="1" min="0" placeholder="Montant (FCFA)" class="border-gray-300 rounded-md shadow-sm text-sm" required>
                     </div>
                     <input type="file" name="file" class="text-sm">
                     <x-input-error :messages="$errors->get('invoice_number')" class="mt-2" />

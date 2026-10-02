@@ -13,7 +13,8 @@ class PurchaseOrderItemFactory extends Factory
         return [
             'description' => fake()->randomElement($articles),
             'quantity' => fake()->numberBetween(1, 20),
-            'unit_price' => fake()->randomFloat(2, 2, 150),
+            // Franc CFA, montants ronds (de 500 à 100 000 FCFA l'unité).
+            'unit_price' => fake()->numberBetween(10, 2000) * 50,
         ];
     }
 }

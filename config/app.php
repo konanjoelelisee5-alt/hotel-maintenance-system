@@ -49,6 +49,13 @@ return [
     'demo' => (bool) env('SEED_DEMO_DATA', false),
 
     /*
+    | Monnaie des montants (achats, factures, pièces) : franc CFA, Côte d'Ivoire.
+    | Affichage via App\Support\Money (« 150 000 FCFA », sans centimes).
+    */
+
+    'currency' => env('APP_CURRENCY', 'FCFA'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------

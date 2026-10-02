@@ -28,8 +28,8 @@
         </div>
 
         <div>
-            <x-input-label for="unit_cost" value="Coût unitaire (optionnel)" />
-            <x-text-input id="unit_cost" name="unit_cost" type="number" step="0.01" min="0" class="mt-1 block w-full" :value="old('unit_cost')" />
+            <x-input-label for="unit_cost" value="Coût unitaire en FCFA (optionnel)" />
+            <x-text-input id="unit_cost" name="unit_cost" type="number" step="1" min="0" class="mt-1 block w-full" :value="old('unit_cost')" />
         </div>
 
         <div class="flex justify-end gap-3">

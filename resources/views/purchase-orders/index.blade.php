@@ -34,7 +34,7 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $po->number }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $po->supplier->name }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ number_format($po->total_amount, 2) }} €</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ \App\Support\Money::format($po->total_amount) }}</td>
                                 <td class="px-6 py-4"><x-purchase-order-status-badge :status="$po->status" /></td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $po->order_date->format('d/m/Y') }}</td>
                                 <td class="px-6 py-4 text-right text-sm">

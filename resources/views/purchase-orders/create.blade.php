@@ -27,6 +27,10 @@
                           },
                           get total() {
                               return this.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+                          },
+                          // Franc CFA : sans centimes, espace entre les milliers (cf. App\Support\Money).
+                          fcfa(amount) {
+                              return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Math.round(amount || 0)) + ' FCFA';
                           }
                       }"
                       class="space-y-6">
@@ -102,13 +106,13 @@
                                     </div>
 
                                     <div class="w-32">
-                                        <input type="number" placeholder="Prix unitaire" step="0.01" min="0"
+                                        <input type="number" placeholder="Prix unitaire (FCFA)" step="1" min="0"
                                                :name="`items[${index}][unit_price]`"
                                                x-model.number="item.unit_price"
                                                class="block w-full border-gray-300 rounded-md shadow-sm text-sm" required>
                                     </div>
 
-                                    <div class="w-24 text-sm text-gray-600 pt-2 text-right" x-text="(item.quantity * item.unit_price).toFixed(2) + ' €'"></div>
+                                    <div class="w-36 text-sm text-gray-600 pt-2 text-right whitespace-nowrap" x-text="fcfa(item.quantity * item.unit_price)"></div>
 
                                     <button type="button" @click="removeItem(index)"
                                             class="text-red-500 hover:text-red-700 text-sm pt-2" x-show="items.length > 1">
@@ -126,7 +130,7 @@
 
                         <!-- Total calculé en temps réel, uniquement visuel (pas envoyé au serveur) -->
                         <div class="mt-4 text-right text-lg font-semibold text-gray-800">
-                            Total : <span x-text="total.toFixed(2) + ' €'"></span>
+                            Total : <span x-text="fcfa(total)"></span>
                         </div>
                     </div>
 

@@ -88,11 +88,12 @@ class RequalifyWorkOrderTest extends TestCase
     public function test_requalify_form_keeps_a_technician_who_has_left(): void
     {
         $workOrder = $this->lateUrgentWorkOrder();
-        $workOrder->assignee->update(['is_active' => false]);
+        // Nom fixe : un nom aléatoire avec apostrophe (« O'Kon ») serait échappé autrement.
+        $workOrder->assignee->update(['is_active' => false, 'name' => 'Yao Konan']);
 
         $this->actingAs($this->manager)->get(route('work-orders.edit', $workOrder))
             ->assertOk()
-            ->assertSee($workOrder->assignee->name.' (a quitté l&#039;hôtel)', false);
+            ->assertSee('Yao Konan (a quitté l&#039;hôtel)', false);
     }
 
     public function test_requalify_button_opens_in_a_window(): void

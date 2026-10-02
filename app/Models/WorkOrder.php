@@ -289,18 +289,20 @@ class WorkOrder extends Model
     }
 
     // ===== Helpers d'affichage =====
+    /** Libellés des statuts, dans l'ordre du cycle de vie (listes, graphiques, PDF). */
+    public const STATUS_LABELS = [
+        'ouvert' => 'Ouvert',
+        'en_cours' => 'En cours',
+        'en_attente' => 'En attente',
+        'resolu' => 'Résolu',
+        'rejete' => 'Rejeté',
+        'ferme' => 'Fermé',
+        'annule' => 'Annulé',
+    ];
+
     public function getStatusLabelAttribute(): string
     {
-        return match ($this->status) {
-            'ouvert'     => 'Ouvert',
-            'en_cours'   => 'En cours',
-            'en_attente' => 'En attente',
-            'resolu'     => 'Résolu',
-            'ferme'      => 'Fermé',
-            'rejete'     => 'Rejeté',
-            'annule'     => 'Annulé',
-            default      => $this->status,
-        };
+        return self::STATUS_LABELS[$this->status] ?? $this->status;
     }
 
     public function getScheduledEndAtAttribute(): ?\Carbon\Carbon

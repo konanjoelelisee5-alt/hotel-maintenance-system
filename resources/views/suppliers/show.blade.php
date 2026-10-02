@@ -32,7 +32,7 @@
                     <div class="flex justify-between items-center border-t py-3 text-sm">
                         <a href="{{ route('purchase-orders.show', $po) }}" class="text-indigo-600 hover:underline">{{ $po->number }}</a>
                         <x-purchase-order-status-badge :status="$po->status" />
-                        <span class="text-gray-500">{{ number_format($po->total_amount, 2) }} €</span>
+                        <span class="text-gray-500">{{ \App\Support\Money::format($po->total_amount) }}</span>
                     </div>
                 @empty
                     <p class="text-sm text-gray-500">Aucune commande pour ce fournisseur.</p>

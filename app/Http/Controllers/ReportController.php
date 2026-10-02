@@ -100,22 +100,35 @@ class ReportController extends Controller
 
     private function buildReportData(Request $request): array
     {
-        $workOrders = $this->filteredWorkOrders($request)->with('priority')->get();
+        $workOrders = $this->filteredWorkOrders($request)->with(['priority', 'assignee'])->get();
         $resolvedOrders = $workOrders->whereNotNull('completed_at');
 
-        $avgResolutionHours = $resolvedOrders->isNotEmpty()
-            ? round($resolvedOrders->avg(fn ($wo) => $wo->created_at->diffInMinutes($wo->completed_at)) / 60, 1)
-            : 0;
+        $avgResolutionMinutes = $resolvedOrders->isNotEmpty()
+            ? (int) round($resolvedOrders->avg(fn ($wo) => $wo->created_at->diffInMinutes($wo->completed_at)))
+            : null;
+        $avgResolutionHours = $avgResolutionMinutes !== null ? round($avgResolutionMinutes / 60, 1) : 0;
 
-        $slaEligible = $workOrders->whereNotNull('sla_resolution_due_at');
-        $slaRespected = $slaEligible->where('sla_breached', false)->count();
+        // Un OT annulé ne compte pas. En retard : signalé dépassé, terminé après son
+        // échéance, ou pas terminé alors que l'échéance est passée (sans attendre que la
+        // tâche planifiée ait posé sla_breached).
+        $slaEligible = $workOrders->whereNotNull('sla_resolution_due_at')->where('status', '!=', 'annule');
+        $slaRespected = $slaEligible->reject(fn (WorkOrder $wo) => $wo->sla_breached
+            || ($wo->completed_at
+                ? $wo->completed_at->greaterThan($wo->sla_resolution_due_at)
+                : ! in_array($wo->status, WorkOrder::FINISHED_STATUSES, true) && $wo->sla_resolution_due_at->isPast())
+        )->count();
         $slaRate = $slaEligible->isNotEmpty() ? round(($slaRespected / $slaEligible->count()) * 100, 1) : null;
 
-        $byStatus = $workOrders->groupBy('status')->map->count();
+        // Statuts dans l'ordre du cycle de vie, avec leur libellé (« En cours », pas « en_cours »).
+        $counts = $workOrders->countBy('status');
+        $byStatus = collect(WorkOrder::STATUS_LABELS)
+            ->filter(fn ($label, $status) => $counts->has($status))
+            ->mapWithKeys(fn ($label, $status) => [$label => $counts[$status]]);
 
         $byTechnician = $workOrders->whereNotNull('assigned_to')
             ->groupBy(fn ($wo) => $wo->assignee?->name ?? 'Inconnu')
-            ->map->count();
+            ->map->count()
+            ->sortDesc();
 
         $totalPurchaseCost = PurchaseOrder::query()
             ->when($request->filled('date_from'), fn ($q) => $q->whereDate('order_date', '>=', $request->date_from))
@@ -131,6 +144,10 @@ class ReportController extends Controller
             'workOrders' => $workOrders,
             'totalCount' => $workOrders->count(),
             'avgResolutionHours' => $avgResolutionHours,
+            'avgResolutionMinutes' => $avgResolutionMinutes,
+            'openCount' => $workOrders->whereIn('status', ['ouvert', 'en_cours', 'en_attente'])->count(),
+            'resolvedCount' => $resolvedOrders->count(),
+            'slaEligibleCount' => $slaEligible->count(),
             'slaRate' => $slaRate,
             'byStatus' => $byStatus,
             'byTechnician' => $byTechnician,
