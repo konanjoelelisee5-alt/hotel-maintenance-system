@@ -1,4 +1,4 @@
-<x-app-layout crumb="Opérations / Supervision" page-title="Supervision — Hôtel Président">
+<x-app-layout crumb="Exploitation" page-title="Supervision">
     @php
         // Les liens de la page conservent filtre et période l'un pour l'autre.
         $here = fn (array $params) => route('admin.dashboard', array_merge(['filter' => $filter, 'period' => $period], $params));

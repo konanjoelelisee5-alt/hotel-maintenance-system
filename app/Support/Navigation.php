@@ -122,9 +122,10 @@ class Navigation
             ],
             UserRole::Housekeeping => [
                 'ops' => [
+                    // Un nom par page, le même partout (menu, barre du bas, titre).
+                    ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                     ['label' => 'Signaler un problème', 'route' => 'quick-reports.create', 'icon' => 'mic'],
-                    ['label' => $user->isDepartmentHead() ? "Signalements de l'équipe" : 'Mes signalements', 'route' => $user->dashboardRoute(), 'badge' => $openCount(), 'icon' => 'home'],
-                    ['label' => 'Historique', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                    ['label' => self::housekeepingListLabel($user), 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
                     // La gouvernante demande les blocages et remet les chambres en vente.
                     ...($user->isDepartmentHead()
                         ? [['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building']]
@@ -135,10 +136,10 @@ class Navigation
             ],
             UserRole::Reception => [
                 'ops' => [
-                    ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'search'],
+                    ['label' => 'Recherche chambre', 'route' => $user->dashboardRoute(), 'icon' => 'search'],
                     ['label' => 'Demandes', 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
                     // Badge = demandes de blocage à valider.
-                    ['label' => 'Blocages', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
+                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
                 ],
                 'adminTitle' => '',
                 'admin' => [],
@@ -158,15 +159,16 @@ class Navigation
 
         return match ($user->role) {
             UserRole::Technicien => [
-                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
-                ['label' => 'Mes OT', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                ['label' => 'Ma journée', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                ['label' => 'Mes ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ['label' => 'Planning', 'route' => 'planning.technician', 'params' => ['technician' => $user->id], 'icon' => 'calendar'],
                 $profile,
             ],
             UserRole::Housekeeping => [
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Signaler', 'route' => 'quick-reports.create', 'icon' => 'mic'],
-                ['label' => 'Mes OT', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                // « Signalements » : version courte de « Mes signalements », la barre est étroite.
+                ['label' => 'Signalements', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 // La gouvernante remet les chambres en vente : son travail quotidien, pas un menu caché.
                 ...($user->isDepartmentHead()
                     ? [['label' => 'Blocages', 'route' => 'room-blocks.index', 'icon' => 'building', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED)]]
@@ -187,13 +189,19 @@ class Navigation
                 $profile,
             ],
             UserRole::Admin => [
-                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                ['label' => 'Supervision', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
                 ['label' => 'Utilisateurs', 'route' => 'users.index', 'icon' => 'users'],
                 $profile,
             ],
         };
+    }
+
+    /** Liste des OT côté housekeeping : ceux de l'agent, ou de toute l'équipe pour la gouvernante. */
+    public static function housekeepingListLabel(User $user): string
+    {
+        return $user->isDepartmentHead() ? "Signalements de l'équipe" : 'Mes signalements';
     }
 
     private static function roomBlockCount(string $status): int

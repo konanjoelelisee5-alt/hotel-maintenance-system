@@ -26,7 +26,7 @@
     $slaColor = $slaRate === null ? 'grey' : ($slaRate >= 90 ? 'green' : ($slaRate >= 75 ? 'amber' : 'red'));
 @endphp
 
-<x-app-layout crumb="Opérations / Rapports" page-title="Rapports & indicateurs">
+<x-app-layout crumb="Exploitation" page-title="Rapports & indicateurs">
     <x-slot:primaryAction>
         {{-- Les exports reprennent les filtres de l'URL : ils correspondent à ce qui est affiché. --}}
         <a href="{{ route('reports.export.csv', request()->query()) }}" class="btn btn-secondary"><x-nav-icon name="list" /> Export CSV</a>

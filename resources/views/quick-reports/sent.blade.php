@@ -18,7 +18,7 @@
         <a href="{{ route('quick-reports.create') }}" class="w-full h-16 rounded-xl bg-gold text-navy flex items-center justify-center gap-3 text-[17px] font-bold">
             <span class="text-2xl">🎤</span> Nouveau signalement
         </a>
-        <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="w-full h-14 rounded-xl border-2 border-line flex items-center justify-center gap-3 text-[15px] font-semibold text-navy">
+        <a href="{{ route('work-orders.index') }}" class="w-full h-14 rounded-xl border-2 border-line flex items-center justify-center gap-3 text-[15px] font-semibold text-navy">
             <span class="text-2xl">📋</span> Mes signalements
         </a>
     </div>

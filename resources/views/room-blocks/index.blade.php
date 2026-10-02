@@ -1,4 +1,4 @@
-<x-app-layout crumb="Chambres · vente" page-title="Chambres bloquées">
+<x-app-layout :crumb="auth()->user()->role->dispatchesWork() ? 'Exploitation' : 'Mon espace'" page-title="Chambres bloquées">
     @php
         $user = auth()->user();
         $canRequest = $user->can('requestAny', \App\Models\RoomBlock::class);

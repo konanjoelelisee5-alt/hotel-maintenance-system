@@ -106,6 +106,31 @@ class MobileNavigationTest extends TestCase
         }
     }
 
+    public function test_a_page_has_the_same_name_in_the_menu_the_bottom_bar_and_its_title(): void
+    {
+        // [rôle, route, nom attendu dans le menu, dans la barre du bas, en titre de page]
+        $cases = [
+            [User::factory()->admin()->create(), 'admin.dashboard', 'Supervision', 'Supervision', 'Supervision'],
+            [User::factory()->technicien()->create(), 'technicien.dashboard', 'Ma journée', 'Ma journée', 'Ma journée'],
+            [User::factory()->technicien()->create(), 'work-orders.index', 'Mes ordres', 'Mes ordres', 'Mes ordres'],
+            [User::factory()->housekeeping()->create(), 'housekeeping.dashboard', 'Accueil', 'Accueil', 'Accueil'],
+            [User::factory()->housekeeping()->create(), 'work-orders.index', 'Mes signalements', 'Signalements', 'Mes signalements'],
+            [User::factory()->housekeeping()->create(['is_department_head' => true]), 'work-orders.index', "Signalements de l'équipe", 'Signalements', "Signalements de l'équipe"],
+            [User::factory()->reception()->create(), 'reception.dashboard', 'Recherche chambre', 'Recherche', 'Recherche chambre'],
+            [User::factory()->reception()->create(), 'work-orders.index', 'Demandes', 'Demandes', 'Demandes'],
+            [User::factory()->reception()->create(), 'room-blocks.index', 'Chambres bloquées', 'Blocages', 'Chambres bloquées'],
+        ];
+
+        foreach ($cases as [$user, $route, $menu, $bottom, $title]) {
+            $menuItems = collect(\App\Support\Navigation::forSidebar($user))->pluck('items')->flatten(1);
+            $this->assertSame($menu, $menuItems->firstWhere('route', $route)['label'], "menu {$route}");
+            $this->assertSame($bottom, collect(\App\Support\Navigation::forBottomNav($user))->firstWhere('route', $route)['label'], "barre {$route}");
+
+            $this->actingAs($user)->get(route($route))
+                ->assertSee('<h1 class="m-0 text-[19px] font-semibold tracking-tight">'.e($title).'</h1>', false);
+        }
+    }
+
     public function test_menu_entry_stays_active_on_sub_pages(): void
     {
         $admin = User::factory()->admin()->create();

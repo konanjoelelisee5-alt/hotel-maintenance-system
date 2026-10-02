@@ -1,8 +1,9 @@
 @php
     $title = match (true) {
-        auth()->user()->role === \App\Enums\UserRole::Technicien => 'Mes ordres de travail',
-        auth()->user()->role === \App\Enums\UserRole::Housekeeping => 'Historique de mes signalements',
-        auth()->user()->role === \App\Enums\UserRole::Reception => 'Demandes de la réception',
+        // Même nom que l'entrée de menu et la barre du bas.
+        auth()->user()->role === \App\Enums\UserRole::Technicien => 'Mes ordres',
+        auth()->user()->role === \App\Enums\UserRole::Housekeeping => \App\Support\Navigation::housekeepingListLabel(auth()->user()),
+        auth()->user()->role === \App\Enums\UserRole::Reception => 'Demandes',
         default => 'Ordres de travail',
     };
 
@@ -21,7 +22,7 @@
     };
 @endphp
 
-<x-app-layout crumb="Espace de travail" :page-title="$title">
+<x-app-layout :crumb="auth()->user()->role->dispatchesWork() ? 'Exploitation' : 'Mon espace'" :page-title="$title">
     @can('create', \App\Models\WorkOrder::class)
         <x-slot:primaryAction>
             <a href="{{ route('work-orders.create') }}" data-modal class="flex-shrink-0 inline-flex items-center h-[38px] px-4 rounded-[9px] bg-navy text-white text-[13px] font-semibold whitespace-nowrap hover:bg-navy-light">+ Nouvel ordre</a>
