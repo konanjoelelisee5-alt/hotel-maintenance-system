@@ -112,7 +112,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @return array<int, array{label: string, value: mixed, sub: string, filter: string}>
+     * @return array<int, array{label: string, value: mixed, sub: string, color: string, filter: ?string}> (color : clé de Swatch)
      */
     private function pulse(User $user): array
     {
@@ -122,42 +122,42 @@ class DashboardController extends Controller
         return match ($user->role) {
             // Ce qui demande une décision maintenant ; chaque carte ouvre l'onglet qui la détaille.
             UserRole::Admin => [
-                ['label' => 'Urgences ouvertes', 'value' => $this->filteredQueue($user, 'urgent')->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
-                ['label' => 'Non affectés', 'value' => $this->filteredQueue($user, 'unassigned')->count(), 'sub' => 'à confier à un technicien', 'filter' => 'unassigned'],
-                ['label' => 'En retard SLA', 'value' => $this->filteredQueue($user, 'late')->count(), 'sub' => 'délai dépassé', 'filter' => 'late'],
-                ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'filter' => 'to_review'],
-                ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'filter' => 'waiting'],
+                ['label' => 'Urgences ouvertes', 'value' => $this->filteredQueue($user, 'urgent')->count(), 'sub' => 'priorité maximale', 'color' => 'red', 'filter' => 'urgent'],
+                ['label' => 'Non affectés', 'value' => $this->filteredQueue($user, 'unassigned')->count(), 'sub' => 'à confier à un technicien', 'color' => 'gold', 'filter' => 'unassigned'],
+                ['label' => 'En retard SLA', 'value' => $this->filteredQueue($user, 'late')->count(), 'sub' => 'délai dépassé', 'color' => 'red', 'filter' => 'late'],
+                ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'color' => 'blue', 'filter' => 'to_review'],
+                ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'color' => 'amber', 'filter' => 'waiting'],
             ],
             // Mêmes indicateurs de décision que l'admin (chacun ouvre son onglet), plus
             // le stock, que le manager réapprovisionne : cette carte-là ouvre la page Pièces.
             UserRole::Manager => [
-                ['label' => 'Urgences ouvertes', 'value' => $this->filteredQueue($user, 'urgent')->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
-                ['label' => 'Non affectés', 'value' => $this->filteredQueue($user, 'unassigned')->count(), 'sub' => 'à répartir maintenant', 'filter' => 'unassigned'],
-                ['label' => 'En retard SLA', 'value' => $this->filteredQueue($user, 'late')->count(), 'sub' => 'délai dépassé', 'filter' => 'late'],
-                ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'filter' => 'to_review'],
-                ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'filter' => 'waiting'],
-                ['label' => 'Stock sous le seuil', 'value' => $this->lowStockCount(), 'sub' => 'pièces à commander', 'filter' => null, 'url' => route('parts.index')],
+                ['label' => 'Urgences ouvertes', 'value' => $this->filteredQueue($user, 'urgent')->count(), 'sub' => 'priorité maximale', 'color' => 'red', 'filter' => 'urgent'],
+                ['label' => 'Non affectés', 'value' => $this->filteredQueue($user, 'unassigned')->count(), 'sub' => 'à répartir maintenant', 'color' => 'gold', 'filter' => 'unassigned'],
+                ['label' => 'En retard SLA', 'value' => $this->filteredQueue($user, 'late')->count(), 'sub' => 'délai dépassé', 'color' => 'red', 'filter' => 'late'],
+                ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'color' => 'blue', 'filter' => 'to_review'],
+                ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'color' => 'amber', 'filter' => 'waiting'],
+                ['label' => 'Stock sous le seuil', 'value' => $this->lowStockCount(), 'sub' => 'pièces à commander', 'color' => 'gold', 'filter' => null, 'url' => route('parts.index')],
             ],
             UserRole::Technicien => [
-                ['label' => 'Mes ordres du jour', 'value' => (clone $mine())->whereDate('scheduled_at', today())->count(), 'sub' => "aujourd'hui", 'filter' => 'mine'],
-                ['label' => 'Urgents', 'value' => (clone $mine())->open()->whereHas('priority', $urgent)->count(), 'sub' => 'SLA à surveiller', 'filter' => 'urgent'],
-                ['label' => 'Temps saisi', 'value' => InterventionSession::where('technician_id', $user->id)->whereDate('started_at', today())->sum('duration_minutes').' min', 'sub' => "aujourd'hui", 'filter' => 'mine'],
-                ['label' => 'Terminés aujourd\'hui', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->whereDate('completed_at', today())->count(), 'sub' => 'objectif du jour', 'filter' => 'mine'],
-                ['label' => 'Pièces à retirer', 'value' => PartReservation::whereIn('work_order_id', (clone $mine())->pluck('id'))->where('status', 'reservee')->count(), 'sub' => 'réservées', 'filter' => 'mine'],
+                ['label' => 'Mes ordres du jour', 'value' => (clone $mine())->whereDate('scheduled_at', today())->count(), 'sub' => "aujourd'hui", 'color' => 'navy', 'filter' => 'mine'],
+                ['label' => 'Urgents', 'value' => (clone $mine())->open()->whereHas('priority', $urgent)->count(), 'sub' => 'SLA à surveiller', 'color' => 'red', 'filter' => 'urgent'],
+                ['label' => 'Temps saisi', 'value' => InterventionSession::where('technician_id', $user->id)->whereDate('started_at', today())->sum('duration_minutes').' min', 'sub' => "aujourd'hui", 'color' => 'amber', 'filter' => 'mine'],
+                ['label' => 'Terminés aujourd\'hui', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->whereDate('completed_at', today())->count(), 'sub' => 'objectif du jour', 'color' => 'green', 'filter' => 'mine'],
+                ['label' => 'Pièces à retirer', 'value' => PartReservation::whereIn('work_order_id', (clone $mine())->pluck('id'))->where('status', 'reservee')->count(), 'sub' => 'réservées', 'color' => 'gold', 'filter' => 'mine'],
             ],
             UserRole::Housekeeping => [
                 $user->isDepartmentHead()
-                    ? ['label' => "Signalements de l'équipe", 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'filter' => 'all']
-                    : ['label' => 'Mes signalements', 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'filter' => 'mine'],
-                ['label' => "En attente d'affectation", 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'non affectés', 'filter' => 'unassigned'],
-                ['label' => 'Résolus cette semaine', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->where('completed_at', '>=', now()->subWeek())->count(), 'sub' => 'clôturés', 'filter' => 'mine'],
-                ['label' => 'Chambres suivies', 'value' => (clone $mine())->distinct('room_id')->count('room_id'), 'sub' => 'avec signalement', 'filter' => 'mine'],
+                    ? ['label' => "Signalements de l'équipe", 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'color' => 'blue', 'filter' => 'all']
+                    : ['label' => 'Mes signalements', 'value' => (clone $mine())->open()->count(), 'sub' => 'ouverts', 'color' => 'blue', 'filter' => 'mine'],
+                ['label' => "En attente d'affectation", 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'non affectés', 'color' => 'gold', 'filter' => 'unassigned'],
+                ['label' => 'Résolus cette semaine', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->where('completed_at', '>=', now()->subWeek())->count(), 'sub' => 'clôturés', 'color' => 'green', 'filter' => 'mine'],
+                ['label' => 'Chambres suivies', 'value' => (clone $mine())->distinct('room_id')->count('room_id'), 'sub' => 'avec signalement', 'color' => 'navy', 'filter' => 'mine'],
             ],
             UserRole::Reception => [
-                ['label' => 'Demandes en cours', 'value' => (clone $mine())->open()->count(), 'sub' => $user->isDepartmentHead() ? "signalées par l'équipe" : 'signalées par la réception', 'filter' => $user->isDepartmentHead() ? 'all' : 'mine'],
-                ['label' => 'Urgentes', 'value' => (clone $mine())->open()->whereHas('priority', $urgent)->count(), 'sub' => 'priorité maximale', 'filter' => 'urgent'],
-                ['label' => 'En attente client', 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'passage annoncé', 'filter' => 'unassigned'],
-                ['label' => 'Clôturées aujourd\'hui', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->whereDate('completed_at', today())->count(), 'sub' => 'réponse donnée', 'filter' => 'mine'],
+                ['label' => 'Demandes en cours', 'value' => (clone $mine())->open()->count(), 'sub' => $user->isDepartmentHead() ? "signalées par l'équipe" : 'signalées par la réception', 'color' => 'blue', 'filter' => $user->isDepartmentHead() ? 'all' : 'mine'],
+                ['label' => 'Urgentes', 'value' => (clone $mine())->open()->whereHas('priority', $urgent)->count(), 'sub' => 'priorité maximale', 'color' => 'red', 'filter' => 'urgent'],
+                ['label' => 'En attente client', 'value' => (clone $mine())->whereNull('assigned_to')->open()->count(), 'sub' => 'passage annoncé', 'color' => 'gold', 'filter' => 'unassigned'],
+                ['label' => 'Clôturées aujourd\'hui', 'value' => (clone $mine())->whereIn('status', ['resolu', 'ferme'])->whereDate('completed_at', today())->count(), 'sub' => 'réponse donnée', 'color' => 'green', 'filter' => 'mine'],
             ],
         };
     }
@@ -180,9 +180,10 @@ class DashboardController extends Controller
     {
         $query = WorkOrder::visibleTo($user);
 
-        // File de travail des superviseurs : un OT déjà réparé, fermé ou annulé n'y a
-        // plus sa place, même s'il était urgent ou a dépassé son SLA à l'époque.
-        if ($user->role->seesAllWorkOrders() && in_array($filter, ['urgent', 'unassigned', 'late'], true)) {
+        // Files de travail (tous les rôles) : un OT déjà réparé, fermé ou annulé n'y a plus
+        // sa place, même s'il était urgent ou a dépassé son SLA à l'époque. Même règle que
+        // les indicateurs (« Urgents » compte les OT ouverts).
+        if (in_array($filter, ['urgent', 'unassigned', 'late'], true)) {
             $query->open();
         }
 

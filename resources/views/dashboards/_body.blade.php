@@ -1,14 +1,21 @@
 @php
     $dashboardRoute = auth()->user()->dashboardRoute();
-    $dotColor = function (string $label) {
-        return match (true) {
-            str_contains($label, 'Urgent'), str_contains($label, 'Urgences'), str_contains($label, 'SLA dépassés'), str_contains($label, 'En retard'), str_contains($label, 'Urgentes') => 'bg-red',
-            str_contains($label, 'Non affect'), str_contains($label, 'attente'), str_contains($label, 'Stock'), str_contains($label, 'Pièces à retirer'), str_contains($label, 'Problèmes qualité') => 'bg-gold',
-            str_contains($label, 'En cours'), str_contains($label, 'Contrôle qualité'), str_contains($label, 'Temps saisi') => 'bg-amber',
-            str_contains($label, 'Respect'), str_contains($label, 'Terminés'), str_contains($label, 'Résolus'), str_contains($label, 'Clôturées'), str_contains($label, 'actifs') => 'bg-green',
-            default => 'bg-blue',
-        };
-    };
+    // Indicateurs : bande de la Supervision (tuiles sur téléphone), couleur fournie par
+    // DashboardController::pulse() ; chacun ouvre l'onglet qui le détaille.
+    $kpiItems = collect($pulse)->map(fn (array $p) => [
+        'label' => $p['label'],
+        'value' => $p['value'],
+        'sub' => $p['sub'],
+        'dot' => \App\Support\Swatch::bg($p['color'] ?? 'blue'),
+        'href' => $p['url'] ?? route($dashboardRoute, ['filter' => $p['filter']]),
+        'active' => $p['filter'] !== null && $filter === $p['filter'],
+    ])->all();
+    $tabItems = collect($filters)->map(fn (array $f) => [
+        'key' => $f['key'],
+        'label' => $f['label'],
+        'count' => $filterCounts[$f['key']] ?? null,
+        'href' => route($dashboardRoute, ['filter' => $f['key']]),
+    ])->all();
 @endphp
 
 @can('create', \App\Models\WorkOrder::class)
@@ -50,40 +57,24 @@
     </section>
 @endif
 
-{{-- Bandeau de metrics : chips indépendantes en défilement horizontal
-     (jamais coupées/écrasées, quelle que soit la largeur d'écran). --}}
-<div class="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 lg:mx-0 lg:px-0">
-    @foreach ($pulse as $p)
-        <x-mobile-metric-chip
-            :label="$p['label']"
-            :value="$p['value']"
-            :sub="$p['sub']"
-            :color="str_replace('bg-', '', $dotColor($p['label']))"
-            :href="$p['url'] ?? route($dashboardRoute, ['filter' => $p['filter']])"
-            :active="$p['filter'] !== null && $filter === $p['filter']"
-        />
-    @endforeach
-</div>
+{{-- Indicateurs : même bande que la Supervision ; tuiles 2 × 2 sur téléphone. --}}
+<x-kpi-band :items="$kpiItems" tiles />
 
 {{-- Contenu principal (file d'OT, ~2/3) + panneau latéral (~1/3) : hiérarchie
      claire au lieu de deux colonnes de même largeur. --}}
 <div class="grid gap-4 items-start lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
     <section class="bg-white border border-line rounded-xl overflow-hidden">
-        <div class="flex items-center gap-3 flex-wrap px-[18px] py-[15px] border-b border-line-soft">
-            <div class="flex flex-col gap-0.5">
-                <div class="text-[14.5px] font-semibold">
-                    {{ match($filter) { 'urgent' => 'Ordres urgents', 'unassigned' => 'Ordres non affectés', 'late' => 'Ordres en retard SLA', 'to_review' => 'Ordres à contrôler', 'waiting' => 'Ordres en attente', 'mine' => 'Mes ordres', default => 'Tous les ordres' } }}
-                </div>
-                <div class="text-[11.5px] text-ink-grey">{{ $queue->count() }} ordre(s) affiché(s) · triés par urgence SLA</div>
+        <div class="flex items-end gap-4 flex-wrap px-4 sm:px-6 pt-5 border-b border-line">
+            <div class="flex flex-col gap-0.5 pb-3.5">
+                <h2 class="m-0 text-[17px] font-semibold text-navy">
+                    {{ match($filter) { 'urgent' => 'Ordres urgents', 'unassigned' => 'Ordres non affectés', 'late' => 'Ordres en retard SLA', 'to_review' => 'Ordres à contrôler', 'waiting' => 'Ordres en attente', 'mine' => collect($filters)->firstWhere('key', 'mine')['label'] ?? 'Mes ordres', default => 'Tous les ordres' } }}
+                </h2>
+                <div class="text-[12.5px] text-[#6C6658]">{{ $queue->count() }} ordre(s) · triés par urgence SLA</div>
             </div>
-            <div class="flex gap-1.5 ml-auto flex-wrap">
-                @foreach ($filters as $f)
-                    <a href="{{ route($dashboardRoute, ['filter' => $f['key']]) }}" class="px-3 py-1.5 rounded-full border text-[12px] font-semibold {{ $filter === $f['key'] ? 'border-navy bg-[#EAF0F6] text-navy' : 'border-line text-[#6C6658]' }}">{{ $f['label'] }}</a>
-                @endforeach
-            </div>
+            <x-tabs :items="$tabItems" :active="$filter" label="Filtres" class="sm:ml-auto max-w-full" />
         </div>
 
-        <div class="flex flex-col gap-2.5 p-3">
+        <div class="flex flex-col gap-3 p-3 sm:p-4">
             @forelse ($queue as $w)
                 @include('work-orders.partials._ot-card', ['w' => $w])
             @empty
