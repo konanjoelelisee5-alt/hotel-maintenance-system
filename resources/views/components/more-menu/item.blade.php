@@ -1,5 +1,5 @@
 @props([
-    'href' => null,      // lien simple
+    'href' => null,      // lien simple (ni href ni action : bouton, ex. x-on:click)
     'action' => null,    // ou formulaire : URL d'envoi…
     'method' => 'POST',  // …et méthode (POST, PATCH, DELETE)
     'icon' => null,
@@ -35,6 +35,13 @@
             <span>{{ $slot }}</span>
         </button>
     </form>
+@elseif (! $href)
+    <button type="button" role="menuitem" {{ $attributes->merge(['class' => $classes]) }}>
+        @if ($icon)
+            <x-nav-icon :name="$icon" class="w-[18px] h-[18px] flex-shrink-0 {{ $danger ? '' : 'text-ink-grey' }}" />
+        @endif
+        <span>{{ $slot }}</span>
+    </button>
 @else
     <a href="{{ $href }}" role="menuitem" @if ($modal) data-modal @endif {{ $attributes->merge(['class' => $classes]) }}>
         @if ($icon)

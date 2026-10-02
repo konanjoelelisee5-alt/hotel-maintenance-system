@@ -1,11 +1,11 @@
-@props(['title', 'icon' => null, 'collapsible' => false, 'open' => true, 'tone' => null, 'flush' => false])
+@props(['title', 'icon' => null, 'collapsible' => false, 'open' => true, 'tone' => null, 'flush' => false, 'overflow' => false])
 
 {{-- Carte de section des fiches (style de la refonte) : en-tête « icône dorée + titre »,
      badge et actions à droite, puis le contenu. collapsible : repliable (<details>,
      sans JavaScript) ; tone="danger" : filet rouge ; flush : contenu sans marge
-     intérieure (listes bord à bord). --}}
+     intérieure (listes bord à bord) ; overflow : laisse dépasser un menu déroulant (⋮). --}}
 @php
-    $frame = 'bg-white rounded-xl border overflow-hidden '.($tone === 'danger' ? 'border-red/30' : 'border-line');
+    $frame = 'bg-white rounded-xl border '.($overflow ? '' : 'overflow-hidden ').($tone === 'danger' ? 'border-red/30' : 'border-line');
     $iconTile = 'w-8 h-8 flex-shrink-0 rounded-[8px] border flex items-center justify-center '
         .($tone === 'danger' ? 'bg-[#FBE4E1] border-red/20 text-red' : 'bg-paper border-line text-gold');
     $body = $flush ? '' : 'px-5 py-4';

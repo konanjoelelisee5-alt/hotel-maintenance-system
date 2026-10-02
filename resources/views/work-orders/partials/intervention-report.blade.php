@@ -95,6 +95,14 @@
             // brouillon était envoyé comme "signé" et l'OT passait en résolu.
             let hasSignature = false;
 
+            // Onglet « Intervention » masqué au chargement : la largeur du canvas valait 0.
+            // On la reprend quand l'onglet s'affiche (événement émis par show.blade.php).
+            window.addEventListener('work-order-tab', function () {
+                if (! hasSignature && canvas.offsetWidth && canvas.width !== canvas.offsetWidth) {
+                    canvas.width = canvas.offsetWidth;
+                }
+            });
+
             function getPosition(event) {
                 const rect = canvas.getBoundingClientRect();
                 const clientX = event.touches ? event.touches[0].clientX : event.clientX;

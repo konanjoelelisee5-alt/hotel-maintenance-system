@@ -1,7 +1,8 @@
 {{-- Panneau « Pilotage » : la fiche OT vue par un superviseur (admin, manager).
-     Il ne travaille pas sur l'OT, il le fait avancer : une « prochaine étape »
-     mise en avant selon l'état, puis ses actions d'arbitre. Le technicien, lui,
-     a son chrono, son avancement et son rapport (cf. show.blade.php). --}}
+     Il ne travaille pas sur l'OT, il le fait avancer : une « prochaine étape » et
+     son unique bouton, les autres actions dans le menu ⋮ (rares en haut, celles qui
+     arrêtent l'OT en bas, après un séparateur). Le technicien, lui, a son chrono,
+     son avancement et son rapport (onglet « Intervention » de show.blade.php). --}}
 @php
     $status = $workOrder->status;
     $assignee = $workOrder->assignee;
@@ -11,9 +12,14 @@
     $canReview = auth()->user()->can('reviewQuality', $workOrder);
     // Formulaire de motif à rouvrir après une erreur de saisie.
     $openReason = $errors->has('reason') ? old('_action') : null;
+    $user = auth()->user();
+    $canReassign = $assignee && in_array($status, ['ouvert', 'en_cours', 'en_attente', 'rejete'], true);
+    $hasMenu = ! in_array($status, ['ferme', 'annule'], true)
+        && ($canReassign || $user->can('update', $workOrder) || $user->can('takeOver', $workOrder)
+            || $user->can('suspend', $workOrder) || $user->can('cancel', $workOrder));
 @endphp
 
-<x-panel title="Pilotage de l'OT" icon="flag" class="border-navy/20">
+<x-panel title="Pilotage de l'OT" icon="flag" overflow class="border-navy/20">
     <x-slot:badge>
         <span class="hidden sm:inline text-[12px] text-ink-grey truncate">
             {{ $assignee ? 'Intervenant : '.$assignee->name : 'Aucun intervenant' }}
@@ -63,51 +69,47 @@
                 </div>
             </div>
 
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 flex items-center gap-2">
                 @if (in_array($status, ['ouvert', 'en_cours'], true) && ! $assignee)
-                    <a href="{{ route('work-orders.schedule', $workOrder) }}" class="btn btn-primary w-full sm:w-auto"><x-nav-icon name="user" /> Affecter et planifier</a>
+                    <a href="{{ route('work-orders.schedule', $workOrder) }}" class="btn btn-primary flex-1 sm:flex-none"><x-nav-icon name="user" /> Affecter et planifier</a>
                 @elseif ($status === 'en_attente' && auth()->user()->can('resume', $workOrder))
-                    <form method="POST" action="{{ route('work-orders.resume', $workOrder) }}">
+                    <form method="POST" action="{{ route('work-orders.resume', $workOrder) }}" class="flex-1 sm:flex-none">
                         @csrf
-                        <button type="submit" class="btn btn-primary w-full sm:w-auto"><x-nav-icon name="play" /> Relancer</button>
+                        <button type="submit" class="btn btn-primary w-full"><x-nav-icon name="play" /> Relancer</button>
                     </form>
                 @elseif ($status === 'resolu' && $canReview)
-                    <a href="{{ route('quality-controls.create', $workOrder) }}" class="btn btn-primary w-full sm:w-auto"><x-nav-icon name="shield" /> Faire le contrôle qualité</a>
+                    <a href="{{ route('quality-controls.create', $workOrder) }}" class="btn btn-primary flex-1 sm:flex-none"><x-nav-icon name="shield" /> Faire le contrôle qualité</a>
+                @endif
+
+                @if ($hasMenu)
+                    <x-more-menu label="Autres actions sur l'OT" title="Autres actions">
+                        @if ($canReassign)
+                            <x-more-menu.item :href="route('work-orders.schedule', $workOrder)" icon="swap">Réaffecter / replanifier</x-more-menu.item>
+                        @endif
+                        @can('update', $workOrder)
+                            <x-more-menu.item :href="route('work-orders.edit', $workOrder)" modal icon="pencil">Modifier la priorité ou le type</x-more-menu.item>
+                        @endcan
+                        @can('takeOver', $workOrder)
+                            <x-more-menu.item :action="route('work-orders.take-over', $workOrder)" icon="hand"
+                                              confirm="Vous deviendrez l'intervenant de cette réparation ; le contrôle qualité sera fait par un autre responsable."
+                                              confirm-title="Vous charger de cet OT ?" confirm-label="Je m'en charge">Je m'en charge</x-more-menu.item>
+                        @endcan
+                        @if ($user->can('suspend', $workOrder) || $user->can('cancel', $workOrder))
+                            <x-more-menu.separator />
+                        @endif
+                        @can('suspend', $workOrder)
+                            <x-more-menu.item icon="pause" x-on:click="reason = 'suspend'; open = false">Mettre en attente…</x-more-menu.item>
+                        @endcan
+                        @can('cancel', $workOrder)
+                            <x-more-menu.item icon="x" danger x-on:click="reason = 'cancel'; open = false">Annuler l'OT…</x-more-menu.item>
+                        @endcan
+                    </x-more-menu>
                 @endif
             </div>
         </div>
 
-        {{-- Actions d'arbitre (seulement celles possibles dans l'état actuel). --}}
+        {{-- Motifs : formulaire déplié depuis le menu ⋮, un seul à la fois. --}}
         @unless (in_array($status, ['ferme', 'annule'], true))
-            <div class="flex flex-wrap gap-2">
-                @if ($assignee && in_array($status, ['ouvert', 'en_cours', 'en_attente', 'rejete'], true))
-                    <a href="{{ route('work-orders.schedule', $workOrder) }}" class="btn btn-secondary"><x-nav-icon name="swap" /> Réaffecter / replanifier</a>
-                @endif
-                @can('update', $workOrder)
-                    <a href="{{ route('work-orders.edit', $workOrder) }}" data-modal class="btn btn-secondary"><x-nav-icon name="pencil" /> Requalifier</a>
-                @endcan
-                @can('takeOver', $workOrder)
-                    <form method="POST" action="{{ route('work-orders.take-over', $workOrder) }}"
-                          onsubmit="return confirm('Vous charger vous-même de cette réparation ? Vous en deviendrez l\'intervenant, et le contrôle qualité sera fait par quelqu\'un d\'autre.');">
-                        @csrf
-                        <button type="submit" class="btn btn-secondary"><x-nav-icon name="hand" /> Je m'en charge</button>
-                    </form>
-                @endcan
-                @can('suspend', $workOrder)
-                    <button type="button" class="btn btn-secondary" :class="{ 'ring-2 ring-navy/15 border-navy': reason === 'suspend' }"
-                            @click="reason = reason === 'suspend' ? null : 'suspend'" :aria-expanded="reason === 'suspend'">
-                        <x-nav-icon name="pause" /> Mettre en attente…
-                    </button>
-                @endcan
-                @can('cancel', $workOrder)
-                    <button type="button" class="btn btn-danger" :class="{ 'ring-2 ring-red/15': reason === 'cancel' }"
-                            @click="reason = reason === 'cancel' ? null : 'cancel'" :aria-expanded="reason === 'cancel'">
-                        <x-nav-icon name="x" /> Annuler l'OT…
-                    </button>
-                @endcan
-            </div>
-
-            {{-- Motifs : formulaire déplié sous les boutons, un seul à la fois. --}}
             @can('suspend', $workOrder)
                 <form method="POST" action="{{ route('work-orders.suspend', $workOrder) }}" x-show="reason === 'suspend'" x-cloak
                       class="flex flex-col sm:flex-row gap-2 p-3.5 rounded-[12px] bg-paper border border-line">
@@ -116,6 +118,7 @@
                     <input type="text" name="reason" required maxlength="500" aria-label="Motif de la mise en attente"
                            placeholder="Motif : pièce commandée, chambre occupée, fournisseur…" value="{{ old('_action') === 'suspend' ? old('reason') : '' }}">
                     <button type="submit" class="btn btn-primary">Confirmer la mise en attente</button>
+                    <button type="button" class="btn btn-ghost" @click="reason = null">Fermer</button>
                 </form>
             @endcan
             @can('cancel', $workOrder)
@@ -126,6 +129,7 @@
                     <input type="text" name="reason" required maxlength="500" aria-label="Motif de l'annulation"
                            placeholder="Motif : doublon de l'OT-…, fausse alerte…" value="{{ old('_action') === 'cancel' ? old('reason') : '' }}">
                     <button type="submit" class="btn btn-danger-solid">Annuler l'OT</button>
+                    <button type="button" class="btn btn-ghost" @click="reason = null">Garder l'OT</button>
                 </form>
             @endcan
             <x-input-error :messages="$errors->get('reason')" />

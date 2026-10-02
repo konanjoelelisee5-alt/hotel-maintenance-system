@@ -100,8 +100,12 @@ class RequalifyWorkOrderTest extends TestCase
     {
         $workOrder = $this->lateUrgentWorkOrder();
 
-        $this->actingAs($this->manager)->get(route('work-orders.show', $workOrder))
-            ->assertSee('href="'.route('work-orders.edit', $workOrder).'" data-modal', false);
+        // Dans le menu ⋮ du pilotage, ouvert en fenêtre.
+        $html = $this->actingAs($this->manager)->get(route('work-orders.show', $workOrder))->getContent();
+        $this->assertMatchesRegularExpression(
+            '#href="'.preg_quote(route('work-orders.edit', $workOrder), '#').'" role="menuitem"\s+data-modal#',
+            $html,
+        );
     }
 
     // ===== Recalcul du SLA =====

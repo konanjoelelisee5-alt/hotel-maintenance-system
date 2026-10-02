@@ -16,7 +16,7 @@
                 : 'min-w-[170px] px-6 py-5';
         @endphp
         <{{ $tag }} @if ($tag === 'a') href="{{ $item['href'] }}" @endif @if ($active) aria-current="true" @endif
-           class="flex-1 flex flex-col gap-1 transition {{ $tileClasses }} {{ $active ? 'lg:bg-paper lg:shadow-[inset_0_-2px_0_theme(colors.navy)]' : ($tag === 'a' ? 'hover:bg-paper' : '') }}">
+           class="flex-1 flex flex-col gap-1 transition {{ $tileClasses }} {{ $active ? 'lg:bg-paper lg:shadow-[inset_0_-2px_0_#0E2136]' : ($tag === 'a' ? 'hover:bg-paper' : '') }}">
             <span class="flex items-center gap-2 text-[13px] text-[#4A4639] whitespace-nowrap">
                 <span class="w-[7px] h-[7px] rounded-full {{ $item['dot'] ?? 'bg-navy' }} flex-shrink-0"></span>
                 <span class="truncate">{{ $item['label'] }}</span>
