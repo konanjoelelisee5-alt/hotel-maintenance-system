@@ -18,12 +18,34 @@ class PurchaseOrderController extends Controller
     
     public function index(Request $request): View
     {
-        $purchaseOrders = PurchaseOrder::with(['supplier', 'workOrder'])
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
-            ->latest()
-            ->paginate(15);
+        // Onglets par étape du cycle d'achat ; « status » reste accepté (anciens liens).
+        $groups = [
+            'open' => ['brouillon', 'envoyee', 'confirmee', 'reception_partielle'],
+            'received' => ['receptionnee'],
+            'invoiced' => ['facturee'],
+            'cancelled' => ['annulee'],
+        ];
+        $tab = array_key_exists((string) $request->tab, $groups) ? (string) $request->tab : 'all';
+        $applyTab = fn ($q, string $key) => $key === 'all' ? $q : $q->whereIn('status', $groups[$key]);
 
-        return view('purchase-orders.index', compact('purchaseOrders'));
+        $purchaseOrders = $applyTab(PurchaseOrder::with(['supplier', 'workOrder']), $tab)
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->when($request->filled('search'), fn ($q) => $q->where(fn ($s) => $s
+                ->where('number', 'like', '%'.$request->search.'%')
+                ->orWhereHas('supplier', fn ($f) => $f->where('name', 'like', '%'.$request->search.'%'))))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $counts = collect(['all', ...array_keys($groups)])->mapWithKeys(fn ($key) => [$key => $applyTab(PurchaseOrder::query(), $key)->count()]);
+        $stats = [
+            'open' => $counts['open'],
+            'committed' => PurchaseOrder::whereIn('status', $groups['open'])->sum('total_amount'),
+            'toReceive' => PurchaseOrder::whereIn('status', ['envoyee', 'confirmee', 'reception_partielle'])->count(),
+            'monthSpend' => PurchaseOrder::whereIn('status', ['receptionnee', 'facturee'])->where('order_date', '>=', now()->startOfMonth())->sum('total_amount'),
+        ];
+
+        return view('purchase-orders.index', compact('purchaseOrders', 'tab', 'counts', 'stats'));
     }
 
     public function create(Request $request): View

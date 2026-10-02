@@ -12,14 +12,34 @@ class PartController extends Controller
 {
     public function index(Request $request): View
     {
-        $parts = Part::query()
-            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('sku', 'like', '%' . $request->search . '%'))
-            ->when($request->boolean('low_stock'), fn ($q) => $q->whereColumn('quantity_on_hand', '<=', 'reorder_threshold'))
-            ->orderBy('name')
-            ->paginate(20);
+        // Onglets : pièces actives, sous le seuil de réapprovisionnement, retirées du catalogue.
+        // (« low_stock=1 » : ancien lien, gardé pour les favoris.)
+        $tab = $request->boolean('low_stock') ? 'low' : (in_array($request->tab, ['low', 'inactive'], true) ? $request->tab : 'all');
+        $applyTab = fn ($q, string $key) => match ($key) {
+            'low' => $q->where('is_active', true)->whereColumn('quantity_on_hand', '<=', 'reorder_threshold'),
+            'inactive' => $q->where('is_active', false),
+            default => $q->where('is_active', true),
+        };
 
-        return view('parts.index', compact('parts'));
+        $parts = $applyTab(Part::query(), $tab)
+            // Recherche groupée : sans parenthèses, le « OU » annulait le filtre d'onglet.
+            ->when($request->filled('search'), fn ($q) => $q->where(fn ($s) => $s
+                ->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('sku', 'like', '%'.$request->search.'%')))
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        $active = Part::where('is_active', true);
+        $stats = [
+            'references' => (clone $active)->count(),
+            'low' => $applyTab(Part::query(), 'low')->count(),
+            'value' => (clone $active)->sum(\Illuminate\Support\Facades\DB::raw('quantity_on_hand * unit_cost')),
+            'reserved' => (clone $active)->sum('quantity_reserved'),
+        ];
+        $counts = collect(['all', 'low', 'inactive'])->mapWithKeys(fn ($key) => [$key => $applyTab(Part::query(), $key)->count()]);
+
+        return view('parts.index', compact('parts', 'tab', 'stats', 'counts'));
     }
 
     public function create(): View

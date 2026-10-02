@@ -19,14 +19,33 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $users = User::query()
-            ->when($request->role === 'department_head', fn ($q) => $q->where('is_department_head', true))
-            ->when($request->filled('role') && $request->role !== 'department_head', fn ($q) => $q->where('role', $request->role))
-            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
-            ->orderBy('name')
-            ->paginate(15);
+        // Onglets : par rôle, responsables de service, comptes désactivés. Chaque onglet a
+        // son compteur, calculé avec la même règle que la liste.
+        $tabs = [
+            '' => 'Tous', 'admin' => 'Administrateurs', 'manager' => 'Managers', 'technicien' => 'Techniciens',
+            'housekeeping' => 'Housekeeping', 'reception' => 'Réception',
+            'department_head' => 'Responsables', 'inactive' => 'Désactivés',
+        ];
+        $role = array_key_exists((string) $request->role, $tabs) ? (string) $request->role : '';
+        $applyTab = fn ($q, string $key) => match ($key) {
+            '' => $q,
+            'department_head' => $q->where('is_department_head', true),
+            'inactive' => $q->where('is_active', false),
+            default => $q->where('role', $key),
+        };
 
-        return view('users.index', compact('users'));
+        $users = $applyTab(User::query(), $role)
+            ->when($request->filled('search'), fn ($q) => $q->where(fn ($s) => $s
+                ->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('email', 'like', '%'.$request->search.'%')))
+            ->orderByDesc('is_active')
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        $counts = collect($tabs)->map(fn ($label, $key) => $applyTab(User::query(), $key)->count());
+
+        return view('users.index', compact('users', 'tabs', 'role', 'counts'));
     }
 
     public function create(): View

@@ -113,7 +113,7 @@ class AdminDashboardTest extends TestCase
         }
 
         // La carte stock ne filtre pas la file : elle mène à la page des pièces.
-        $this->assertSame(route('parts.index'), $pulse->firstWhere('label', 'Stock sous le seuil')['url']);
+        $this->assertSame(route('parts.index', ['tab' => 'low']), $pulse->firstWhere('label', 'Stock sous le seuil')['url']);
     }
 
     public function test_manager_review_tab_has_its_own_title(): void

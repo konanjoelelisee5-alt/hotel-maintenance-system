@@ -24,7 +24,12 @@
 
 <nav {{ $attributes->merge(['class' => 'flex overflow-x-auto [scrollbar-width:none] '.($pills ? 'gap-2' : 'gap-1 -mb-px')]) }}
      aria-label="{{ $label }}" @if ($model) role="tablist" @endif
-     x-data x-init="$nextTick(() => { const a = $el.querySelector('[aria-current=page], [aria-selected=true]'); if (a) $el.scrollLeft = a.offsetLeft - 16 })">
+     x-data x-init="$nextTick(() => {
+         const a = $el.querySelector('[aria-current=page], [aria-selected=true]');
+         if (! a) return;
+         const left = a.getBoundingClientRect().left - $el.getBoundingClientRect().left + $el.scrollLeft;
+         if (left + a.offsetWidth > $el.scrollLeft + $el.clientWidth) $el.scrollLeft = left - 16;
+     })">
     @foreach ($items as $item)
         @if ($model)
             <button type="button" role="tab" id="tab-{{ $item['key'] }}" aria-controls="panel-{{ $item['key'] }}"

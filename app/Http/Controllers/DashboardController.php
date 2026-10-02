@@ -136,7 +136,7 @@ class DashboardController extends Controller
                 ['label' => 'En retard SLA', 'value' => $this->filteredQueue($user, 'late')->count(), 'sub' => 'délai dépassé', 'color' => 'red', 'filter' => 'late'],
                 ['label' => 'À contrôler', 'value' => $this->filteredQueue($user, 'to_review')->count(), 'sub' => 'résolus, contrôle qualité', 'color' => 'blue', 'filter' => 'to_review'],
                 ['label' => 'En attente', 'value' => $this->filteredQueue($user, 'waiting')->count(), 'sub' => 'pièce, accès chambre…', 'color' => 'amber', 'filter' => 'waiting'],
-                ['label' => 'Stock sous le seuil', 'value' => $this->lowStockCount(), 'sub' => 'pièces à commander', 'color' => 'gold', 'filter' => null, 'url' => route('parts.index')],
+                ['label' => 'Stock sous le seuil', 'value' => $this->lowStockCount(), 'sub' => 'pièces à commander', 'color' => 'gold', 'filter' => null, 'url' => route('parts.index', ['tab' => 'low'])],
             ],
             UserRole::Technicien => [
                 ['label' => 'Mes ordres du jour', 'value' => (clone $mine())->whereDate('scheduled_at', today())->count(), 'sub' => "aujourd'hui", 'color' => 'navy', 'filter' => 'mine'],
