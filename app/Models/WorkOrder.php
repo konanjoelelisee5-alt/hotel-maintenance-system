@@ -41,6 +41,15 @@ class WorkOrder extends Model
         static::created(function (WorkOrder $workOrder) {
             $workOrder->applySlaPolicy();
         });
+
+        // Requalification : la priorité ou le type change le délai SLA. Un OT déjà
+        // terminé garde son résultat d'origine (les rapports de conformité en dépendent).
+        static::updated(function (WorkOrder $workOrder) {
+            if ($workOrder->wasChanged(['priority_id', 'type_id'])
+                && ! in_array($workOrder->status, self::FINISHED_STATUSES, true)) {
+                $workOrder->recalculateSla();
+            }
+        });
     }
 
     // ===== Relations =====
@@ -235,6 +244,48 @@ class WorkOrder extends Model
             'sla_response_due_at' => $this->created_at->copy()->addMinutes($policy->response_time_minutes),
             'sla_resolution_due_at' => $this->created_at->copy()->addMinutes($policy->resolution_time_minutes),
         ]);
+    }
+
+    /**
+     * Après une requalification (priorité ou type) : la politique SLA est recherchée de
+     * nouveau et les délais recalculés depuis la création de l'OT, comme à l'origine.
+     * « Dépassé » reflète la nouvelle échéance (un OT passé d'Urgente à Basse peut ne
+     * plus être en retard). Tracé au journal avec l'ancienne et la nouvelle échéance.
+     */
+    public function recalculateSla(): void
+    {
+        // Les relations chargées pointent encore vers l'ancienne priorité / l'ancien type.
+        $this->unsetRelation('priority')->unsetRelation('type');
+
+        $before = $this->sla_resolution_due_at?->copy();
+        $policy = SlaPolicy::findBestMatch($this->priority->code, $this->type->code);
+        $responseDue = $policy ? $this->created_at->copy()->addMinutes($policy->response_time_minutes) : null;
+        $resolutionDue = $policy ? $this->created_at->copy()->addMinutes($policy->resolution_time_minutes) : null;
+
+        $unchanged = $before && $resolutionDue ? $before->equalTo($resolutionDue) : ! $before && ! $resolutionDue;
+        if ($unchanged) {
+            return;
+        }
+
+        $this->update([
+            'sla_policy_id' => $policy?->id,
+            'sla_response_due_at' => $responseDue,
+            'sla_resolution_due_at' => $resolutionDue,
+            'sla_breached' => (bool) $resolutionDue?->isPast(),
+        ]);
+
+        $format = fn ($date) => $date ? $date->format('d/m/Y à H\hi') : 'aucune (pas de politique SLA)';
+        ActivityLog::record(
+            'work_order.sla_recalculated',
+            "SLA de l'OT {$this->code()} recalculé (priorité {$this->priority->label}, type {$this->type->label}) : "
+                ."résolution attendue {$format($before)} → {$format($resolutionDue)}",
+            $this,
+            [
+                'policy' => $policy?->name,
+                'resolution_due_at' => ['from' => $before?->toIso8601String(), 'to' => $resolutionDue?->toIso8601String()],
+                'breached' => (bool) $resolutionDue?->isPast(),
+            ],
+        );
     }
 
     // ===== Helpers d'affichage =====

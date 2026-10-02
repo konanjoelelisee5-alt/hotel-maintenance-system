@@ -84,7 +84,7 @@
                     <a href="{{ route('work-orders.schedule', $workOrder) }}" class="btn btn-secondary"><x-nav-icon name="swap" /> Réaffecter / replanifier</a>
                 @endif
                 @can('update', $workOrder)
-                    <a href="{{ route('work-orders.edit', $workOrder) }}" class="btn btn-secondary"><x-nav-icon name="pencil" /> Requalifier</a>
+                    <a href="{{ route('work-orders.edit', $workOrder) }}" data-modal class="btn btn-secondary"><x-nav-icon name="pencil" /> Requalifier</a>
                 @endcan
                 @can('takeOver', $workOrder)
                     <form method="POST" action="{{ route('work-orders.take-over', $workOrder) }}"

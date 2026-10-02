@@ -39,7 +39,7 @@ class CheckWorkOrderSla extends Command
 
         foreach ($activeWorkOrders as $workOrder) {
             foreach ($rules as $rule) {
-                if ($this->shouldTrigger($workOrder, $rule) && ! $this->alreadyTriggered($workOrder, $rule)) {
+                if ($this->shouldTrigger($workOrder, $rule) && ! $this->alreadyTriggered($workOrder, $rule, $this->triggerMoment($workOrder, $rule))) {
                     $this->trigger($workOrder, $rule);
                     $triggeredCount++;
                 }
@@ -57,29 +57,33 @@ class CheckWorkOrderSla extends Command
      */
     private function shouldTrigger(WorkOrder $workOrder, EscalationRule $rule): bool
     {
+        $triggerMoment = $this->triggerMoment($workOrder, $rule);
+
+        // On considère que la règle "doit se déclencher" si ce moment est déjà passé
+        return $triggerMoment && now()->greaterThanOrEqualTo($triggerMoment);
+    }
+
+    /** Le moment exact où cette règle doit se déclencher = échéance SLA + décalage de la règle. */
+    private function triggerMoment(WorkOrder $workOrder, EscalationRule $rule): ?\Carbon\CarbonInterface
+    {
         $referenceDate = str_contains($rule->trigger_type, 'reponse')
             ? $workOrder->sla_response_due_at
             : $workOrder->sla_resolution_due_at;
 
-        if (! $referenceDate) {
-            return false;
-        }
-
-        // Le moment exact où cette règle doit se déclencher = échéance + décalage
-        $triggerMoment = $referenceDate->copy()->addMinutes($rule->offset_minutes);
-
-        // On considère que la règle "doit se déclencher" si ce moment est déjà passé
-        return now()->greaterThanOrEqualTo($triggerMoment);
+        return $referenceDate?->copy()->addMinutes($rule->offset_minutes);
     }
 
     /**
-     * Vérifie si cette combinaison OT + règle a déjà été enregistrée dans les logs,
-     * pour éviter d'envoyer la même alerte plusieurs fois.
+     * Vérifie si cette combinaison OT + règle a déjà été déclenchée pour l'échéance
+     * ACTUELLE, pour éviter d'envoyer la même alerte plusieurs fois. Une alerte partie
+     * avant ce moment visait une ancienne échéance (OT requalifié, délai repoussé) :
+     * elle ne doit pas empêcher l'alerte de la nouvelle échéance.
      */
-    private function alreadyTriggered(WorkOrder $workOrder, EscalationRule $rule): bool
+    private function alreadyTriggered(WorkOrder $workOrder, EscalationRule $rule, ?\Carbon\CarbonInterface $triggerMoment): bool
     {
         return EscalationLog::where('work_order_id', $workOrder->id)
             ->where('escalation_rule_id', $rule->id)
+            ->when($triggerMoment, fn ($q) => $q->where('triggered_at', '>=', $triggerMoment))
             ->exists();
     }
 

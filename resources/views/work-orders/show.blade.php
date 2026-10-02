@@ -6,7 +6,7 @@
     @cannot('pilot', $workOrder)
         @can('update', $workOrder)
             <x-slot:primaryAction>
-                <a href="{{ route('work-orders.edit', $workOrder) }}" class="btn btn-secondary"><x-nav-icon name="pencil" /> Modifier</a>
+                <a href="{{ route('work-orders.edit', $workOrder) }}" data-modal class="btn btn-secondary"><x-nav-icon name="pencil" /> Modifier</a>
             </x-slot:primaryAction>
         @endcan
     @endcannot

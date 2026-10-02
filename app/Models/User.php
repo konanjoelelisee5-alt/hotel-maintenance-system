@@ -112,7 +112,8 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function scopeActiveTechnicians($query, ?int $keepId = null)
     {
         return $query->where('role', UserRole::Technicien)
-            ->where(fn ($q) => $q->where('is_active', true)->when($keepId, fn ($q) => $q->orWhereKey($keepId)))
+            // orWhereKey() n'existe pas dans Eloquent : la clé est comparée explicitement.
+            ->where(fn ($q) => $q->where('is_active', true)->when($keepId, fn ($q) => $q->orWhere($q->getModel()->getQualifiedKeyName(), $keepId)))
             ->orderBy('name');
     }
 

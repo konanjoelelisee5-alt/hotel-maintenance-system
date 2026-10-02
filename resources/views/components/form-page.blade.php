@@ -20,7 +20,7 @@
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 @if ($card)
-                    <div class="bg-white p-6 shadow-sm rounded-lg">
+                    <div class="ui-form bg-white p-6 shadow-sm rounded-lg">
                         {{ $slot }}
                     </div>
                 @else
