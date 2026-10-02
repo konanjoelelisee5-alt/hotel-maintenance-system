@@ -63,6 +63,49 @@ class MobileNavigationTest extends TestCase
         $this->assertSame(['Opérations'], $sections->pluck('title')->all());
     }
 
+    public function test_bottom_bar_gives_each_role_its_daily_screens(): void
+    {
+        $routes = fn (User $user) => array_column(\App\Support\Navigation::forBottomNav($user), 'route');
+
+        // Réception et gouvernante décident des blocages : plus besoin du menu ☰ pour y aller.
+        $this->assertContains('room-blocks.index', $routes(User::factory()->reception()->create()));
+        $this->assertContains('room-blocks.index', $routes(User::factory()->housekeeping()->create(['is_department_head' => true])));
+        $this->assertNotContains('room-blocks.index', $routes(User::factory()->housekeeping()->create()));
+        $this->assertContains('planning.index', $routes(User::factory()->admin()->create()));
+    }
+
+    public function test_reception_bottom_bar_counts_block_requests_to_decide(): void
+    {
+        \App\Models\RoomBlock::create([
+            'room_id' => \App\Models\Room::factory()->create()->id,
+            'status' => \App\Models\RoomBlock::REQUESTED,
+            'reason' => 'Clim en panne',
+            'requested_by' => User::factory()->manager()->create()->id,
+        ]);
+
+        $this->actingAs(User::factory()->reception()->create())
+            ->get(route('reception.dashboard'))
+            ->assertSee('aria-label="1 en attente"', false);
+    }
+
+    public function test_every_bottom_bar_entry_opens_for_its_role(): void
+    {
+        $users = [
+            User::factory()->admin()->create(),
+            User::factory()->manager()->create(),
+            User::factory()->technicien()->create(),
+            User::factory()->housekeeping()->create(['is_department_head' => true]),
+            User::factory()->reception()->create(),
+        ];
+
+        foreach ($users as $user) {
+            foreach (\App\Support\Navigation::forBottomNav($user) as $item) {
+                $this->actingAs($user)->get(route($item['route'], $item['params'] ?? []))
+                    ->assertOk();
+            }
+        }
+    }
+
     public function test_menu_entry_stays_active_on_sub_pages(): void
     {
         $admin = User::factory()->admin()->create();

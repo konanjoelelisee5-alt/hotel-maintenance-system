@@ -147,7 +147,10 @@ class Navigation
     }
 
     /**
-     * @return array<int, array{label: string, route: string, icon: string, params?: array}>
+     * Barre du bas (téléphone) : les 3 à 5 destinations quotidiennes du rôle. Ce qui
+     * attend une décision du rôle porte un compteur (badge), comme dans la sidebar.
+     *
+     * @return array<int, array{label: string, route: string, icon: string, params?: array, badge?: int}>
      */
     public static function forBottomNav(User $user): array
     {
@@ -164,11 +167,17 @@ class Navigation
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Signaler', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                 ['label' => 'Mes OT', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                // La gouvernante remet les chambres en vente : son travail quotidien, pas un menu caché.
+                ...($user->isDepartmentHead()
+                    ? [['label' => 'Blocages', 'route' => 'room-blocks.index', 'icon' => 'building', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED)]]
+                    : []),
                 $profile,
             ],
             UserRole::Reception => [
                 ['label' => 'Recherche', 'route' => $user->dashboardRoute(), 'icon' => 'search'],
                 ['label' => 'Demandes', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                // Accepter ou refuser un blocage est la décision clé de la réception.
+                ['label' => 'Blocages', 'route' => 'room-blocks.index', 'icon' => 'building', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED)],
                 $profile,
             ],
             UserRole::Manager => [
@@ -180,6 +189,7 @@ class Navigation
             UserRole::Admin => [
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
                 ['label' => 'Utilisateurs', 'route' => 'users.index', 'icon' => 'users'],
                 $profile,
             ],

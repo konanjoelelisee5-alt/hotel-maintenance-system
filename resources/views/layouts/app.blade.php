@@ -136,7 +136,13 @@
             @php $active = request()->routeIs(\Illuminate\Support\Str::beforeLast($item['route'], '.').'.*'); @endphp
             <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-[10px] {{ $active ? 'bg-paper' : '' }}">
                 <span class="w-1 h-1 rounded-full {{ $active ? 'bg-gold' : 'bg-transparent' }}"></span>
-                <x-nav-icon :name="$item['icon'] ?? 'home'" class="w-5 h-5 {{ $active ? 'text-navy' : 'text-[#A8A296]' }}" />
+                <span class="relative">
+                    <x-nav-icon :name="$item['icon'] ?? 'home'" class="w-5 h-5 {{ $active ? 'text-navy' : 'text-[#A8A296]' }}" />
+                    @if (! empty($item['badge']))
+                        <span class="absolute -top-1.5 -right-2.5 min-w-[17px] h-[17px] px-1 rounded-full bg-gold text-navy text-[10px] font-bold leading-none flex items-center justify-center"
+                              aria-label="{{ $item['badge'] }} en attente">{{ $item['badge'] }}</span>
+                    @endif
+                </span>
                 <span class="text-[11px] whitespace-nowrap {{ $active ? 'font-semibold text-navy' : 'font-medium text-ink-grey' }}">{{ $item['label'] }}</span>
             </a>
         @endforeach
