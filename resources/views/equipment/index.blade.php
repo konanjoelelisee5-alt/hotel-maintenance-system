@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels'" :page-title="'Équipements'">
+<x-app-layout :crumb="'Patrimoine'" :page-title="'Équipements'">
     <x-slot:primaryAction>
         <a href="{{ route('equipment.create') }}" data-modal class="btn btn-primary">+ Nouvel équipement</a>
     </x-slot:primaryAction>

@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Administration'" page-title="Journal d'activité">
+<x-app-layout :crumb="'Paramètres'" page-title="Journal d'activité" :back-route="route('settings.index')">
     <div>
         <div class="w-full space-y-4">
 

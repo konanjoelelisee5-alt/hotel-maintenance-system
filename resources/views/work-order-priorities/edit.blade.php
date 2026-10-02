@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels / Priorités'" :page-title="'Modifier la priorité'" :back-route="route('work-order-priorities.index')">
+<x-app-layout :crumb="'Paramètres / Priorités'" :page-title="'Modifier la priorité'" :back-route="route('work-order-priorities.index')">
     <div>
         <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">

@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels / Lieux'" :page-title="$room->label" :back-route="route('rooms.index')">
+<x-app-layout :crumb="'Patrimoine / Lieux'" :page-title="$room->label" :back-route="route('rooms.index')">
     <x-slot:primaryAction>
         <a href="{{ route('rooms.edit', $room) }}" class="btn btn-secondary"><x-nav-icon name="pencil" /> Modifier</a>
         @if ($room->status !== 'hors_service')

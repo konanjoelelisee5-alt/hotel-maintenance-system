@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Administration'" :page-title="'Utilisateurs'">
+<x-app-layout :crumb="'Paramètres'" :page-title="'Utilisateurs & rôles'" :back-route="route('settings.index')">
     <x-slot:primaryAction>
         <a href="{{ route('users.create') }}" data-modal class="btn btn-primary">+ Nouvel utilisateur</a>
     </x-slot:primaryAction>

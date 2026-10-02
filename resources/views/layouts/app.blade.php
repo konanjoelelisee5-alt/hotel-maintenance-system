@@ -135,7 +135,7 @@
     {{-- Barre de navigation mobile --}}
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line flex gap-0.5 px-2.5 py-1.5">
         @foreach ($bottomNav as $item)
-            @php $active = request()->routeIs(\Illuminate\Support\Str::beforeLast($item['route'], '.').'.*'); @endphp
+            @php $active = request()->routeIs(...($item['match'] ?? [\Illuminate\Support\Str::beforeLast($item['route'], '.').'.*'])); @endphp
             <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-[10px] {{ $active ? 'bg-paper' : '' }}">
                 <span class="w-1 h-1 rounded-full {{ $active ? 'bg-gold' : 'bg-transparent' }}"></span>
                 <span class="relative">

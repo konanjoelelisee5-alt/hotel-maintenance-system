@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Alertes & SLA'" :page-title="'Astreinte'">
+<x-app-layout :crumb="'Paramètres'" :page-title="'Astreinte'" :back-route="route('settings.index')">
     <div>
         <div class="w-full max-w-4xl space-y-6">
 

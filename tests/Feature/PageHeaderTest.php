@@ -35,7 +35,7 @@ class PageHeaderTest extends TestCase
             ->getContent();
 
         // Barre mobile + en-tête bureau : le titre et l'action apparaissent chacun deux fois.
-        $this->assertStringContainsString('<div class="text-[16px] font-semibold truncate">Utilisateurs</div>', $html);
+        $this->assertStringContainsString('<div class="text-[16px] font-semibold truncate">Utilisateurs &amp; rôles</div>', $html);
         $this->assertSame(2, substr_count($html, '+ Nouvel utilisateur'));
     }
 

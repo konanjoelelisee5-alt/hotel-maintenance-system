@@ -25,7 +25,8 @@ class MobileNavigationTest extends TestCase
         $start = strpos($html, 'id="mobile-menu"');
         $mobileMenu = substr($html, $start, strpos($html, '</aside>', $start) - $start);
 
-        foreach (['activity-logs.index', 'sla-policies.index', 'on-call.edit', 'reports.index', 'users.index'] as $route) {
+        // Les écrans de configuration sont regroupés derrière « Paramètres ».
+        foreach (['reports.index', 'quality-controls.index', 'rooms.index', 'settings.index'] as $route) {
             $this->assertStringContainsString('href="'.route($route).'"', $mobileMenu, $route);
         }
     }
@@ -35,12 +36,26 @@ class MobileNavigationTest extends TestCase
         $sections = collect(\App\Support\Navigation::forSidebar(User::factory()->admin()->create()));
 
         $this->assertSame(
-            ['Exploitation', 'Stock & achats', 'Référentiels', 'Alertes & SLA', 'Administration'],
+            ['Exploitation', 'Stock & achats', 'Patrimoine', 'Administration'],
             $sections->pluck('title')->all(),
         );
         // Les fournisseurs avaient une page mais aucune entrée de menu.
         $this->assertContains('suppliers.index', array_column($sections->firstWhere('title', 'Stock & achats')['items'], 'route'));
-        $this->assertSame(['users.index', 'activity-logs.index'], array_column($sections->firstWhere('title', 'Administration')['items'], 'route'));
+        // Configuration : une seule entrée, qui reste active sur chacun de ses écrans.
+        $this->assertSame(['settings.index'], array_column($sections->firstWhere('title', 'Administration')['items'], 'route'));
+    }
+
+    public function test_settings_home_lists_every_configuration_screen_for_the_admin_only(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $response = $this->actingAs($admin)->get(route('settings.index'))->assertOk();
+
+        foreach (collect(\App\Support\Navigation::settings())->flatten(1) as $item) {
+            $response->assertSee('href="'.route($item['route']).'"', false);
+            $this->actingAs($admin)->get(route($item['route']))->assertOk();
+        }
+
+        $this->actingAs(User::factory()->manager()->create())->get(route('settings.index'))->assertForbidden();
     }
 
     public function test_manager_menu_is_grouped_like_the_admin_one_without_admin_screens(): void
@@ -48,7 +63,7 @@ class MobileNavigationTest extends TestCase
         $manager = User::factory()->manager()->create();
         $sections = collect(\App\Support\Navigation::forSidebar($manager));
 
-        $this->assertSame(['Exploitation', 'Stock & achats', 'Référentiels'], $sections->pluck('title')->all());
+        $this->assertSame(['Exploitation', 'Stock & achats', 'Patrimoine'], $sections->pluck('title')->all());
 
         // Chaque entrée doit être une page que le manager a le droit d'ouvrir.
         foreach ($sections->pluck('items')->flatten(1) as $item) {
@@ -110,7 +125,9 @@ class MobileNavigationTest extends TestCase
     {
         // [rôle, route, nom attendu dans le menu, dans la barre du bas, en titre de page]
         $cases = [
-            [User::factory()->admin()->create(), 'admin.dashboard', 'Supervision', 'Supervision', 'Supervision'],
+            [User::factory()->admin()->create(), 'admin.dashboard', 'Tableau de bord', 'Accueil', 'Tableau de bord'],
+            [User::factory()->manager()->create(), 'manager.dashboard', 'Tableau de bord', 'Accueil', 'Tableau de bord'],
+            [User::factory()->manager()->create(), 'quality-controls.index', 'Validation', 'Validation', 'Validation'],
             [User::factory()->technicien()->create(), 'technicien.dashboard', 'Ma journée', 'Ma journée', 'Ma journée'],
             [User::factory()->technicien()->create(), 'work-orders.index', 'Mes ordres', 'Mes ordres', 'Mes ordres'],
             [User::factory()->housekeeping()->create(), 'housekeeping.dashboard', 'Accueil', 'Accueil', 'Accueil'],
@@ -138,6 +155,6 @@ class MobileNavigationTest extends TestCase
 
         $html = $this->actingAs($admin)->get(route('users.edit', $user))->assertOk()->getContent();
 
-        $this->assertMatchesRegularExpression('#href="'.preg_quote(route('users.index'), '#').'"\s+aria-current="page"#', $html);
+        $this->assertMatchesRegularExpression('#href="'.preg_quote(route('settings.index'), '#').'"\s+aria-current="page"#', $html);
     }
 }

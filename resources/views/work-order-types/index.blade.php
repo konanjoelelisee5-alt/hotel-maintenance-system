@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels'" page-title="Types d'ordres de travail">
+<x-app-layout :crumb="'Paramètres'" page-title="Types d'ordres de travail" :back-route="route('settings.index')">
     <x-slot:primaryAction>
         <a href="{{ route('work-order-types.create') }}" data-modal class="btn btn-primary">+ Nouveau type</a>
     </x-slot:primaryAction>

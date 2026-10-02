@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels'" :page-title="'Lieux'">
+<x-app-layout :crumb="'Patrimoine'" :page-title="'Lieux'">
     <x-slot:primaryAction>
         <a href="{{ route('rooms.create', ['type' => 'espace_commun']) }}" data-modal class="btn btn-secondary">+ Espace commun</a>
             <a href="{{ route('rooms.create') }}" data-modal class="btn btn-primary">+ Chambre</a>

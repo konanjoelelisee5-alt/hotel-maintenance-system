@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Administration / Utilisateurs'" :page-title="'Désactiver '.$user->name" :back-route="route('users.index')">
+<x-app-layout :crumb="'Paramètres / Utilisateurs'" :page-title="'Désactiver '.$user->name" :back-route="route('users.index')">
     @php
         // « Paul — 3 OT en cours · Plomberie, Électricité » : charge et compétences
         // aident à choisir le bon remplaçant sans ouvrir d'autre écran.

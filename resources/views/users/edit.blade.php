@@ -1,4 +1,4 @@
-<x-form-page :title="'Modifier '.$user->name" :card="false" crumb="Administration · Utilisateurs" icon="user"
+<x-form-page :title="'Modifier '.$user->name" :card="false" crumb="Paramètres / Utilisateurs" icon="user"
              :subtitle="$user->role_label.' · '.$user->email">
     @php($inModal = request()->hasHeader(\App\Http\Middleware\HandleModalRequests::HEADER))
 

@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels / Équipements'" :page-title="'Modifier '.$equipment->name" :back-route="route('equipment.show', $equipment)">
+<x-app-layout :crumb="'Patrimoine / Équipements'" :page-title="'Modifier '.$equipment->name" :back-route="route('equipment.show', $equipment)">
     <div>
         <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">

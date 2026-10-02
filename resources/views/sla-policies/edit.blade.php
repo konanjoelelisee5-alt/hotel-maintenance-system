@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Alertes & SLA / Politiques SLA'" :page-title="'Modifier la politique SLA'" :back-route="route('sla-policies.index')">
+<x-app-layout :crumb="'Paramètres / Politiques SLA'" :page-title="'Modifier la politique SLA'" :back-route="route('sla-policies.index')">
     <div>
         <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">

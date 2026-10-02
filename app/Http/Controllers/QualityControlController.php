@@ -17,6 +17,34 @@ use App\Models\ActivityLog;
 
 class QualityControlController extends Controller
 {
+    /**
+     * File « Validation » du responsable technique : réparations à contrôler (la plus
+     * ancienne d'abord), corrections demandées en cours, décisions des 7 derniers jours.
+     */
+    public function index(): View
+    {
+        $toReview = WorkOrder::where('status', 'resolu')
+            ->with(['room', 'equipment', 'type', 'priority', 'assignee', 'qualityControls'])
+            ->orderBy('completed_at')
+            ->get();
+
+        $corrections = WorkOrder::where('status', 'rejete')
+            ->with(['room', 'equipment', 'type', 'priority', 'assignee', 'correctionRequests'])
+            ->orderBy('updated_at')
+            ->get();
+
+        $recent = WorkOrderQualityControl::whereIn('status', ['approuve', 'rejete'])
+            ->where('reviewed_at', '>=', now()->subDays(7))
+            ->with(['workOrder', 'reviewer'])
+            ->latest('reviewed_at')
+            ->limit(10)
+            ->get();
+
+        $inProgress = $toReview->filter(fn (WorkOrder $wo) => $wo->qualityControls->contains('status', 'en_attente'))->count();
+
+        return view('quality-controls.index', compact('toReview', 'corrections', 'recent', 'inProgress'));
+    }
+
     public function create(WorkOrder $workOrder): View
     {
         // Celui qui a réalisé l'intervention ne la contrôle pas lui-même.

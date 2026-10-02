@@ -21,6 +21,7 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\CorrectionRequestController;
 use App\Http\Controllers\QualityControlController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EscalationRuleController;
 use App\Http\Controllers\SlaPolicyController;
 use App\Http\Controllers\ReportController;
@@ -144,6 +145,9 @@ Route::middleware('auth')->group(function () {
 // === MODULE G : CONTRÔLE QUALITÉ & VALIDATION ===
 Route::middleware(['auth', 'role:admin,manager'])->group(function () {
 
+    // File « Validation » : OT réparés à contrôler, contrôles en cours, corrections.
+    Route::get('/validation', [QualityControlController::class, 'index'])->name('quality-controls.index');
+
     // Démarrer un contrôle qualité (imbriqué sous l'OT concerné)
     Route::get('/work-orders/{workOrder}/quality-controls/create', [QualityControlController::class, 'create'])
         ->name('quality-controls.create');
@@ -216,6 +220,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::post('/users/{user}/deactivate', [UserDeactivationController::class, 'store'])->name('users.deactivate.store');
     });
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+
+    // Espace « Paramètres » : accueil des écrans de configuration (comptes, règles, référentiels).
+    Route::get('/parametres', SettingsController::class)->name('settings.index');
 });
 
 // === MODULE ACHATS & FOURNISSEURS (admin + manager) ===

@@ -1,6 +1,7 @@
 {{-- Contenu de la navigation, partagé par la sidebar desktop et le panneau « Menu » mobile.
-     Une entrée reste active sur ses sous-pages (users.index → users.edit, users.create...). --}}
-@php $isActive = fn (array $item) => request()->routeIs(\Illuminate\Support\Str::beforeLast($item['route'], '.').'.*'); @endphp
+     Une entrée reste active sur ses sous-pages (users.index → users.edit, users.create...) ;
+     'match' : motifs de routes explicites (ex. « Paramètres » couvre plusieurs écrans). --}}
+@php $isActive = fn (array $item) => request()->routeIs(...($item['match'] ?? [\Illuminate\Support\Str::beforeLast($item['route'], '.').'.*'])); @endphp
 
 @foreach ($nav as $section)
     <nav class="flex flex-col gap-0.5" aria-label="{{ $section['title'] }}">

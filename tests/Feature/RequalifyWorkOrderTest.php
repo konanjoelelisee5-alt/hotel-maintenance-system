@@ -77,7 +77,7 @@ class RequalifyWorkOrderTest extends TestCase
 
         $this->actingAs($this->manager)->get(route('work-orders.edit', $workOrder))
             ->assertOk()
-            ->assertSee('Requalifier '.$workOrder->code())
+            ->assertSee('Modifier la priorité ou le type')
             ->assertSee('recalcule le délai SLA');
 
         $this->actingAs($this->manager)->get(route('work-orders.edit', $workOrder), ['X-Modal' => '1'])

@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels / Compétences'" :page-title="'Modifier la compétence'" :back-route="route('skills.index')">
+<x-app-layout :crumb="'Paramètres / Compétences'" :page-title="'Modifier la compétence'" :back-route="route('skills.index')">
     <div>
         <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">

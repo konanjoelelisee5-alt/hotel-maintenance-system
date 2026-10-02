@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels'" :page-title="'Compétences'">
+<x-app-layout :crumb="'Paramètres'" :page-title="'Compétences'" :back-route="route('settings.index')">
     <x-slot:primaryAction>
         <a href="{{ route('skills.create') }}" data-modal class="btn btn-primary">+ Nouvelle compétence</a>
     </x-slot:primaryAction>

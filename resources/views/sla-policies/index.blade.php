@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Alertes & SLA'" :page-title="'Politiques SLA'">
+<x-app-layout :crumb="'Paramètres'" :page-title="'Politiques SLA'" :back-route="route('settings.index')">
     <x-slot:primaryAction>
         <a href="{{ route('sla-policies.create') }}" class="btn btn-primary">+ Nouvelle politique</a>
     </x-slot:primaryAction>

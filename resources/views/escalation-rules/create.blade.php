@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Alertes & SLA / Règles d\'escalade'" page-title="Nouvelle règle d'escalade" :back-route="route('escalation-rules.index')">
+<x-app-layout :crumb="'Paramètres / Règles d\'escalade'" page-title="Nouvelle règle d'escalade" :back-route="route('escalation-rules.index')">
     <div>
         <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">

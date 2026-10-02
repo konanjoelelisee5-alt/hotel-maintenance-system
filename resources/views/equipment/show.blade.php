@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels / Équipements'" :page-title="$equipment->name" :back-route="route('equipment.index')">
+<x-app-layout :crumb="'Patrimoine / Équipements'" :page-title="$equipment->name" :back-route="route('equipment.index')">
     <x-slot:primaryAction>
         <a href="{{ route('equipment.edit', $equipment) }}" class="btn btn-secondary"><x-nav-icon name="pencil" /> Modifier</a>
         @if ($equipment->status !== 'hors_service')

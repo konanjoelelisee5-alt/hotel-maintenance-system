@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels / Lieux'" :page-title="'Modifier '.$room->label" :back-route="route('rooms.show', $room)">
+<x-app-layout :crumb="'Patrimoine / Lieux'" :page-title="'Modifier '.$room->label" :back-route="route('rooms.show', $room)">
     <div>
         <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">

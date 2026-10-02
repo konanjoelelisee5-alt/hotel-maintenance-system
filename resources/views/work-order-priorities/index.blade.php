@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels'" :page-title="'Priorités'">
+<x-app-layout :crumb="'Paramètres'" :page-title="'Priorités'" :back-route="route('settings.index')">
     <x-slot:primaryAction>
         <a href="{{ route('work-order-priorities.create') }}" data-modal class="btn btn-primary">+ Nouvelle priorité</a>
     </x-slot:primaryAction>

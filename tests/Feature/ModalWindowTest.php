@@ -134,7 +134,7 @@ class ModalWindowTest extends TestCase
         $fragment = $this->actingAs($admin)->get(route('users.edit', $user), self::MODAL)
             ->assertOk()
             ->assertSee('Modifier Yao Konan')
-            ->assertSee('Administration · Utilisateurs')
+            ->assertSee('Paramètres / Utilisateurs')
             ->assertSee('class="modal-form', false)
             ->assertSee('Réinitialiser')
             ->getContent();

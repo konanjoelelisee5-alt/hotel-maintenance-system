@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Référentiels / Types d\'OT'" :page-title="'Modifier le type d\'OT'" :back-route="route('work-order-types.index')">
+<x-app-layout :crumb="'Paramètres / Types d\'OT'" :page-title="'Modifier le type d\'OT'" :back-route="route('work-order-types.index')">
     <div>
         <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">

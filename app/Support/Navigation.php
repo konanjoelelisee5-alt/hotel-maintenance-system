@@ -7,16 +7,15 @@ use App\Models\Part;
 use App\Models\RoomBlock;
 use App\Models\User;
 use App\Models\WorkOrder;
+use Illuminate\Support\Str;
 
 /**
  * Construit la sidebar / bottom-nav de la nouvelle coquille, par rôle.
  * Utilise nos noms de route existants (aucune route renommée pour la refonte).
  *
- * NB : certains modules du plan (Contrôle qualité en page dédiée, Pièces & stock
- * ouvert aux techniciens, "Mes chambres" par étage pour le housekeeping...) n'ont
- * pas encore d'équivalent chez nous — ils seront ajoutés ici au fil des phases
- * suivantes, pas inventés à l'avance (une entrée de nav sans route réelle serait
- * une 404).
+ * Principe : le menu ne contient que des destinations ; les actions vivent dans les
+ * pages (bouton principal + menu ⋮). La configuration de l'admin est regroupée dans
+ * l'espace « Paramètres » (settings()), hors du travail quotidien.
  */
 class Navigation
 {
@@ -28,51 +27,20 @@ class Navigation
      */
     public static function forSidebar(User $user): array
     {
-        // Admin : sections par nature (le quotidien, le stock, les données de référence,
-        // les règles automatiques, puis comptes et sécurité) plutôt qu'une liste à plat.
-        if ($user->role === UserRole::Admin) {
-            return [
-                self::section('Exploitation', [
-                    ['label' => 'Supervision', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
-                    ['label' => 'Ordres de travail', 'route' => 'work-orders.index', 'badge' => WorkOrder::visibleTo($user)->open()->count(), 'icon' => 'clipboard'],
-                    ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
-                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
-                    ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index', 'icon' => 'status'],
-                    ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
-                ]),
-                self::section('Stock & achats', [
-                    ['label' => 'Pièces & stock', 'route' => 'parts.index', 'badge' => self::lowStockCount()],
-                    ['label' => 'Bons de commande', 'route' => 'purchase-orders.index'],
-                    ['label' => 'Fournisseurs', 'route' => 'suppliers.index'],
-                ], secondary: true),
-                self::section('Référentiels', [
-                    ['label' => 'Lieux', 'route' => 'rooms.index'],
-                    ['label' => 'Équipements', 'route' => 'equipment.index'],
-                    ['label' => "Types d'OT", 'route' => 'work-order-types.index'],
-                    ['label' => 'Priorités', 'route' => 'work-order-priorities.index'],
-                    ['label' => 'Compétences', 'route' => 'skills.index'],
-                ], secondary: true),
-                self::section('Alertes & SLA', [
-                    ['label' => 'Politiques SLA', 'route' => 'sla-policies.index'],
-                    ['label' => "Règles d'escalade", 'route' => 'escalation-rules.index'],
-                    ['label' => 'Astreinte', 'route' => 'on-call.edit'],
-                ], secondary: true),
-                self::section('Administration', [
-                    ['label' => 'Utilisateurs', 'route' => 'users.index'],
-                    ['label' => "Journal d'activité", 'route' => 'activity-logs.index'],
-                ], secondary: true),
-            ];
-        }
+        // Admin et manager : le travail quotidien (Exploitation), le stock, le patrimoine.
+        // Les écrans de configuration de l'admin sont regroupés derrière « Paramètres »,
+        // en bas, pour ne pas encombrer le quotidien du chef technique.
+        if (in_array($user->role, [UserRole::Admin, UserRole::Manager], true)) {
+            $isAdmin = $user->role === UserRole::Admin;
 
-        // Manager : même rangement que l'admin, limité à ce qu'il pilote (pas de comptes,
-        // ni de règles SLA / astreinte, ni de types et priorités, réservés à l'admin).
-        if ($user->role === UserRole::Manager) {
-            return [
+            return array_values(array_filter([
                 self::section('Exploitation', [
-                    ['label' => 'Pilotage', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                    ['label' => 'Tableau de bord', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                     ['label' => 'Ordres de travail', 'route' => 'work-orders.index', 'badge' => WorkOrder::visibleTo($user)->open()->count(), 'icon' => 'clipboard'],
+                    ['label' => 'Validation', 'route' => 'quality-controls.index', 'badge' => self::toReviewCount(), 'icon' => 'shield'],
                     ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
-                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building'],
+                    // Admin : demandes à décider ; manager : chambres retirées de la vente.
+                    ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount($isAdmin ? RoomBlock::REQUESTED : RoomBlock::BLOCKED), 'icon' => 'building'],
                     ['label' => 'Maintenance préventive', 'route' => 'maintenance-plans.index', 'icon' => 'status'],
                     ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
                 ]),
@@ -81,11 +49,14 @@ class Navigation
                     ['label' => 'Bons de commande', 'route' => 'purchase-orders.index'],
                     ['label' => 'Fournisseurs', 'route' => 'suppliers.index'],
                 ], secondary: true),
-                self::section('Référentiels', [
+                self::section('Patrimoine', [
                     ['label' => 'Lieux', 'route' => 'rooms.index'],
                     ['label' => 'Équipements', 'route' => 'equipment.index'],
                 ], secondary: true),
-            ];
+                $isAdmin ? self::section('Administration', [
+                    ['label' => 'Paramètres', 'route' => 'settings.index', 'icon' => 'settings', 'match' => self::settingsRoutePatterns()],
+                ]) : null,
+            ]));
         }
 
         $nav = self::legacySidebar($user);
@@ -94,6 +65,42 @@ class Navigation
             self::section('Opérations', $nav['ops']),
             $nav['admin'] ? self::section($nav['adminTitle'], $nav['admin'], secondary: true) : null,
         ]));
+    }
+
+    /**
+     * Écrans de l'espace « Paramètres » (admin), par thème : accueil en cartes
+     * (settings.index) et entrée « Paramètres » active sur chacun d'eux.
+     *
+     * @return array<string, array<int, array{label: string, route: string, icon: string, description: string}>>
+     */
+    public static function settings(): array
+    {
+        return [
+            'Organisation' => [
+                ['label' => 'Utilisateurs & rôles', 'route' => 'users.index', 'icon' => 'users', 'description' => 'Comptes, rôles, responsables de service, mots de passe provisoires, départs.'],
+                ['label' => 'Compétences', 'route' => 'skills.index', 'icon' => 'star', 'description' => 'Savoir-faire des techniciens, utilisés pour proposer qui affecter.'],
+                ['label' => 'Astreinte', 'route' => 'on-call.edit', 'icon' => 'bell', 'description' => 'Horaires de jour et de nuit, téléphones qui reçoivent les alertes.'],
+            ],
+            'Ordres de travail' => [
+                ['label' => "Types d'OT", 'route' => 'work-order-types.index', 'icon' => 'tag', 'description' => 'Maintenance, préventif, demande client… proposés à la création.'],
+                ['label' => 'Priorités', 'route' => 'work-order-priorities.index', 'icon' => 'flag', 'description' => "Niveaux d'urgence, leur couleur et leur ordre."],
+                ['label' => 'Politiques SLA', 'route' => 'sla-policies.index', 'icon' => 'clock', 'description' => 'Délais de réponse et de résolution par priorité et par type.'],
+                ['label' => "Règles d'escalade", 'route' => 'escalation-rules.index', 'icon' => 'alert', 'description' => "Qui prévenir, et quand, à l'approche ou au dépassement d'un délai."],
+            ],
+            'Sécurité' => [
+                ['label' => "Journal d'activité", 'route' => 'activity-logs.index', 'icon' => 'history', 'description' => 'Connexions, exports, changements sensibles : qui a fait quoi, et quand.'],
+            ],
+        ];
+    }
+
+    /** @return array<int, string> motifs routeIs() des écrans de l'espace « Paramètres » */
+    public static function settingsRoutePatterns(): array
+    {
+        return collect(self::settings())->flatten(1)
+            ->map(fn (array $item) => Str::beforeLast($item['route'], '.').'.*')
+            ->push('settings.*')
+            ->values()
+            ->all();
     }
 
     private static function section(string $title, array $items, bool $secondary = false): array
@@ -183,16 +190,17 @@ class Navigation
                 $profile,
             ],
             UserRole::Manager => [
-                ['label' => 'Pilotage', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                ['label' => 'Validation', 'route' => 'quality-controls.index', 'icon' => 'shield', 'badge' => self::toReviewCount()],
                 ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
                 $profile,
             ],
             UserRole::Admin => [
-                ['label' => 'Supervision', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
-                ['label' => 'Utilisateurs', 'route' => 'users.index', 'icon' => 'users'],
+                ['label' => 'Paramètres', 'route' => 'settings.index', 'icon' => 'settings', 'match' => self::settingsRoutePatterns()],
                 $profile,
             ],
         };
@@ -202,6 +210,12 @@ class Navigation
     public static function housekeepingListLabel(User $user): string
     {
         return $user->isDepartmentHead() ? "Signalements de l'équipe" : 'Mes signalements';
+    }
+
+    /** OT réparés qui attendent leur contrôle qualité. */
+    private static function toReviewCount(): int
+    {
+        return WorkOrder::where('status', 'resolu')->count();
     }
 
     private static function roomBlockCount(string $status): int

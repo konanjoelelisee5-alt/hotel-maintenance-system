@@ -1,4 +1,4 @@
-<x-app-layout :crumb="'Alertes & SLA'" page-title="Règles d'escalade">
+<x-app-layout :crumb="'Paramètres'" page-title="Règles d'escalade" :back-route="route('settings.index')">
     <x-slot:primaryAction>
         <a href="{{ route('escalation-rules.create') }}" class="btn btn-primary">+ Nouvelle règle</a>
     </x-slot:primaryAction>

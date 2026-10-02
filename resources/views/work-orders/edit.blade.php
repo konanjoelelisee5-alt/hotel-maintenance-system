@@ -2,7 +2,7 @@
      type, priorité, lieu, technicien, échéance). En fenêtre depuis le panneau
      « Pilotage », en page complète sinon (x-form-page). Chaque correction est
      journalisée ; priorité ou type modifiés recalculent le délai SLA. --}}
-<x-form-page :title="'Requalifier '.$workOrder->code()" crumb="Ordres de travail · Pilotage" icon="pencil"
+<x-form-page :title="'Modifier la priorité ou le type'" :crumb="'Ordres de travail / '.$workOrder->code()" icon="pencil"
              subtitle="Corrigez ce qui a été mal renseigné au signalement. Chaque modification est notée au journal.">
     <form method="POST" action="{{ route('work-orders.update', $workOrder) }}" class="space-y-5">
         @csrf
