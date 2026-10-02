@@ -20,8 +20,10 @@
     $technicianName = $technicians->firstWhere('id', $filters['technician_id'] ?? null)?->name;
     $typeLabel = $types->firstWhere('id', $filters['type_id'] ?? null)?->label;
 
-    // Couleurs des statuts : palette de la refonte (même sens que les badges).
-    $statusColors = ['Ouvert' => '#26496B', 'En cours' => '#B58435', 'En attente' => '#B4740F', 'Résolu' => '#1E7A55', 'Rejeté' => '#B3261E', 'Fermé' => '#8A8578', 'Annulé' => '#CFC8B8'];
+    // Couleurs des statuts : les mêmes que les badges (WorkOrder::STATUS_COLORS).
+    $statusColors = collect(\App\Models\WorkOrder::STATUS_LABELS)
+        ->mapWithKeys(fn ($label, $status) => [$label => \App\Support\Swatch::hex(\App\Models\WorkOrder::statusColor($status))])
+        ->all();
     $statusChartColors = $byStatus->keys()->map(fn ($label) => $statusColors[$label] ?? '#8A8578')->values();
     $slaColor = $slaRate === null ? 'grey' : ($slaRate >= 90 ? 'green' : ($slaRate >= 75 ? 'amber' : 'red'));
 @endphp

@@ -1,27 +1,7 @@
 @props(['status'])
 
-@php
-$colors = [
-    'ouvert'     => 'bg-navy-100 text-navy-700',
-    'en_cours'   => 'bg-gold-100 text-gold-700',
-    'en_attente' => 'bg-orange-100 text-orange-700',
-    'resolu'     => 'bg-emerald-100 text-emerald-700',
-    'ferme'      => 'bg-slate-200 text-slate-600',
-    'rejete'     => 'bg-red-100 text-red-700',
-    'annule'     => 'bg-slate-100 text-slate-500',
-];
-
-$labels = [
-    'ouvert'     => 'Ouvert',
-    'en_cours'   => 'En cours',
-    'en_attente' => 'En attente',
-    'resolu'     => 'Résolu',
-    'ferme'      => 'Fermé',
-    'rejete'     => 'Rejeté',
-    'annule'     => 'Annulé',
-];
-@endphp
-
-<span {{ $attributes->merge(['class' => 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ' . ($colors[$status] ?? 'bg-slate-100 text-slate-700')]) }}>
-    {{ $labels[$status] ?? $status }}
+{{-- Libellé et couleur viennent du modèle (WorkOrder::STATUS_LABELS / STATUS_COLORS) :
+     même couleur pour un statut partout dans l'application. --}}
+<span {{ $attributes->merge(['class' => 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap '.\App\Support\Swatch::pill(\App\Models\WorkOrder::statusColor($status))]) }}>
+    {{ \App\Models\WorkOrder::STATUS_LABELS[$status] ?? $status }}
 </span>

@@ -130,6 +130,8 @@
                     shadow-[0_28px_70px_-18px_rgba(11,27,44,.55)] overflow-y-auto overscroll-contain"></div>
     </div>
 
+    <x-confirm-dialog />
+
     {{-- Barre de navigation mobile --}}
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line flex gap-0.5 px-2.5 py-1.5">
         @foreach ($bottomNav as $item)

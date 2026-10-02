@@ -22,12 +22,21 @@
         'waiting' => 'Ordres en attente',
         default => 'Tous les ordres',
     };
+
+    $tabItems = collect($filters)->map(fn ($f) => [
+        'key' => $f['key'], 'label' => $f['label'], 'count' => $filterCounts[$f['key']] ?? 0,
+        'href' => $here(['filter' => $f['key'], 'page' => null]),
+    ])->all();
+    $kpiItems = collect($stats)->map(fn ($s) => $s + [
+        'href' => $here(['filter' => $s['filter'], 'page' => null]),
+        'active' => $filter === $s['filter'],
+    ])->all();
 @endphp
 
 <x-app-layout :crumb="auth()->user()->role->dispatchesWork() ? 'Exploitation' : 'Mon espace'" :page-title="$title">
     @can('create', \App\Models\WorkOrder::class)
         <x-slot:primaryAction>
-            <a href="{{ route('work-orders.create') }}" data-modal class="flex-shrink-0 inline-flex items-center h-[38px] px-4 rounded-[9px] bg-navy text-white text-[13px] font-semibold whitespace-nowrap hover:bg-navy-light">+ Nouvel ordre</a>
+            <a href="{{ route('work-orders.create') }}" data-modal class="btn btn-primary">+ Nouvel ordre</a>
         </x-slot:primaryAction>
     @endcan
 
@@ -90,58 +99,17 @@
             </div>
         </form>
 
-        {{-- L'onglet actif est ramené à l'écran s'il est au bout de la rangée. --}}
-        <nav class="flex gap-2 overflow-x-auto -mx-4 px-4 pb-0.5 [scrollbar-width:none]" aria-label="Filtres"
-             x-init="const a = $el.querySelector('[aria-current]'); if (a) $el.scrollLeft = a.offsetLeft - 16">
-            @foreach ($filters as $f)
-                @php $active = $filter === $f['key']; @endphp
-                <a href="{{ $here(['filter' => $f['key'], 'page' => null]) }}"
-                   @if ($active) aria-current="page" @endif
-                   class="flex-shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-full border text-[14px] whitespace-nowrap transition {{ $active ? 'bg-navy border-navy text-white font-semibold' : 'bg-white border-line text-navy font-medium' }}">
-                    {{ $f['label'] }}
-                    <span class="min-w-[22px] h-[22px] px-1.5 rounded-full text-[11.5px] font-mono flex items-center justify-center {{ $active ? 'bg-white/15 text-white' : 'bg-line-soft text-[#4A4639]' }}">{{ $filterCounts[$f['key']] ?? 0 }}</span>
-                </a>
-            @endforeach
-        </nav>
-
-        <div class="grid grid-cols-2 gap-3">
-            @foreach ($stats as $s)
-                <a href="{{ $here(['filter' => $s['filter'], 'page' => null]) }}"
-                   @if ($filter === $s['filter']) aria-current="true" @endif
-                   class="flex flex-col gap-1 p-4 rounded-2xl bg-white border transition {{ $filter === $s['filter'] ? 'border-navy ring-1 ring-navy' : 'border-line' }}">
-                    <span class="flex items-center gap-2 text-[13px] text-[#4A4639]">
-                        <span class="w-[7px] h-[7px] rounded-full {{ $s['dot'] }} flex-shrink-0"></span>
-                        <span class="truncate">{{ $s['label'] }}</span>
-                    </span>
-                    <span class="text-[26px] leading-tight font-semibold tracking-tight text-navy">{{ $s['value'] }}</span>
-                    <span class="text-[12px] text-ink-grey leading-snug">{{ $s['sub'] }}</span>
-                </a>
-            @endforeach
-        </div>
-
-        <div class="flex items-baseline justify-between gap-3 pt-2 px-1">
-            <h2 class="text-[17px] font-semibold text-navy">{{ $listTitle }}</h2>
-            <span class="text-[12.5px] text-ink-grey whitespace-nowrap">{{ $workOrders->total() }} ordre(s)</span>
-        </div>
+        <x-tabs :items="$tabItems" :active="$filter" variant="pills" label="Filtres" class="-mx-4 px-4 pb-0.5" />
     </div>
 
-    {{-- Indicateurs : même bande que la Supervision ; chacun ouvre la liste filtrée. --}}
-    <section class="hidden lg:block bg-white border border-line rounded-xl overflow-x-auto">
-        <div class="flex divide-x divide-line min-w-max lg:min-w-0">
-            @foreach ($stats as $s)
-                <a href="{{ $here(['filter' => $s['filter'], 'page' => null]) }}"
-                   @if ($filter === $s['filter']) aria-current="true" @endif
-                   class="flex-1 min-w-[170px] flex flex-col gap-1 px-6 py-5 transition {{ $filter === $s['filter'] ? 'bg-paper shadow-[inset_0_-2px_0_theme(colors.navy)]' : 'hover:bg-paper' }}">
-                    <span class="flex items-center gap-2 text-[13px] text-[#4A4639] whitespace-nowrap">
-                        <span class="w-[7px] h-[7px] rounded-full {{ $s['dot'] }} flex-shrink-0"></span>
-                        {{ $s['label'] }}
-                    </span>
-                    <span class="text-[30px] leading-tight font-semibold tracking-tight text-navy whitespace-nowrap">{{ $s['value'] }}</span>
-                    <span class="text-[12.5px] text-ink-grey whitespace-nowrap">{{ $s['sub'] }}</span>
-                </a>
-            @endforeach
-        </div>
-    </section>
+    {{-- Indicateurs : même bande que la Supervision (tuiles 2 × 2 sur téléphone) ;
+         chacun ouvre la liste filtrée. --}}
+    <x-kpi-band :items="$kpiItems" tiles />
+
+    <div class="lg:hidden -mb-2 flex items-baseline justify-between gap-3 px-1">
+        <h2 class="text-[17px] font-semibold text-navy">{{ $listTitle }}</h2>
+        <span class="text-[12.5px] text-ink-grey whitespace-nowrap">{{ $workOrders->total() }} ordre(s)</span>
+    </div>
 
     <section class="min-w-0 lg:bg-white lg:border lg:border-line lg:rounded-xl lg:overflow-hidden">
         {{-- Titre + onglets soulignés avec compteur --}}
@@ -151,17 +119,7 @@
                 <div class="text-[12.5px] text-ink-grey">{{ $workOrders->total() }} ordre(s) · triés par {{ ['due' => 'échéance SLA', 'priority' => 'priorité', 'created' => 'date de création'][$sort] }}</div>
             </div>
 
-            <nav class="flex gap-1 ml-auto overflow-x-auto -mb-px max-w-full" aria-label="Filtres">
-                @foreach ($filters as $f)
-                    @php $active = $filter === $f['key']; @endphp
-                    <a href="{{ $here(['filter' => $f['key'], 'page' => null]) }}"
-                       @if ($active) aria-current="page" @endif
-                       class="flex items-center gap-1.5 px-3.5 pb-3 pt-1 border-b-2 text-[13.5px] whitespace-nowrap {{ $active ? 'border-navy text-navy font-semibold' : 'border-transparent text-[#6C6658] font-medium hover:text-navy' }}">
-                        {{ $f['label'] }}
-                        <span class="font-mono text-[11.5px] text-ink-grey">{{ $filterCounts[$f['key']] ?? 0 }}</span>
-                    </a>
-                @endforeach
-            </nav>
+            <x-tabs :items="$tabItems" :active="$filter" label="Filtres" class="ml-auto max-w-full" />
         </div>
 
         {{-- Barre d'outils : recherche, affinage, tri (envoi automatique au changement) --}}

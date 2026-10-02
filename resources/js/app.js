@@ -2,6 +2,7 @@
 
 import Alpine from 'alpinejs';
 import './modal';
+import './confirm';
 import agenda from './agenda';
 
 window.Alpine = Alpine;

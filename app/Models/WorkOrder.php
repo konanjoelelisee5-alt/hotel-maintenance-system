@@ -311,6 +311,25 @@ class WorkOrder extends Model
         'annule' => 'Annulé',
     ];
 
+    /**
+     * Couleur de chaque statut (clé App\Support\Swatch), source unique pour le badge,
+     * la frise de la fiche, les cartes et les graphiques des rapports.
+     */
+    public const STATUS_COLORS = [
+        'ouvert' => 'blue',
+        'en_cours' => 'gold',
+        'en_attente' => 'amber',
+        'resolu' => 'green',
+        'rejete' => 'red',
+        'ferme' => 'grey',
+        'annule' => 'muted',
+    ];
+
+    public static function statusColor(?string $status): string
+    {
+        return self::STATUS_COLORS[$status] ?? 'grey';
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return self::STATUS_LABELS[$this->status] ?? $this->status;

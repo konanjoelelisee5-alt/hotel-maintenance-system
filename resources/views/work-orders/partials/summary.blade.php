@@ -17,8 +17,8 @@
     $steps = ['ouvert' => 'Ouvert', 'en_cours' => 'En cours', 'resolu' => 'Résolu', 'ferme' => 'Fermé'];
     $reached = ['ouvert' => 0, 'en_cours' => 1, 'en_attente' => 1, 'resolu' => 2, 'rejete' => 2, 'ferme' => 3, 'annule' => -1][$status] ?? 0;
     $stepNote = match ($status) {
-        'en_attente' => ['En attente', 'amber'],
-        'rejete' => ['Correction demandée', 'red'],
+        'en_attente' => ['En attente', \App\Models\WorkOrder::statusColor($status)],
+        'rejete' => ['Correction demandée', \App\Models\WorkOrder::statusColor($status)],
         default => null,
     };
     $stepDate = fn (string $key) => match ($key) {
