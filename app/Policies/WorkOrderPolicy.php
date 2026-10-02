@@ -162,4 +162,17 @@ class WorkOrderPolicy
         return in_array($user->role?->value, ['admin', 'manager'], true)
             && ! $workOrder?->wasExecutedBy($user);
     }
+
+    /**
+     * Le service qui a signalé (l'agent, ou le responsable de son service) confirme
+     * que la panne est réglée, ou rouvre l'OT, pendant les jours qui suivent la réparation.
+     */
+    public function confirmResolution(User $user, WorkOrder $workOrder): bool
+    {
+        return in_array($user->role?->value, ['housekeeping', 'reception'], true)
+            && $this->view($user, $workOrder)
+            && in_array($workOrder->status, ['resolu', 'ferme'], true)
+            && $workOrder->requester_confirmed_at === null
+            && $workOrder->completed_at?->greaterThanOrEqualTo(now()->subDays(WorkOrder::CONFIRMATION_WINDOW_DAYS));
+    }
 }

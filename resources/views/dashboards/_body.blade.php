@@ -30,6 +30,26 @@
     @endif
 @endcan
 
+{{-- Réparations à confirmer par le service demandeur (vide pour les autres rôles). --}}
+@if ($toConfirm->isNotEmpty())
+    <section class="bg-white border border-green/30 rounded-xl overflow-hidden">
+        <div class="px-5 pt-4 pb-3 border-b border-line-soft">
+            <h2 class="m-0 text-[15.5px] font-semibold text-navy">À confirmer</h2>
+            <p class="m-0 mt-0.5 text-[12.5px] text-[#6C6658]">Réparations terminées : dites si le problème est bien réglé.</p>
+        </div>
+        @foreach ($toConfirm as $w)
+            <a href="{{ route('work-orders.show', $w) }}" class="flex items-center gap-3 px-5 py-3.5 border-b border-line-soft last:border-b-0 hover:bg-paper">
+                <span class="w-9 h-9 flex-shrink-0 rounded-full bg-[#E6F3EC] text-green flex items-center justify-center"><x-nav-icon name="check" class="w-[18px] h-[18px]" /></span>
+                <span class="flex flex-col gap-0.5 min-w-0 flex-1">
+                    <span class="text-[14px] font-semibold text-navy truncate">{{ $w->room?->label ?? '—' }} · {{ $w->title }}</span>
+                    <span class="text-[12px] text-[#6C6658]">Réparé {{ $w->completed_at?->locale('fr')->diffForHumans() }}{{ $w->assignee ? ' par '.$w->assignee->name : '' }}</span>
+                </span>
+                <span class="btn btn-sm btn-secondary flex-shrink-0">Répondre</span>
+            </a>
+        @endforeach
+    </section>
+@endif
+
 {{-- Bandeau de metrics : chips indépendantes en défilement horizontal
      (jamais coupées/écrasées, quelle que soit la largeur d'écran). --}}
 <div class="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 lg:mx-0 lg:px-0">

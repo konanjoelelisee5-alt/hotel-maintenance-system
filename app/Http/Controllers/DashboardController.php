@@ -81,6 +81,10 @@ class DashboardController extends Controller
             'sideA' => $this->sideA($user, $period),
             'sideB' => $this->sideB($user),
             'timeline' => $this->timeline($user),
+            // Service demandeur : réparations à confirmer ou à rouvrir.
+            'toConfirm' => in_array($user->role, [UserRole::Housekeeping, UserRole::Reception], true)
+                ? WorkOrder::visibleTo($user)->awaitingRequesterConfirmation()->with(['room', 'assignee'])->latest('completed_at')->get()
+                : collect(),
         ]);
     }
 

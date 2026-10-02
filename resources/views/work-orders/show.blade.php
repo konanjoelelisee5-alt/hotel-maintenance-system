@@ -59,6 +59,7 @@
         <div id="panel-apercu" data-tab-panel="apercu" role="tabpanel" aria-labelledby="tab-apercu" x-show="tab === 'apercu'" @if ($defaultTab !== 'apercu') x-cloak @endif
              class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
             <div class="flex flex-col gap-5 min-w-0">
+                @include('work-orders.partials.requester-confirmation')
                 @can('pilot', $workOrder)
                     @include('work-orders.partials.pilot-panel')
                 @endcan
@@ -83,15 +84,22 @@
                     @include('work-orders.partials.intervention-tracking')
                     @include('work-orders.partials.status-form')
                     @include('work-orders.partials.intervention-report')
-                @elseif ($user->can('work', $workOrder) && $workOrder->interventionReport)
-                    @include('work-orders.partials.intervention-report')
                 @else
-                    <x-panel title="Intervention" icon="wrench">
-                        <p class="m-0 text-[13.5px] text-ink-grey">
-                            {{ $workOrder->assignee ? $workOrder->assignee->name.' n\'a pas encore rédigé de rapport.' : 'Aucun technicien n\'est encore affecté.' }}
-                            Temps saisi : {{ \App\Support\Duration::human($workOrder->total_worked_minutes) }}.
-                        </p>
-                    </x-panel>
+                    {{-- Superviseur : les temps saisis (corrections signalées) et le rapport,
+                         seulement s'il y a quelque chose à lire. --}}
+                    @php $hasReport = $user->can('work', $workOrder) && $workOrder->interventionReport; @endphp
+                    @if ($user->can('pilot', $workOrder) && $workOrder->interventionSessions->isNotEmpty())
+                        @include('work-orders.partials.intervention-tracking', ['readonly' => true])
+                    @endif
+                    @if ($hasReport)
+                        @include('work-orders.partials.intervention-report')
+                    @elseif ($workOrder->interventionSessions->isEmpty())
+                        <x-panel title="Intervention" icon="wrench">
+                            <p class="m-0 text-[13.5px] text-[#6C6658]">
+                                {{ $workOrder->assignee ? $workOrder->assignee->name.' n\'a encore saisi ni temps ni rapport.' : 'Aucun technicien n\'est encore affecté.' }}
+                            </p>
+                        </x-panel>
+                    @endif
                 @endif
             </div>
             <aside class="flex flex-col gap-5 min-w-0">

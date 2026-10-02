@@ -22,11 +22,16 @@ class WorkOrder extends Model
         'scheduled_at', 'estimated_duration_minutes', 'scheduled_by',
         'sla_policy_id', 'sla_response_due_at', 'sla_resolution_due_at', 'sla_breached',
         'room_occupancy', 'reception_alerted_at',
+        'requester_confirmed_at', 'requester_confirmed_by',
     ];
+
+    /** Délai pendant lequel le demandeur peut confirmer la réparation ou rouvrir l'OT. */
+    public const CONFIRMATION_WINDOW_DAYS = 14;
 
     protected $casts = [
         'room_occupancy' => RoomOccupancy::class,
         'reception_alerted_at' => 'datetime',
+        'requester_confirmed_at' => 'datetime',
         'due_date' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -81,6 +86,11 @@ class WorkOrder extends Model
     public function reporter()
     {
         return $this->belongsTo(User::class, 'reported_by');
+    }
+
+    public function requesterConfirmedBy()
+    {
+        return $this->belongsTo(User::class, 'requester_confirmed_by');
     }
 
     public function scheduledBy()
@@ -196,6 +206,17 @@ class WorkOrder extends Model
         return $query->open()->where(fn (Builder $q) => $q
             ->where('sla_breached', true)
             ->orWhere(fn (Builder $o) => $o->slaResolutionOverdue()));
+    }
+
+    /**
+     * Réparations que le service demandeur n'a pas encore confirmées (résolues ou
+     * fermées depuis moins de CONFIRMATION_WINDOW_DAYS jours).
+     */
+    public function scopeAwaitingRequesterConfirmation(Builder $query): Builder
+    {
+        return $query->whereIn('status', ['resolu', 'ferme'])
+            ->whereNull('requester_confirmed_at')
+            ->where('completed_at', '>=', now()->subDays(self::CONFIRMATION_WINDOW_DAYS));
     }
 
     public function scopePreventive(Builder $query): Builder

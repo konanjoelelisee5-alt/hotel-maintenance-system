@@ -22,6 +22,7 @@ use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\CorrectionRequestController;
 use App\Http\Controllers\QualityControlController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\WorkOrderConfirmationController;
 use App\Http\Controllers\EscalationRuleController;
 use App\Http\Controllers\SlaPolicyController;
 use App\Http\Controllers\ReportController;
@@ -92,6 +93,10 @@ Route::middleware('auth')->group(function () {
         ->name('work-orders.attachments.destroy');
 
     // Signalement rapide (pictogrammes + message vocal) pour le personnel d'étage.
+    // Le service demandeur confirme la réparation, ou rouvre l'OT (droits : WorkOrderPolicy::confirmResolution).
+    Route::post('/work-orders/{workOrder}/confirmation', [WorkOrderConfirmationController::class, 'confirm'])->name('work-orders.confirm');
+    Route::post('/work-orders/{workOrder}/reouverture', [WorkOrderConfirmationController::class, 'reopen'])->name('work-orders.reopen');
+
     Route::get('/signaler', [QuickReportController::class, 'create'])->name('quick-reports.create');
     Route::post('/signaler', [QuickReportController::class, 'store'])->name('quick-reports.store');
     Route::get('/signaler/{workOrder}/envoye', [QuickReportController::class, 'sent'])->name('quick-reports.sent');
@@ -181,6 +186,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/work-orders/{workOrder}/sessions/stop', [InterventionSessionController::class, 'stop'])
         ->name('work-orders.sessions.stop');
+    // Chrono oublié : saisie après coup, ou correction d'une de ses sessions.
+    Route::post('/work-orders/{workOrder}/sessions', [InterventionSessionController::class, 'store'])
+        ->name('work-orders.sessions.store');
+    Route::patch('/work-orders/{workOrder}/sessions/{interventionSession}', [InterventionSessionController::class, 'update'])
+        ->scopeBindings()
+        ->name('work-orders.sessions.update');
 
     Route::post('/work-orders/{workOrder}/report', [InterventionReportController::class, 'store'])
         ->name('work-orders.report.store');
