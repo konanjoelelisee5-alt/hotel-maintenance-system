@@ -1,63 +1,82 @@
+@php
+    $search = request('search');
+    $tabItems = [
+        ['key' => 'active', 'label' => 'Actifs', 'count' => $counts['active'], 'href' => route('suppliers.index', array_filter(['search' => $search], 'filled'))],
+        ['key' => 'inactive', 'label' => 'Désactivés', 'count' => $counts['inactive'], 'href' => route('suppliers.index', array_filter(['tab' => 'inactive', 'search' => $search], 'filled'))],
+    ];
+    $kpis = [
+        ['label' => 'Fournisseurs actifs', 'value' => $stats['active'], 'sub' => 'à qui commander', 'dot' => 'bg-navy'],
+        ['label' => 'Commandes en cours', 'value' => $stats['openOrders'], 'sub' => 'tous fournisseurs', 'dot' => 'bg-blue', 'href' => route('purchase-orders.index', ['tab' => 'open'])],
+        ['label' => 'Achats '.now()->year, 'value' => \App\Support\Money::format($stats['yearSpend']), 'sub' => 'hors commandes annulées', 'dot' => 'bg-gold'],
+    ];
+@endphp
+
 <x-app-layout :crumb="'Stock & achats'" :page-title="'Fournisseurs'">
     <x-slot:primaryAction>
         <a href="{{ route('suppliers.create') }}" data-modal class="btn btn-primary">+ Nouveau fournisseur</a>
     </x-slot:primaryAction>
 
-    <div>
-        <div class="w-full">
+    <x-kpi-band :items="$kpis" />
 
-
-            <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
-                <form method="GET" class="flex gap-3">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher un fournisseur..."
-                        class="flex-1 border-gray-300 rounded-md shadow-sm text-sm">
-                    <button type="submit" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-md hover:bg-gray-300">
-                        Rechercher
-                    </button>
-                </form>
+    <section class="bg-white border border-line rounded-xl overflow-hidden min-w-0">
+        <div class="flex items-end gap-4 flex-wrap px-4 sm:px-6 pt-5 border-b border-line">
+            <div class="flex flex-col gap-0.5 pb-3.5">
+                <h2 class="m-0 text-[17px] font-semibold text-navy">{{ $tab === 'active' ? 'Fournisseurs actifs' : 'Fournisseurs désactivés' }}</h2>
+                <div class="text-[12.5px] text-[#6C6658]">{{ $suppliers->total() }} fournisseur(s) · par nom</div>
             </div>
-
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-                <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                            <th class="px-6 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @forelse ($suppliers as $supplier)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-sm text-gray-900">{{ $supplier->name }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $supplier->contact_person ?? '—' }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $supplier->phone ?? '—' }}</td>
-                                <td class="px-6 py-4">
-                                    @if ($supplier->is_active)
-                                        <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Actif</span>
-                                    @else
-                                        <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">Inactif</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-right text-sm">
-                                    <a href="{{ route('suppliers.show', $supplier) }}" class="text-indigo-600 hover:text-indigo-900">Voir</a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">Aucun fournisseur trouvé.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                </div>
-            </div>
-
-            <div class="mt-4">{{ $suppliers->links() }}</div>
-
+            <x-tabs :items="$tabItems" :active="$tab" label="Filtres" class="sm:ml-auto max-w-full" />
         </div>
-    </div>
+
+        <form method="GET" action="{{ route('suppliers.index') }}" class="flex items-center gap-2.5 flex-wrap px-4 sm:px-6 py-3.5 bg-paper/60 border-b border-line-soft">
+            @if ($tab === 'inactive') <input type="hidden" name="tab" value="inactive"> @endif
+            <label class="flex items-center gap-2 h-[40px] w-full sm:w-[320px] px-3 rounded-[9px] border border-line bg-white text-[13px] focus-within:border-navy">
+                <svg class="w-4 h-4 text-ink-grey flex-shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4" stroke-linecap="round"/></svg>
+                <span class="sr-only">Rechercher</span>
+                <input type="search" name="search" value="{{ $search }}" placeholder="Nom, contact ou e-mail…" class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[13.5px] placeholder:text-ink-grey focus:ring-0">
+            </label>
+            @if (filled($search))
+                <a href="{{ route('suppliers.index', array_filter(['tab' => $tab === 'inactive' ? 'inactive' : null], 'filled')) }}" class="text-[12.5px] font-semibold text-[#6C6658] hover:text-navy">Effacer la recherche</a>
+            @endif
+        </form>
+
+        @if ($suppliers->isEmpty())
+            <div class="px-5 py-12 flex flex-col items-center gap-2 text-center">
+                <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-grey"><x-nav-icon name="truck" class="w-5 h-5" /></div>
+                <div class="text-[14px] font-semibold">Aucun fournisseur</div>
+                <div class="text-[12.5px] text-[#6C6658]">Ajoutez la société à qui vous commandez vos pièces.</div>
+            </div>
+        @else
+            <div class="hidden md:grid grid-cols-[minmax(0,1fr)_minmax(0,220px)_150px_170px_90px] gap-4 px-6 py-3 bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-[#6C6658]">
+                <span>Fournisseur</span><span>Contact</span><span class="text-right">Commandes</span><span class="text-right">Total acheté</span><span></span>
+            </div>
+            <ul class="m-0 p-0 list-none divide-y divide-line-soft">
+                @foreach ($suppliers as $supplier)
+                    <li class="relative grid gap-1.5 md:grid-cols-[minmax(0,1fr)_minmax(0,220px)_150px_170px_90px] md:gap-4 md:items-center px-4 sm:px-6 py-3.5 hover:bg-paper/60">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="w-10 h-10 rounded-[10px] bg-paper border border-line flex items-center justify-center text-gold flex-shrink-0"><x-nav-icon name="truck" class="w-5 h-5" /></span>
+                            <span class="min-w-0">
+                                <a href="{{ route('suppliers.show', $supplier) }}" class="block text-[14.5px] font-semibold text-navy truncate hover:underline after:absolute after:inset-0 md:after:hidden">{{ $supplier->name }}</a>
+                                @if ($supplier->open_orders_count)
+                                    <span class="text-[12px] text-blue font-medium">{{ $supplier->open_orders_count }} commande(s) en cours</span>
+                                @endif
+                            </span>
+                        </div>
+                        <div class="text-[13px] text-[#4A4639] min-w-0 pl-[52px] md:pl-0">
+                            <div class="truncate">{{ $supplier->contact_person ?? '—' }}</div>
+                            <div class="text-[12px] text-[#6C6658] truncate">{{ collect([$supplier->phone, $supplier->email])->filter()->implode(' · ') ?: 'Pas de coordonnées' }}</div>
+                        </div>
+                        <div class="text-[13px] md:text-right pl-[52px] md:pl-0"><span class="font-mono">{{ $supplier->purchase_orders_count }}</span> <span class="md:hidden text-[#6C6658]">commande(s)</span></div>
+                        <div class="font-mono text-[13.5px] text-navy md:text-right pl-[52px] md:pl-0">{{ \App\Support\Money::format($supplier->purchased_amount ?? 0) }}</div>
+                        <div class="hidden md:block text-right">
+                            <a href="{{ route('suppliers.show', $supplier) }}" class="btn btn-sm btn-secondary">Ouvrir</a>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+
+            @if ($suppliers->hasPages())
+                <div class="px-4 sm:px-6 py-3.5 border-t border-line bg-paper/60">{{ $suppliers->links() }}</div>
+            @endif
+        @endif
+    </section>
 </x-app-layout>

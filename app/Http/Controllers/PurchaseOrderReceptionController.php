@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -17,7 +16,8 @@ class PurchaseOrderReceptionController extends Controller
         ]);
 
         foreach ($request->input('received') as $itemId => $receivedQuantity) {
-            $item = PurchaseOrderItem::findOrFail($itemId);
+            // Seulement les lignes de CE bon : un identifiant d'une autre commande est refusé.
+            $item = $purchaseOrder->items()->findOrFail($itemId);
 
             $receivedQuantity = min($receivedQuantity, $item->quantity);
             $previouslyReceived = $item->received_quantity;

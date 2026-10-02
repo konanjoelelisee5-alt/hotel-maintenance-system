@@ -85,10 +85,14 @@ class PurchaseOrder extends Model
         // INSERT ... ON DUPLICATE KEY UPDATE est une opération ATOMIQUE en MySQL :
         // aucune autre requête ne peut s'intercaler entre la lecture et l'écriture
         // de cette valeur, contrairement à un simple "SELECT puis UPDATE" séparés.
-        DB::statement(
-            'INSERT INTO number_sequences (sequence_key, value, created_at, updated_at)
-             VALUES (?, 1, NOW(), NOW())
-             ON DUPLICATE KEY UPDATE value = value + 1, updated_at = NOW()',
+        // SQLite (base des tests) : même opération atomique, avec sa propre syntaxe.
+        DB::statement(DB::getDriverName() === 'sqlite'
+            ? "INSERT INTO number_sequences (sequence_key, value, created_at, updated_at)
+               VALUES (?, 1, datetime('now'), datetime('now'))
+               ON CONFLICT(sequence_key) DO UPDATE SET value = value + 1, updated_at = datetime('now')"
+            : 'INSERT INTO number_sequences (sequence_key, value, created_at, updated_at)
+               VALUES (?, 1, NOW(), NOW())
+               ON DUPLICATE KEY UPDATE value = value + 1, updated_at = NOW()',
             [$key]
         );
 

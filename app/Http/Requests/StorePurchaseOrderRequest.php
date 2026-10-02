@@ -22,6 +22,8 @@ class StorePurchaseOrderRequest extends FormRequest
 
             // Validation du tableau de lignes
             'items' => ['required', 'array', 'min:1'],
+            // Ligne reliée à une pièce du catalogue : la réception alimente alors le stock.
+            'items.*.part_id' => ['nullable', 'exists:parts,id'],
             'items.*.description' => ['required', 'string', 'max:255'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],

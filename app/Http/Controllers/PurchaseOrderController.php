@@ -53,10 +53,13 @@ class PurchaseOrderController extends Controller
         $suppliers = Supplier::where('is_active', true)->orderBy('name')->get();
         $workOrders = WorkOrder::open()->orderBy('title')->get();
 
-        // Permet de pré-remplir le work_order_id si on arrive depuis la fiche d'un OT
+        // Pré-remplissage depuis la fiche d'un OT ou d'un fournisseur.
         $selectedWorkOrderId = $request->query('work_order_id');
+        $selectedSupplierId = $request->query('supplier_id');
+        // Pièces du catalogue, pour relier une ligne au stock (prix proposé = coût unitaire).
+        $parts = \App\Models\Part::where('is_active', true)->orderBy('name')->get(['id', 'name', 'sku', 'unit', 'unit_cost', 'quantity_on_hand', 'reorder_threshold']);
 
-        return view('purchase-orders.create', compact('suppliers', 'workOrders', 'selectedWorkOrderId'));
+        return view('purchase-orders.create', compact('suppliers', 'workOrders', 'selectedWorkOrderId', 'selectedSupplierId', 'parts'));
     }
 
     public function store(StorePurchaseOrderRequest $request): RedirectResponse
