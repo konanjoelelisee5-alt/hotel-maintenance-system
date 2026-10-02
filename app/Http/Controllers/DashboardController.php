@@ -292,12 +292,11 @@ class DashboardController extends Controller
                     ->map(fn (ActivityLog $a) => ['label' => $a->description, 'meta' => $a->action.' · '.$a->created_at->format('H:i'), 'color' => 'blue', 'time' => $a->created_at->format('H:i'), 'who' => $a->user?->name]),
             ],
             default => [
-                'title' => 'Blocages à décider',
-                // Achats en retard + stock sous le seuil + maintenance préventive à venir :
-                // modules propres à notre app (absents de la maquette de référence),
-                // conservés ici tels quels (cf. plan de refonte, Phase 1).
+                // Achats en retard + stock sous le seuil + maintenance préventive à venir.
+                // (« Blocages » se confondait avec les chambres bloquées.)
+                'title' => 'Achats, stock et préventif à suivre',
                 'items' => PurchaseOrder::whereIn('status', ['brouillon', 'envoyee', 'confirmee'])->where('expected_delivery_date', '<', now())->with('supplier')->limit(2)->get()
-                    ->map(fn (PurchaseOrder $po) => ['label' => $po->number.' non réceptionné', 'meta' => $po->supplier->name, 'color' => 'red'])
+                    ->map(fn (PurchaseOrder $po) => ['label' => $po->number.' : livraison en retard', 'meta' => $po->supplier->name.' · prévue le '.$po->expected_delivery_date->format('d/m'), 'color' => 'red'])
                     ->concat(
                         Part::whereColumn('quantity_on_hand', '<=', 'reorder_threshold')->where('is_active', true)->take(2)->get()
                             ->map(fn (Part $p) => ['label' => 'Stock « '.$p->name.' » sous le seuil', 'meta' => $p->quantity_on_hand.' restant(s)', 'color' => 'gold'])

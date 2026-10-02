@@ -43,6 +43,22 @@ class FieldDashboardTest extends TestCase
         $this->assertSame(1, $response->viewData('filterCounts')['urgent']);
     }
 
+    public function test_manager_and_admin_dashboards_share_the_same_building_blocks(): void
+    {
+        foreach ([User::factory()->manager()->create(), User::factory()->admin()->create()] as $user) {
+            $html = $this->actingAs($user)->get(route($user->dashboardRoute()))->assertOk()->getContent();
+
+            // Recherche + nouvel ordre en en-tête, bande d'indicateurs, onglets à compteurs.
+            $this->assertStringContainsString('placeholder="Rechercher un ordre, une chambre…"', $html, $user->role->value);
+            $this->assertStringContainsString('<h1 class="m-0 text-[19px] font-semibold tracking-tight">Tableau de bord</h1>', $html);
+            $this->assertStringContainsString('aria-label="Filtres"', $html);
+        }
+
+        $this->actingAs(User::factory()->manager()->create())->get(route('manager.dashboard'))
+            ->assertSee('Achats, stock et préventif à suivre')
+            ->assertDontSee('Blocages à décider');
+    }
+
     public function test_indicator_colors_come_from_the_controller(): void
     {
         $response = $this->actingAs(User::factory()->technicien()->create())->get(route('technicien.dashboard'));
