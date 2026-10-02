@@ -35,7 +35,8 @@
         @if (! $activeBlock && $isOpen)
             @can('request', [\App\Models\RoomBlock::class, $workOrder])
                 <form method="POST" action="{{ route('room-blocks.store', $workOrder) }}"
-                      onsubmit="return confirm(@js($workOrder->room_occupancy?->isOccupied() ? 'Un client occupe cette chambre : la réception devra le déloger avant de la bloquer. Envoyer la demande ?' : 'Demander à la réception de retirer cette chambre de la vente ?'));">
+                      data-confirm="{{ $workOrder->room_occupancy?->isOccupied() ? 'Un client occupe cette chambre : la réception devra le déloger avant de la bloquer.' : 'La réception décidera de retirer la chambre de la vente.' }}"
+                      data-confirm-title="Demander le blocage de la chambre ?" data-confirm-label="Envoyer la demande">
                     @csrf
                     <button type="submit" class="btn btn-secondary w-full"><x-nav-icon name="ban" /> Demander le blocage</button>
                 </form>

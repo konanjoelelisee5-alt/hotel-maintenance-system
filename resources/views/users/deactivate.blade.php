@@ -9,7 +9,7 @@
     <div>
         <div class="w-full max-w-4xl">
             <form method="POST" action="{{ route('users.deactivate.store', $user) }}" class="space-y-6"
-                  onsubmit="return confirm('Confirmer la désactivation de ce compte ?');">
+                  data-confirm="Le compte ne pourra plus se connecter ; ses OT ouverts seront réaffectés comme indiqué." data-confirm-title="Désactiver ce compte ?" data-confirm-label="Désactiver le compte" data-confirm-tone="danger">
                 @csrf
 
                 @if ($workOrders->isEmpty())

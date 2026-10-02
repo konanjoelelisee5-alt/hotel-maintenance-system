@@ -86,7 +86,7 @@
                         </div>
 
                         <form method="POST" action="{{ route('planning.availabilities.destroy', [$technician, $availability]) }}"
-                              onsubmit="return confirm('Supprimer cette disponibilité ?');">
+                              data-confirm="Le créneau sera retiré du planning du technicien." data-confirm-title="Supprimer cette disponibilité ?" data-confirm-label="Supprimer" data-confirm-tone="danger">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:underline text-xs">Supprimer</button>

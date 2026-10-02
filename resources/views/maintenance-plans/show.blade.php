@@ -1,11 +1,18 @@
 <x-app-layout :crumb="'Exploitation / Maintenance préventive'" :page-title="$maintenancePlan->name" :back-route="route('maintenance-plans.index')">
     <x-slot:primaryAction>
-        <a href="{{ route('maintenance-plans.edit', $maintenancePlan) }}" class="btn btn-secondary">Modifier</a>
-            <form method="POST" action="{{ route('maintenance-plans.generate', $maintenancePlan) }}"
-                  onsubmit="return confirm('Générer un OT maintenant pour ce plan, sans attendre son échéance ?');">
-                @csrf
-                <button type="submit" class="btn btn-primary">Générer un OT maintenant</button>
-            </form>
+        <form method="POST" action="{{ route('maintenance-plans.generate', $maintenancePlan) }}"
+              data-confirm="Un ordre de travail est créé tout de suite, sans attendre l’échéance du plan."
+              data-confirm-title="Générer un OT maintenant ?" data-confirm-label="Générer l’OT">
+            @csrf
+            <button type="submit" class="btn btn-primary">Générer un OT maintenant</button>
+        </form>
+        <x-more-menu>
+            <x-more-menu.item :href="route('maintenance-plans.edit', $maintenancePlan)" icon="pencil">Modifier le plan</x-more-menu.item>
+            <x-more-menu.separator />
+            <x-more-menu.item :action="route('maintenance-plans.destroy', $maintenancePlan)" method="DELETE" icon="trash" danger
+                              confirm="Le plan ne générera plus d’OT. Les OT déjà créés sont conservés."
+                              confirm-title="Supprimer ce plan de maintenance ?" confirm-label="Supprimer le plan">Supprimer le plan</x-more-menu.item>
+        </x-more-menu>
     </x-slot:primaryAction>
 
     <div>
@@ -119,12 +126,6 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('maintenance-plans.destroy', $maintenancePlan) }}"
-                  onsubmit="return confirm('Supprimer définitivement ce plan de maintenance préventive ?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-sm text-red-600 hover:underline">Supprimer ce plan</button>
-            </form>
 
         </div>
     </div>

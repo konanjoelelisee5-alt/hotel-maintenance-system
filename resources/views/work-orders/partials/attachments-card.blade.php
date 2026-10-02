@@ -33,7 +33,7 @@
                             <span class="flex-1 min-w-0 text-[11.5px] text-[#4A4639] truncate" title="{{ $attachment->original_name }}">{{ $attachment->original_name }}</span>
                             @can('deleteAttachment', [$workOrder, $attachment])
                                 <form method="POST" action="{{ route('work-orders.attachments.destroy', [$workOrder, $attachment]) }}"
-                                      onsubmit="return confirm('Retirer ce fichier de la fiche ? Le retrait sera noté au journal.');">
+                                      data-confirm="Le retrait sera noté au journal d’activité." data-confirm-title="Retirer ce fichier de la fiche ?" data-confirm-label="Retirer" data-confirm-tone="danger">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="w-6 h-6 rounded-md flex items-center justify-center text-ink-grey hover:text-red hover:bg-[#FBE4E1]" title="Retirer">

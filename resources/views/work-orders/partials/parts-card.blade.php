@@ -37,7 +37,8 @@
                                         <button type="submit" class="btn btn-sm btn-secondary">Sortir</button>
                                     </form>
                                 @endcan
-                                <form method="POST" action="{{ route('work-orders.reservations.cancel', [$workOrder, $reservation]) }}">
+                                <form method="POST" action="{{ route('work-orders.reservations.cancel', [$workOrder, $reservation]) }}"
+                                      data-confirm="La pièce redevient disponible au magasin." data-confirm-title="Annuler cette réservation ?" data-confirm-label="Annuler la réservation" data-confirm-tone="danger">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-ghost text-red" aria-label="Annuler la réservation">Annuler</button>

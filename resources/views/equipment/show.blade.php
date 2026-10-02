@@ -1,14 +1,12 @@
 <x-app-layout :crumb="'Référentiels / Équipements'" :page-title="$equipment->name" :back-route="route('equipment.index')">
     <x-slot:primaryAction>
-        <a href="{{ route('equipment.edit', $equipment) }}" class="btn btn-secondary">Modifier</a>
-            @if ($equipment->status !== 'hors_service')
-                <form method="POST" action="{{ route('equipment.destroy', $equipment) }}"
-                      onsubmit="return confirm('Mettre cet équipement hors service ? Son historique est conservé.');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Mettre hors service</button>
-                </form>
-            @endif
+        <a href="{{ route('equipment.edit', $equipment) }}" class="btn btn-secondary"><x-nav-icon name="pencil" /> Modifier</a>
+        @if ($equipment->status !== 'hors_service')
+            <x-more-menu>
+                <x-more-menu.item :action="route('equipment.destroy', $equipment)" method="DELETE" icon="ban" danger
+                                  confirm="Il ne sera plus proposé pour les nouveaux signalements. Son historique est conservé." confirm-title="Mettre cet équipement hors service ?" confirm-label="Mettre hors service">Mettre hors service</x-more-menu.item>
+            </x-more-menu>
+        @endif
     </x-slot:primaryAction>
 
     <p class="flex items-center gap-1.5 flex-wrap text-[13.5px] text-ink-grey">

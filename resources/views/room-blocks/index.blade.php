@@ -124,7 +124,8 @@
                                 @can('release', $block)
                                     <x-slot:actions>
                                         <form method="POST" action="{{ route('room-blocks.release', $block) }}"
-                                              onsubmit="return confirm(@js($repaired || $cancelled ? 'Vous avez vérifié la chambre : la remettre en vente ?' : 'La réparation n\'est pas terminée. Remettre quand même la chambre en vente ?'));">
+                                              data-confirm="{{ $repaired || $cancelled ? 'Vous avez vérifié la chambre : elle redevient disponible à la vente.' : 'La réparation n’est pas terminée : la chambre sera quand même remise en vente.' }}"
+                                              data-confirm-title="Remettre la chambre en vente ?" data-confirm-label="Remettre en vente">
                                             @csrf
                                             <button type="submit" class="btn {{ $repaired || $cancelled ? 'btn-primary' : 'btn-secondary' }}"><x-nav-icon name="check" /> Vérifiée : remettre en vente</button>
                                         </form>

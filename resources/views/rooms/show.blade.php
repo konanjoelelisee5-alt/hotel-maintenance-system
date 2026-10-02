@@ -1,14 +1,12 @@
 <x-app-layout :crumb="'Référentiels / Lieux'" :page-title="$room->label" :back-route="route('rooms.index')">
     <x-slot:primaryAction>
-        <a href="{{ route('rooms.edit', $room) }}" class="btn btn-secondary">Modifier</a>
-            @if ($room->status !== 'hors_service')
-                <form method="POST" action="{{ route('rooms.destroy', $room) }}"
-                      onsubmit="return confirm('Mettre ce lieu hors service ? Il ne sera plus proposé pour les nouveaux signalements.');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Mettre hors service</button>
-                </form>
-            @endif
+        <a href="{{ route('rooms.edit', $room) }}" class="btn btn-secondary"><x-nav-icon name="pencil" /> Modifier</a>
+        @if ($room->status !== 'hors_service')
+            <x-more-menu>
+                <x-more-menu.item :action="route('rooms.destroy', $room)" method="DELETE" icon="ban" danger
+                                  confirm="Il ne sera plus proposé pour les nouveaux signalements. Son historique est conservé." confirm-title="Mettre ce lieu hors service ?" confirm-label="Mettre hors service">Mettre hors service</x-more-menu.item>
+            </x-more-menu>
+        @endif
     </x-slot:primaryAction>
 
     <p class="flex items-center gap-1.5 flex-wrap text-[13.5px] text-ink-grey">

@@ -10,7 +10,7 @@
             </p>
         </div>
         <form method="POST" action="{{ route('users.password.reset', $user) }}" class="flex-shrink-0"
-              onsubmit="return confirm('Réinitialiser ce mot de passe ? L\'ancien ne fonctionnera plus.');">
+              data-confirm="L’ancien mot de passe ne fonctionnera plus ; un mot de passe provisoire sera affiché une seule fois." data-confirm-title="Réinitialiser le mot de passe ?" data-confirm-label="Réinitialiser">
             @csrf
             <button type="submit">Réinitialiser</button>
         </form>
@@ -23,7 +23,7 @@
             Il devra le remplacer dès sa prochaine connexion.
         </p>
         <form method="POST" action="{{ route('users.password.reset', $user) }}" class="mt-4"
-              onsubmit="return confirm('Réinitialiser ce mot de passe ? L\'ancien ne fonctionnera plus.');">
+              data-confirm="L’ancien mot de passe ne fonctionnera plus ; un mot de passe provisoire sera affiché une seule fois." data-confirm-title="Réinitialiser le mot de passe ?" data-confirm-label="Réinitialiser">
             @csrf
             <button type="submit" class="px-4 py-2 bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-50">
                 Réinitialiser le mot de passe
