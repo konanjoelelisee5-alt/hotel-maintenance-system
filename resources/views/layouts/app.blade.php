@@ -17,13 +17,10 @@
     <div class="min-h-screen flex items-stretch">
 
         {{-- Sidebar desktop --}}
+        {{-- Sans bloc logo « Hôtel Président Maintenance » (retiré à la demande de l'hôtel) :
+             la sidebar commence par l'utilisateur connecté. --}}
         <aside class="hidden lg:flex lg:flex-col lg:w-[252px] lg:flex-shrink-0 bg-navy text-white p-3.5 gap-5">
-            <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="flex items-center gap-2.5 px-1.5 py-1">
-                <span class="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-[12px] font-bold text-navy">HP</span>
-                <span class="text-[13.5px] font-semibold leading-tight">Hôtel Président<br>Maintenance</span>
-            </a>
-
-            <div class="flex items-center gap-2.5 px-1.5">
+            <div class="flex items-center gap-2.5 px-1.5 pt-1">
                 <span class="w-[34px] h-[34px] rounded-[9px] bg-gold flex items-center justify-center text-[13px] font-bold text-navy flex-shrink-0">{{ auth()->user()->initialsOrGenerated() }}</span>
                 <span class="flex flex-col gap-0.5 min-w-0">
                     <span class="text-[13.5px] font-semibold truncate">{{ auth()->user()->name }}</span>
