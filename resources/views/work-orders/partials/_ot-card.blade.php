@@ -37,10 +37,11 @@
         </div>
     @endif
 
+    @php $sla = $w->slaSummary(); @endphp
     <div class="flex items-center gap-2 mt-2.5">
         <span class="flex-1 h-[5px] rounded-full bg-line-soft overflow-hidden">
-            <span class="block h-full {{ \App\Support\Swatch::bg($w->slaColorClass()) }}" style="width: {{ $w->slaProgressPercent() }}%"></span>
+            <span class="block h-full {{ \App\Support\Swatch::bg($sla['color']) }}" style="width: {{ $sla['width'] }}%"></span>
         </span>
-        <span class="font-mono text-[11px] {{ \App\Support\Swatch::text($w->slaColorClass()) }} whitespace-nowrap">{{ $w->slaRemainingLabel() }}</span>
+        <span class="font-mono text-[11px] {{ \App\Support\Swatch::text($sla['color']) }} whitespace-nowrap">{{ $sla['text'] }}</span>
     </div>
 </a>

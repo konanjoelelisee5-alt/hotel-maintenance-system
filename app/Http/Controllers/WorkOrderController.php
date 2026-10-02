@@ -33,22 +33,36 @@ class WorkOrderController extends Controller
         $filter = $request->string('filter')->toString() ?: ($authUser->role->seesAllWorkOrders() ? 'all' : 'mine');
         $sort = $request->string('sort')->toString() ?: 'due';
 
+        // Un onglet = un filtre ; les compteurs des onglets et des indicateurs
+        // utilisent exactement la même règle que la liste.
+        $applyFilter = fn ($qr, string $key) => match ($key) {
+            'mine' => $qr->when($authUser->isDepartmentHead(), fn ($m) => $m->where('reported_by', $authUser->id)),
+            'open' => $qr->open(),
+            'urgent' => $qr->whereHas('priority', fn ($p) => $p->where('code', 'urgente')),
+            'unassigned' => $qr->whereNull('assigned_to')->open(),
+            // En retard : signalé dépassé, ou échéance passée sans attendre la tâche planifiée.
+            'late' => $qr->where(fn ($l) => $l->where('sla_breached', true)
+                ->orWhere(fn ($o) => $o->slaResolutionOverdue())),
+            default => $qr,
+        };
+
         $workOrders = (clone $query)
             ->when($q !== '', fn ($qr) => $qr->where(fn ($w) => $w
                 ->where('title', 'like', "%{$q}%")
                 ->orWhereHas('room', fn ($r) => $r->where('number', 'like', "%{$q}%"))
             ))
-            ->when($filter === 'mine' && $authUser->isDepartmentHead(), fn ($qr) => $qr->where('reported_by', $authUser->id))
-            ->when($filter === 'urgent', fn ($qr) => $qr->whereHas('priority', fn ($p) => $p->where('code', 'urgente')))
-            ->when($filter === 'unassigned', fn ($qr) => $qr->whereNull('assigned_to'))
-            ->when($filter === 'late', fn ($qr) => $qr->where('sla_breached', true))
+            ->tap(fn ($qr) => $applyFilter($qr, $filter))
             ->when($request->filled('status'), fn ($qr) => $qr->where('status', $request->status))
             ->when($request->filled('priority_id'), fn ($qr) => $qr->where('priority_id', $request->priority_id))
             ->when($sort === 'priority', fn ($qr) => $qr->join('work_order_priorities', 'work_order_priorities.id', '=', 'work_orders.priority_id')
                 ->orderBy('work_order_priorities.position')
                 ->select('work_orders.*'))
             ->when($sort === 'created', fn ($qr) => $qr->latest('work_orders.created_at'))
-            ->when($sort === 'due', fn ($qr) => $qr->orderByRaw('CASE WHEN sla_breached THEN 0 ELSE 1 END')->orderBy('sla_resolution_due_at'))
+            // Échéance : les OT encore à traiter d'abord (les plus en retard en tête), les terminés ensuite.
+            ->when($sort === 'due', fn ($qr) => $qr
+                ->orderByRaw('CASE WHEN status IN ('.implode(',', array_fill(0, count(WorkOrder::FINISHED_STATUSES), '?')).') THEN 1 ELSE 0 END', WorkOrder::FINISHED_STATUSES)
+                ->orderByRaw('CASE WHEN sla_resolution_due_at IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('sla_resolution_due_at'))
             ->paginate(15)
             ->withQueryString();
 
@@ -59,14 +73,25 @@ class WorkOrderController extends Controller
             ? [['key' => 'all', 'label' => 'Tous'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'unassigned', 'label' => 'Non affectés'], ['key' => 'late', 'label' => 'En retard SLA']]
             : [['key' => 'mine', 'label' => $authUser->role === UserRole::Technicien ? 'Mes ordres' : 'Mes signalements'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'all', 'label' => $authUser->isDepartmentHead() ? "Toute l'équipe" : 'Tous']];
 
+        $count = fn (string $key) => $applyFilter(clone $query, $key)->count();
+        $filterCounts = collect($filters)->mapWithKeys(fn ($f) => [$f['key'] => $count($f['key'])])->all();
+
+        $total = $count('all');
+        $open = $count('open');
         $stats = [
-            ['label' => 'Total', 'value' => (clone $query)->count()],
-            ['label' => 'Ouverts', 'value' => (clone $query)->open()->count()],
-            ['label' => 'Non affectés', 'value' => (clone $query)->whereNull('assigned_to')->open()->count()],
-            ['label' => 'SLA dépassé', 'value' => (clone $query)->where('sla_breached', true)->count()],
+            ['label' => 'Total', 'value' => $total, 'sub' => 'tous statuts confondus', 'filter' => 'all', 'dot' => 'bg-navy'],
+            ['label' => 'Ouverts', 'value' => $open, 'sub' => 'à traiter ou en cours', 'filter' => 'open', 'dot' => 'bg-blue'],
+            ['label' => 'Non affectés', 'value' => $count('unassigned'), 'sub' => 'ouverts, sans technicien', 'filter' => 'unassigned', 'dot' => 'bg-gold'],
+            ['label' => 'En retard SLA', 'value' => $late = $count('late'), 'sub' => $total ? round($late / $total * 100).' % des ordres' : 'aucun ordre', 'filter' => 'late', 'dot' => 'bg-red'],
         ];
 
-        return view('work-orders.index', compact('workOrders', 'q', 'filter', 'filters', 'stats', 'isSupervisor', 'sort', 'sortOptions'));
+        $priorities = WorkOrderPriority::where('is_active', true)->orderBy('position')->get();
+        $statusLabels = WorkOrder::STATUS_LABELS;
+
+        return view('work-orders.index', compact(
+            'workOrders', 'q', 'filter', 'filters', 'filterCounts', 'stats', 'isSupervisor',
+            'sort', 'sortOptions', 'priorities', 'statusLabels',
+        ));
     }
 
     public function create(): View

@@ -383,4 +383,33 @@ class WorkOrder extends Model
 
         return $this->sla_resolution_due_at->locale('fr')->diffForHumans(null, true).' restantes';
     }
+
+    /**
+     * État SLA prêt à afficher dans les listes : un OT en cours a un compte à rebours,
+     * un OT terminé n'en a plus — on dit seulement s'il a tenu son délai.
+     *
+     * @return array{text: string, color: string, width: int, late: bool}
+     */
+    public function slaSummary(): array
+    {
+        $due = $this->sla_resolution_due_at;
+
+        if (in_array($this->status, self::FINISHED_STATUSES, true)) {
+            return match (true) {
+                ! $due || $this->status === 'annule' => ['text' => '—', 'color' => 'grey', 'width' => 0, 'late' => false],
+                $this->sla_breached || (bool) $this->completed_at?->greaterThan($due)
+                    => ['text' => 'Terminé hors délai', 'color' => 'red', 'width' => 0, 'late' => false],
+                default => ['text' => 'Terminé dans le délai', 'color' => 'green', 'width' => 0, 'late' => false],
+            };
+        }
+
+        $late = $this->sla_breached || (bool) $due?->isPast();
+
+        return [
+            'text' => $this->slaRemainingLabel(),
+            'color' => $late ? 'red' : $this->slaColorClass(),
+            'width' => $late ? 100 : $this->slaProgressPercent(),
+            'late' => $late,
+        ];
+    }
 }
