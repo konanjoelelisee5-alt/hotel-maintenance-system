@@ -1,63 +1,69 @@
-<x-accordion-card id="parts" title="Pièces réservées" :open="$workOrder->partReservations->isNotEmpty()">
-    <div class="space-y-3">
-        @can('intervene', $workOrder)
-            <form method="POST" action="{{ route('work-orders.reservations.store', $workOrder) }}" class="space-y-2">
-                @csrf
-                <select name="part_id" class="w-full border-slate-300 rounded-md shadow-sm text-sm" required>
-                    <option value="">-- Choisir une pièce --</option>
-                    @foreach (\App\Models\Part::where('is_active', true)->orderBy('name')->get() as $part)
-                        <option value="{{ $part->id }}">{{ $part->name }} (dispo : {{ $part->quantity_available }})</option>
-                    @endforeach
-                </select>
-                <div class="flex gap-2">
-                    <input type="number" name="quantity" min="1" value="1"
-                           class="w-20 border-slate-300 rounded-md shadow-sm text-sm">
-                    <button type="submit" class="flex-1 px-3 py-2 bg-navy-800 text-white text-xs font-medium rounded-md hover:bg-navy-900">
-                        Réserver
-                    </button>
-                </div>
-                <x-input-error :messages="$errors->get('part_id')" />
-            </form>
-        @endcan
+@php
+    $reservationStyles = [
+        'reservee' => 'bg-[#FBF1DF] text-[#7A5A16]',
+        'sortie' => 'bg-[#E6F3EC] text-green',
+        'annulee' => 'bg-line-soft text-ink-grey',
+    ];
+@endphp
 
-        @if ($workOrder->partReservations->isEmpty())
-            <p class="text-sm text-ink-grey">Aucune pièce réservée pour cet OT.</p>
-        @else
-            <div class="divide-y divide-slate-100">
-                @foreach ($workOrder->partReservations as $reservation)
-                    <div class="flex justify-between items-start gap-2 py-3 first:pt-0 text-sm">
-                        <div>
-                            <p class="text-slate-800">{{ $reservation->part->name }}</p>
-                            <p class="text-xs text-ink-grey">{{ $reservation->quantity }} {{ $reservation->part->unit }}</p>
-                            <span class="inline-flex items-center px-2 py-0.5 mt-1 text-xs rounded-full
-                                {{ $reservation->status === 'reservee' ? 'bg-gold-100 text-gold-700' : '' }}
-                                {{ $reservation->status === 'sortie' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                {{ $reservation->status === 'annulee' ? 'bg-slate-100 text-ink-grey' : '' }}">
-                                {{ $reservation->status_label }}
-                            </span>
-                        </div>
-
-                        @can('intervene', $workOrder)
-                            @if ($reservation->status === 'reservee')
-                                <div class="flex flex-col gap-1 text-xs whitespace-nowrap">
-                                    {{-- Sortie physique du magasin : par l'intervenant assigné uniquement. --}}
-                                    @can('perform', $workOrder)
-                                        <form method="POST" action="{{ route('work-orders.reservations.withdraw', [$workOrder, $reservation]) }}">
-                                            @csrf
-                                            <button type="submit" class="text-emerald-600 hover:underline">Sortir</button>
-                                        </form>
-                                    @endcan
-                                    <form method="POST" action="{{ route('work-orders.reservations.cancel', [$workOrder, $reservation]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:underline">Annuler</button>
-                                    </form>
-                                </div>
-                            @endif
-                        @endcan
-                    </div>
-                @endforeach
-            </div>
+<x-panel id="parts" title="Pièces réservées" icon="part" flush>
+    <x-slot:badge>
+        @if ($workOrder->partReservations->isNotEmpty())
+            <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-[#4A4639]">{{ $workOrder->partReservations->count() }}</span>
         @endif
-    </div>
-</x-accordion-card>
+    </x-slot:badge>
+
+    @if ($workOrder->partReservations->isEmpty())
+        <p class="m-0 px-5 py-4 text-[13px] text-ink-grey">Aucune pièce réservée pour cet OT.</p>
+    @else
+        <ul class="m-0 p-0 list-none divide-y divide-line-soft">
+            @foreach ($workOrder->partReservations as $reservation)
+                <li class="flex items-center justify-between gap-3 px-5 py-3">
+                    <div class="min-w-0">
+                        <p class="m-0 text-[13.5px] font-semibold text-navy truncate">{{ $reservation->part->name }}</p>
+                        <p class="m-0 flex items-center gap-2 mt-0.5 text-[12px] text-[#6C6658]">
+                            {{ $reservation->quantity }} {{ $reservation->part->unit }}
+                            <span class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold {{ $reservationStyles[$reservation->status] ?? '' }}">{{ $reservation->status_label }}</span>
+                        </p>
+                    </div>
+
+                    @can('intervene', $workOrder)
+                        @if ($reservation->status === 'reservee')
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                {{-- Sortie physique du magasin : par l'intervenant assigné uniquement. --}}
+                                @can('perform', $workOrder)
+                                    <form method="POST" action="{{ route('work-orders.reservations.withdraw', [$workOrder, $reservation]) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-secondary">Sortir</button>
+                                    </form>
+                                @endcan
+                                <form method="POST" action="{{ route('work-orders.reservations.cancel', [$workOrder, $reservation]) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-ghost text-red" aria-label="Annuler la réservation">Annuler</button>
+                                </form>
+                            </div>
+                        @endif
+                    @endcan
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
+    @can('intervene', $workOrder)
+        <form method="POST" action="{{ route('work-orders.reservations.store', $workOrder) }}" class="flex flex-col gap-2 px-5 py-4 border-t border-line-soft bg-paper/50">
+            @csrf
+            <select name="part_id" required aria-label="Pièce à réserver">
+                <option value="">Choisir une pièce…</option>
+                @foreach (\App\Models\Part::where('is_active', true)->orderBy('name')->get() as $part)
+                    <option value="{{ $part->id }}">{{ $part->name }} (dispo : {{ $part->quantity_available }})</option>
+                @endforeach
+            </select>
+            <div class="flex gap-2">
+                <input type="number" name="quantity" min="1" value="1" aria-label="Quantité" class="!w-24">
+                <button type="submit" class="btn btn-primary flex-1"><x-nav-icon name="part" /> Réserver</button>
+            </div>
+            <x-input-error :messages="$errors->get('part_id')" />
+        </form>
+    @endcan
+</x-panel>

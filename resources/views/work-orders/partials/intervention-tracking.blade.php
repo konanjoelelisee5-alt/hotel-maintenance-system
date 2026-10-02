@@ -1,70 +1,58 @@
+{{-- Chrono de l'intervention : affiché uniquement à l'intervenant assigné (cf. show.blade.php). --}}
 @php
     $activeSession = $workOrder->activeSession();
 @endphp
 
-<div class="bg-white rounded-xl border border-line">
-    <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between">
-        <h3 class="font-semibold text-navy-900 text-sm">Suivi de l'intervention</h3>
-        <span class="text-xs text-ink-grey">
-            Temps total : <strong class="text-slate-700">{{ $workOrder->total_worked_minutes }} min</strong>
-        </span>
-    </div>
+<x-panel title="Suivi de l'intervention" icon="clock" flush>
+    <x-slot:badge>
+        <span class="text-[12px] text-ink-grey">Total : <strong class="text-navy">{{ \App\Support\Duration::human($workOrder->total_worked_minutes) }}</strong></span>
+    </x-slot:badge>
 
-    <div class="p-5">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                @if ($activeSession)
-                    <p class="text-sm text-ink-grey">Intervention en cours depuis :</p>
-                    <p class="text-2xl font-mono font-bold text-emerald-600" id="timer" data-started-at="{{ $activeSession->started_at->toIso8601String() }}">
-                        00:00:00
-                    </p>
-                @else
-                    <p class="text-sm text-ink-grey">Aucune intervention en cours.</p>
-                @endif
-            </div>
-
-            <div>
-                {{-- Bloc affiché uniquement à l'intervenant assigné (cf. show.blade.php). --}}
-                @if ($activeSession)
-                    <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700">
-                            ⏸ Arrêter
-                        </button>
-                    </form>
-                @else
-                    <form method="POST" action="{{ route('work-orders.sessions.start', $workOrder) }}">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700">
-                            ▶ Démarrer
-                        </button>
-                    </form>
-                @endif
-            </div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-5 {{ $activeSession ? 'bg-[#E6F3EC]/50' : '' }}">
+        <div>
+            @if ($activeSession)
+                <p class="m-0 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-green">
+                    <span class="w-2 h-2 rounded-full bg-green animate-pulse"></span> Intervention en cours depuis {{ $activeSession->started_at->format('H\hi') }}
+                </p>
+                <p class="m-0 mt-1 font-mono text-[34px] leading-none font-semibold text-navy" id="timer" data-started-at="{{ $activeSession->started_at->toIso8601String() }}">00:00:00</p>
+            @else
+                <p class="m-0 text-[12px] font-semibold uppercase tracking-wide text-ink-grey">Chrono arrêté</p>
+                <p class="m-0 mt-1 text-[13.5px] text-[#4A4639]">Démarrez le chrono en arrivant sur place, arrêtez-le en partant.</p>
+            @endif
         </div>
 
-        @if ($workOrder->interventionSessions->isNotEmpty())
-            <div class="border-t border-line-soft pt-3 space-y-2">
-                @foreach ($workOrder->interventionSessions as $session)
-                    <div class="text-xs text-ink-grey flex justify-between">
-                        <span>
-                            {{ $session->technician->name }} —
-                            {{ $session->started_at->format('d/m/Y H:i') }}
-                            @if ($session->ended_at)
-                                → {{ $session->ended_at->format('H:i') }}
-                            @else
-                                <span class="text-emerald-600 font-medium">(en cours)</span>
-                            @endif
-                        </span>
-                        @if ($session->duration_minutes)
-                            <span>{{ $session->duration_minutes }} min</span>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
+        @if ($activeSession)
+            <form method="POST" action="{{ route('work-orders.sessions.stop', $workOrder) }}">
+                @csrf
+                <button type="submit" class="btn btn-lg btn-danger-solid w-full sm:w-auto"><x-nav-icon name="pause" /> Arrêter le chrono</button>
+            </form>
+        @else
+            <form method="POST" action="{{ route('work-orders.sessions.start', $workOrder) }}">
+                @csrf
+                <button type="submit" class="btn btn-lg btn-primary w-full sm:w-auto"><x-nav-icon name="play" /> Démarrer le chrono</button>
+            </form>
         @endif
     </div>
-</div>
+
+    @if ($workOrder->interventionSessions->isNotEmpty())
+        <ul class="m-0 p-0 list-none border-t border-line-soft divide-y divide-line-soft">
+            @foreach ($workOrder->interventionSessions as $session)
+                <li class="flex items-center justify-between gap-3 px-5 py-2.5 text-[12.5px]">
+                    <span class="text-[#4A4639]">
+                        <span class="font-semibold text-navy">{{ $session->technician->name }}</span>
+                        · {{ $session->started_at->format('d/m H\hi') }}
+                        @if ($session->ended_at) → {{ $session->ended_at->format('H\hi') }} @endif
+                    </span>
+                    @if ($session->ended_at)
+                        <span class="font-mono text-[#6C6658]">{{ $session->duration_minutes }} min</span>
+                    @else
+                        <span class="text-green font-semibold">en cours</span>
+                    @endif
+                </li>
+            @endforeach
+        </ul>
+    @endif
+</x-panel>
 
 @push('scripts')
     <script>
@@ -75,7 +63,7 @@
             const startedAt = new Date(timerEl.dataset.startedAt);
 
             function updateTimer() {
-                const diffSeconds = Math.floor((new Date() - startedAt) / 1000);
+                const diffSeconds = Math.max(0, Math.floor((new Date() - startedAt) / 1000));
                 const hours = String(Math.floor(diffSeconds / 3600)).padStart(2, '0');
                 const minutes = String(Math.floor((diffSeconds % 3600) / 60)).padStart(2, '0');
                 const seconds = String(diffSeconds % 60).padStart(2, '0');

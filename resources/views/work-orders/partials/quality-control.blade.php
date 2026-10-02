@@ -1,20 +1,19 @@
 {{-- Historique des contrôles qualité de l'OT. Le lancement d'un contrôle (et
      l'avertissement « vous avez réalisé l'intervention ») est dans le panneau
      « Pilotage », à l'étape « Résolu ». --}}
-<div class="bg-white rounded-xl border border-line">
-    <div class="px-5 py-4 border-b border-line-soft">
-        <h3 class="font-semibold text-navy-900 text-sm">Contrôles qualité</h3>
-    </div>
-
-    <div class="p-5">
+<x-panel title="Contrôles qualité" icon="shield" flush>
+    <ul class="m-0 p-0 list-none divide-y divide-line-soft">
         @foreach ($workOrder->qualityControls as $qc)
-            <div class="flex justify-between items-center {{ ! $loop->first ? 'border-t border-line-soft pt-3 mt-3' : '' }} text-sm">
-                <span class="text-slate-600">{{ $qc->created_at->format('d/m/Y H:i') }} — {{ $qc->reviewer->name }}</span>
-                <div class="flex items-center gap-3">
+            <li class="flex items-center justify-between gap-3 px-5 py-3 text-[13px]">
+                <span class="min-w-0">
+                    <span class="block font-semibold text-navy">{{ $qc->reviewer->name }}</span>
+                    <span class="block text-[12px] text-ink-grey">{{ $qc->created_at->format('d/m/Y à H\hi') }}</span>
+                </span>
+                <span class="flex items-center gap-2.5 flex-shrink-0">
                     <x-quality-control-status-badge :status="$qc->status" />
-                    <a href="{{ route('quality-controls.show', $qc) }}" class="text-navy-700 hover:underline font-medium">Voir</a>
-                </div>
-            </div>
+                    <a href="{{ route('quality-controls.show', $qc) }}" class="btn btn-sm btn-secondary">Voir</a>
+                </span>
+            </li>
         @endforeach
-    </div>
-</div>
+    </ul>
+</x-panel>

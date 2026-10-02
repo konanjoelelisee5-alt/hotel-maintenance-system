@@ -100,7 +100,7 @@ class SeparationOfDutiesTest extends TestCase
         // bloc contrôle qualité sans rien à faire. Seulement ce qui lui sert.
         $this->actingAs($this->chef)->get(route('work-orders.show', $this->workOrder))
             ->assertOk()
-            ->assertDontSee('▶ Démarrer')
+            ->assertDontSee('Démarrer le chrono')
             ->assertDontSee("Suivi de l'intervention", false)
             ->assertDontSee("Rapport d'intervention", false)
             ->assertDontSee('Aucun contrôle qualité')
@@ -109,7 +109,7 @@ class SeparationOfDutiesTest extends TestCase
             ->assertSee("Je m'en charge", false);
 
         $this->actingAs($this->technician)->get(route('work-orders.show', $this->workOrder))
-            ->assertSee('▶ Démarrer')
+            ->assertSee('Démarrer le chrono')
             ->assertSee('Enregistrer le rapport');
     }
 

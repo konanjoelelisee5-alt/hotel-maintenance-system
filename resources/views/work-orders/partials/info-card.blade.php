@@ -1,69 +1,52 @@
-<div class="bg-white rounded-xl border border-line">
-    <div class="px-5 py-4 border-b border-line-soft">
-        <h3 class="font-semibold text-navy-900 text-sm">Informations</h3>
-    </div>
-    <dl class="p-5 space-y-3 text-sm">
-        <div class="flex justify-between gap-3">
-            <dt class="text-ink-grey">Lieu</dt>
-            <dd class="text-slate-800 font-medium text-right">{{ $workOrder->room?->label ?? '—' }}</dd>
-        </div>
-        <div class="flex justify-between gap-3">
-            <dt class="text-ink-grey">Équipement</dt>
-            <dd class="text-slate-800 font-medium text-right">{{ $workOrder->equipment?->name ?? '—' }}</dd>
-        </div>
-        <div class="flex justify-between gap-3">
-            <dt class="text-ink-grey">Type</dt>
-            <dd class="text-slate-800 font-medium text-right">{{ $workOrder->type->label }}</dd>
-        </div>
-        <div class="flex justify-between gap-3">
-            <dt class="text-ink-grey">Assigné à</dt>
-            <dd class="text-slate-800 font-medium text-right">{{ $workOrder->assignee?->name ?? 'Non assigné' }}</dd>
-        </div>
-        {{-- Résumé du chrono pour qui n'a pas le bloc « Suivi de l'intervention »
-             (superviseurs) : seul l'intervenant assigné chronomètre. --}}
-        @cannot('perform', $workOrder)
-            @php $activeSession = $workOrder->activeSession(); @endphp
-            @if ($activeSession || $workOrder->total_worked_minutes > 0)
-                <div class="flex justify-between gap-3">
+{{-- Planification et temps (colonne latérale). Type, priorité, signalement, lieu,
+     technicien, échéance et SLA sont dans l'en-tête de synthèse (summary.blade.php) :
+     on ne les répète pas ici. --}}
+@php
+    $rows = [];
+    if ($workOrder->scheduled_at) {
+        $rows[] = ['Planifié le', $workOrder->scheduled_at->format('d/m/Y à H\hi')];
+    }
+    if ($workOrder->estimated_duration_minutes) {
+        $rows[] = ['Durée estimée', \App\Support\Duration::human($workOrder->estimated_duration_minutes)];
+    }
+    if ($workOrder->started_at) {
+        $rows[] = ['Démarré le', $workOrder->started_at->format('d/m/Y à H\hi')];
+    }
+    if ($workOrder->completed_at) {
+        $rows[] = ['Terminé le', $workOrder->completed_at->format('d/m/Y à H\hi')];
+    }
+
+    // Résumé du chrono pour qui n'a pas le bloc « Suivi de l'intervention »
+    // (superviseurs) : seul l'intervenant assigné chronomètre.
+    $showTime = auth()->user()->cannot('perform', $workOrder);
+    $activeSession = $showTime ? $workOrder->activeSession() : null;
+    $showTime = $showTime && ($activeSession || $workOrder->total_worked_minutes > 0);
+@endphp
+
+@if ($rows || $showTime)
+    <x-panel title="Planification et temps" icon="clock" flush>
+        <dl class="m-0 divide-y divide-line-soft text-[13px]">
+            @foreach ($rows as [$label, $value])
+                <div class="flex justify-between gap-3 px-5 py-2.5">
+                    <dt class="text-ink-grey">{{ $label }}</dt>
+                    <dd class="m-0 text-right font-medium text-[#14202B]">{{ $value }}</dd>
+                </div>
+            @endforeach
+
+            @if ($showTime)
+                <div class="flex justify-between gap-3 px-5 py-2.5">
                     <dt class="text-ink-grey">Temps passé</dt>
-                    <dd class="text-slate-800 font-medium text-right">
-                        {{ $workOrder->total_worked_minutes }} min
+                    <dd class="m-0 text-right font-medium text-[#14202B]">
+                        {{ \App\Support\Duration::human($workOrder->total_worked_minutes) }}
                         @if ($activeSession)
-                            <span class="block text-xs text-emerald-600 font-semibold">● intervention en cours depuis {{ $activeSession->started_at->format('H:i') }}</span>
+                            <span class="flex items-center justify-end gap-1.5 text-[11.5px] text-green font-semibold mt-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green animate-pulse"></span>
+                                en cours depuis {{ $activeSession->started_at->format('H\hi') }}
+                            </span>
                         @endif
                     </dd>
                 </div>
             @endif
-        @endcannot
-        <div class="flex justify-between gap-3">
-            <dt class="text-ink-grey">Signalé par</dt>
-            <dd class="text-slate-800 font-medium text-right">{{ $workOrder->reporter?->name ?? '—' }}</dd>
-        </div>
-        <div class="border-t border-line-soft pt-3 flex justify-between gap-3">
-            <dt class="text-ink-grey">Créé le</dt>
-            <dd class="text-slate-800 text-right">{{ $workOrder->created_at->format('d/m/Y H:i') }}</dd>
-        </div>
-        @if ($workOrder->scheduled_at)
-            <div class="flex justify-between gap-3">
-                <dt class="text-ink-grey">Planifié le</dt>
-                <dd class="text-slate-800 text-right">{{ $workOrder->scheduled_at->format('d/m/Y H:i') }}</dd>
-            </div>
-        @endif
-        <div class="flex justify-between gap-3">
-            <dt class="text-ink-grey">Échéance</dt>
-            <dd class="text-right {{ $workOrder->due_date && $workOrder->due_date->isPast() && ! in_array($workOrder->status, \App\Models\WorkOrder::FINISHED_STATUSES) ? 'text-red-600 font-semibold' : 'text-slate-800' }}">
-                {{ $workOrder->due_date?->format('d/m/Y H:i') ?? '—' }}
-            </dd>
-        </div>
-    </dl>
-
-    @if ($workOrder->maintenance_plan_id && in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true))
-        <div class="px-5 py-3 border-t border-line-soft bg-navy-50 rounded-b-xl">
-            <a href="{{ route('maintenance-plans.show', $workOrder->maintenance_plan_id) }}"
-               class="flex items-center gap-2 text-xs text-navy-700 hover:underline">
-                <span>⟳</span>
-                <span>Généré automatiquement — voir le plan de maintenance préventive</span>
-            </a>
-        </div>
-    @endif
-</div>
+        </dl>
+    </x-panel>
+@endif

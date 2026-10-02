@@ -1,90 +1,85 @@
-<div id="report" class="bg-white rounded-xl border border-line">
-    <div class="px-5 py-4 border-b border-line-soft">
-        <h3 class="font-semibold text-navy-900 text-sm">Rapport d'intervention</h3>
-    </div>
+@php $report = $workOrder->interventionReport; @endphp
 
-    <div class="p-5">
-        @php $report = $workOrder->interventionReport; @endphp
-
+<x-panel id="report" title="Rapport d'intervention" icon="report">
+    <x-slot:badge>
         @if ($report?->is_signed)
-            <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md text-sm text-emerald-800">
-                ✓ Rapport signé par {{ $report->signed_by_name }}
-                le {{ $report->signed_at->format('d/m/Y à H:i') }}
-                — intervention réalisée par {{ $report->technician?->name ?? '—' }}. Document verrouillé.
-            </div>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E6F3EC] text-green text-[11.5px] font-semibold"><x-nav-icon name="check" class="w-3 h-3" /> Signé</span>
+        @elseif ($report)
+            <span class="px-2 py-0.5 rounded-full bg-[#FBF1DF] text-[#7A5A16] text-[11.5px] font-semibold">Brouillon</span>
         @endif
+    </x-slot:badge>
 
-        {{-- Lecture seule : rapport signé (verrouillé), ou superviseur qui le consulte
-             (ce bloc ne lui est montré que si un rapport existe, cf. show.blade.php). --}}
-        @if ($report && ($report->is_signed || auth()->user()->cannot('perform', $workOrder)))
-            <dl class="space-y-3 text-sm">
-                @foreach (['Travail effectué' => $report->work_performed, 'Pièces / matériel utilisés' => $report->parts_used, 'Recommandations' => $report->recommendations] as $label => $text)
-                    @if (filled($text))
-                        <div>
-                            <dt class="text-xs font-semibold text-ink-grey uppercase">{{ $label }}</dt>
-                            <dd class="text-[#3d3a33] whitespace-pre-line mt-0.5">{{ $text }}</dd>
-                        </div>
-                    @endif
-                @endforeach
-                @unless ($report->is_signed)
-                    <p class="text-xs text-ink-grey">Brouillon de {{ $report->technician?->name ?? "l'intervenant" }}, pas encore signé.</p>
-                @endunless
-            </dl>
-        @else
+    @if ($report?->is_signed)
+        <div class="flex gap-2.5 mb-4 px-3.5 py-3 rounded-[10px] bg-[#E6F3EC] text-[13px] text-success">
+            <x-nav-icon name="check" class="w-4 h-4 flex-shrink-0 mt-0.5 text-green" />
+            <span>Rapport signé par <strong>{{ $report->signed_by_name }}</strong> le {{ $report->signed_at->format('d/m/Y à H\hi') }}
+                — intervention réalisée par {{ $report->technician?->name ?? '—' }}. Document verrouillé.</span>
+        </div>
+    @endif
 
-        <form method="POST" action="{{ route('work-orders.report.store', $workOrder) }}" class="space-y-4">
+    {{-- Lecture seule : rapport signé (verrouillé), ou superviseur qui le consulte
+         (ce bloc ne lui est montré que si un rapport existe, cf. show.blade.php). --}}
+    @if ($report && ($report->is_signed || auth()->user()->cannot('perform', $workOrder)))
+        <dl class="m-0 flex flex-col gap-3.5 text-[13.5px]">
+            @foreach (['Travail effectué' => $report->work_performed, 'Pièces / matériel utilisés' => $report->parts_used, 'Recommandations' => $report->recommendations] as $label => $text)
+                @if (filled($text))
+                    <div>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-grey">{{ $label }}</dt>
+                        <dd class="m-0 mt-1 text-[#3d3a33] leading-relaxed whitespace-pre-line">{{ $text }}</dd>
+                    </div>
+                @endif
+            @endforeach
+            @unless ($report->is_signed)
+                <p class="m-0 text-[12px] text-ink-grey">Brouillon de {{ $report->technician?->name ?? "l'intervenant" }}, pas encore signé.</p>
+            @endunless
+        </dl>
+    @else
+        <form method="POST" action="{{ route('work-orders.report.store', $workOrder) }}" class="flex flex-col gap-4">
             @csrf
 
             <div>
-                <x-input-label for="work_performed" value="Travail effectué" />
-                <textarea id="work_performed" name="work_performed" rows="4" required
-                    class="mt-1 block w-full border-slate-300 rounded-md shadow-sm text-sm">{{ old('work_performed', $workOrder->interventionReport?->work_performed) }}</textarea>
-                <x-input-error :messages="$errors->get('work_performed')" class="mt-2" />
+                <label for="work_performed">Travail effectué</label>
+                <textarea id="work_performed" name="work_performed" rows="4" required placeholder="Ce qui a été constaté et réparé…">{{ old('work_performed', $report?->work_performed) }}</textarea>
+                <x-input-error :messages="$errors->get('work_performed')" />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <x-input-label for="parts_used" value="Pièces / matériel utilisés" />
-                    <textarea id="parts_used" name="parts_used" rows="2"
-                        class="mt-1 block w-full border-slate-300 rounded-md shadow-sm text-sm">{{ old('parts_used', $workOrder->interventionReport?->parts_used) }}</textarea>
-                    <x-input-error :messages="$errors->get('parts_used')" class="mt-2" />
+                    <label for="parts_used">Pièces / matériel utilisés</label>
+                    <textarea id="parts_used" name="parts_used" rows="2">{{ old('parts_used', $report?->parts_used) }}</textarea>
+                    <x-input-error :messages="$errors->get('parts_used')" />
                 </div>
-
                 <div>
-                    <x-input-label for="recommendations" value="Recommandations" />
-                    <textarea id="recommendations" name="recommendations" rows="2"
-                        class="mt-1 block w-full border-slate-300 rounded-md shadow-sm text-sm">{{ old('recommendations', $workOrder->interventionReport?->recommendations) }}</textarea>
-                    <x-input-error :messages="$errors->get('recommendations')" class="mt-2" />
+                    <label for="recommendations">Recommandations</label>
+                    <textarea id="recommendations" name="recommendations" rows="2">{{ old('recommendations', $report?->recommendations) }}</textarea>
+                    <x-input-error :messages="$errors->get('recommendations')" />
                 </div>
             </div>
 
             <div>
-                <x-input-label for="signed_by_name" value="Nom du signataire (client / responsable)" />
-                <x-text-input id="signed_by_name" name="signed_by_name" type="text" class="mt-1 block w-full"
-                    :value="old('signed_by_name', $workOrder->interventionReport?->signed_by_name)" />
-                <x-input-error :messages="$errors->get('signed_by_name')" class="mt-2" />
+                <label for="signed_by_name">Nom du signataire (client / responsable)</label>
+                <input id="signed_by_name" name="signed_by_name" type="text" value="{{ old('signed_by_name', $report?->signed_by_name) }}">
+                <x-input-error :messages="$errors->get('signed_by_name')" />
             </div>
 
             <div>
-                <x-input-label value="Signature électronique" />
-                <div class="mt-1 border border-slate-300 rounded-md bg-paper">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[12px] font-semibold uppercase tracking-wide text-[#6C6658]">Signature électronique</span>
+                    <button type="button" id="clear-signature" class="btn btn-sm btn-ghost">Effacer</button>
+                </div>
+                <div class="rounded-[10px] border-2 border-dashed border-line bg-paper">
                     <canvas id="signature-pad" class="w-full touch-none" height="150"></canvas>
                 </div>
-                <button type="button" id="clear-signature" class="mt-2 text-xs text-ink-grey hover:underline">
-                    Effacer la signature
-                </button>
+                <p class="m-0 mt-1.5 text-[12px] text-ink-grey">Faites signer au doigt ou à la souris. Sans signature, le rapport reste un brouillon.</p>
                 <input type="hidden" name="signature" id="signature-input">
             </div>
 
             <div class="flex justify-end">
-                <button type="submit" class="px-4 py-2 bg-navy-800 text-white text-sm font-medium rounded-md hover:bg-navy-900">
-                    Enregistrer le rapport
-                </button>
+                <button type="submit" class="btn btn-primary"><x-nav-icon name="report" /> Enregistrer le rapport</button>
             </div>
         </form>
-        @endif
-    </div>
-</div>
+    @endif
+</x-panel>
 
 @push('scripts')
     <script>

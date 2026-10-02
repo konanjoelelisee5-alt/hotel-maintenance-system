@@ -1,33 +1,29 @@
-<div class="bg-white rounded-xl border border-red-200">
-    <div class="px-5 py-4 border-b border-red-100">
-        <h3 class="font-semibold text-navy-900 text-sm">Demandes de correction</h3>
-    </div>
-
-    <div class="p-5">
+<x-panel title="Demandes de correction" icon="alert" tone="danger" flush>
+    <ul class="m-0 p-0 list-none divide-y divide-line-soft">
         @foreach ($workOrder->correctionRequests as $correction)
-            <div class="{{ ! $loop->first ? 'border-t border-line-soft pt-3 mt-3' : '' }} text-sm">
-                <div class="flex justify-between items-start gap-3">
-                    <p class="text-slate-700">{{ $correction->description }}</p>
-                    @if ($correction->status === 'ouverte')
-                        @if (in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true))
-                            <form method="POST" action="{{ route('correction-requests.resolve', $correction) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="text-xs text-navy-700 hover:underline whitespace-nowrap">
-                                    Marquer traitée
-                                </button>
-                            </form>
-                        @else
-                            <span class="text-xs text-gold-700 whitespace-nowrap font-medium">À traiter</span>
-                        @endif
-                    @else
-                        <span class="text-xs text-emerald-600 whitespace-nowrap">✓ Traitée</span>
-                    @endif
+            <li class="flex items-start justify-between gap-3 px-5 py-3.5 text-[13px]">
+                <div class="min-w-0">
+                    <p class="m-0 text-[#3d3a33] leading-relaxed">{{ $correction->description }}</p>
+                    <p class="m-0 mt-1 text-[12px] text-ink-grey">
+                        Demandée par {{ $correction->requester?->name ?? '—' }} le {{ $correction->created_at->format('d/m/Y à H\hi') }}
+                    </p>
                 </div>
-                <p class="text-xs text-ink-grey mt-1">
-                    Demandée par {{ $correction->requester?->name ?? '—' }} le {{ $correction->created_at->format('d/m/Y H:i') }}
-                </p>
-            </div>
+                @if ($correction->status === 'ouverte')
+                    @if (in_array(auth()->user()->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager], true))
+                        <form method="POST" action="{{ route('correction-requests.resolve', $correction) }}" class="flex-shrink-0">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-sm btn-secondary"><x-nav-icon name="check" /> Marquer traitée</button>
+                        </form>
+                    @else
+                        <span class="flex-shrink-0 px-2 py-0.5 rounded-full bg-[#FBF1DF] text-[#7A5A16] text-[11.5px] font-semibold">À traiter</span>
+                    @endif
+                @else
+                    <span class="flex-shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E6F3EC] text-green text-[11.5px] font-semibold">
+                        <x-nav-icon name="check" class="w-3 h-3" /> Traitée
+                    </span>
+                @endif
+            </li>
         @endforeach
-    </div>
-</div>
+    </ul>
+</x-panel>

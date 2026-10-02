@@ -6,6 +6,25 @@
 [x-cloak] { display: none !important; }
 
 /* ==========================================================================
+   Boutons de la refonte (fiches, panneaux) : .btn + une variante.
+   ========================================================================== */
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 h-[40px] px-4 rounded-[9px] text-[13px] font-semibold
+            whitespace-nowrap transition disabled:opacity-60 disabled:cursor-not-allowed;
+    }
+    .btn svg, .btn > span:has(> svg) { @apply w-4 h-4 flex-shrink-0; }
+    .btn-primary { @apply bg-navy text-white hover:bg-navy-light; }
+    .btn-gold { @apply bg-gold text-navy hover:bg-gold-400; }
+    .btn-secondary { @apply border border-line bg-white text-[#3d3a33] hover:bg-paper; }
+    .btn-danger { @apply border border-red/30 bg-white text-red hover:bg-[#FBE4E1]; }
+    .btn-danger-solid { @apply bg-red text-white hover:bg-[#9A2019]; }
+    .btn-ghost { @apply text-[#4A4639] hover:bg-line-soft; }
+    .btn-sm { @apply h-[32px] px-3 text-[12.5px] rounded-[8px]; }
+    .btn-lg { @apply h-[48px] px-5 text-[14px] rounded-[10px]; }
+}
+
+/* ==========================================================================
    Fenêtres (modales) — resources/js/modal.js, components/modal-panel.blade.php
    ========================================================================== */
 
@@ -47,49 +66,50 @@
     margin-top: 0;
 }
 
-/* Champs : mêmes formes que la refonte (rayon 9 px, filet beige, focus navy). */
-.modal-form label:not(:has(input)) {
+/* Champs : mêmes formes que la refonte (rayon 9 px, filet beige, focus navy), dans les
+   fenêtres (.modal-form) comme sur les fiches (.ui-form, ex. fiche d'un OT). */
+:is(.modal-form, .ui-form) label:not(:has(input)) {
     @apply block text-[12px] font-semibold uppercase tracking-wide text-[#6C6658] mb-1.5;
 }
-.modal-form label:has(input[type="checkbox"]) {
+:is(.modal-form, .ui-form) label:has(input[type="checkbox"]) {
     @apply inline-flex items-center gap-2.5 text-[14px] font-medium text-[#14202B] cursor-pointer;
 }
-.modal-form :is(input[type="text"], input[type="email"], input[type="password"], input[type="number"],
+:is(.modal-form, .ui-form) :is(input[type="text"], input[type="email"], input[type="password"], input[type="number"],
     input[type="date"], input[type="datetime-local"], input[type="tel"], input[type="search"], select, textarea) {
     @apply block w-full mt-0 px-3.5 py-2.5 rounded-[9px] border border-line bg-white text-[14px] text-[#14202B]
         shadow-none placeholder:text-ink-grey transition focus:border-navy focus:ring-2 focus:ring-navy/15 focus:outline-none;
 }
-.modal-form select {
+:is(.modal-form, .ui-form) select {
     @apply pr-10; /* place pour la flèche de la liste */
 }
-.modal-form :is(input, select, textarea):disabled {
+:is(.modal-form, .ui-form) :is(input, select, textarea):disabled {
     @apply bg-paper text-ink-grey cursor-not-allowed;
 }
-.modal-form input[type="checkbox"] {
+:is(.modal-form, .ui-form) input[type="checkbox"] {
     @apply w-[18px] h-[18px] rounded-[5px] border-line text-navy focus:ring-navy/20;
 }
 /* Choix exclusifs (ex. Chambre / Espace commun) : pastilles, la choisie en navy. */
-.modal-form label:has(input[type="radio"]) {
+:is(.modal-form, .ui-form) label:has(input[type="radio"]) {
     @apply inline-flex items-center gap-2.5 h-[42px] px-4 rounded-[9px] border border-line bg-white
         text-[14px] font-medium text-[#4A4639] cursor-pointer transition hover:bg-paper;
 }
-.modal-form label:has(input[type="radio"]:checked) {
+:is(.modal-form, .ui-form) label:has(input[type="radio"]:checked) {
     @apply border-navy bg-[#EAF0F6] text-navy font-semibold;
 }
-.modal-form input[type="radio"] {
+:is(.modal-form, .ui-form) input[type="radio"] {
     @apply w-4 h-4 border-line text-navy focus:ring-navy/20;
 }
-.modal-form input[type="color"] {
+:is(.modal-form, .ui-form) input[type="color"] {
     @apply block w-20 h-[42px] p-1 rounded-[9px] border border-line bg-white cursor-pointer;
 }
 /* Plus spécifique que la règle des champs ci-dessus, sinon le filet beige l'emporte. */
-.modal-form :is(input, select, textarea)[aria-invalid="true"] {
+:is(.modal-form, .ui-form) :is(input, select, textarea)[aria-invalid="true"] {
     @apply border-red bg-[#FFFBFA] focus:border-red focus:ring-red/15;
 }
-.modal-form p.text-xs {
+:is(.modal-form, .ui-form) p.text-xs {
     @apply text-[12px] text-ink-grey mt-1.5;
 }
-.modal-form ul.text-sm, .modal-form p[data-modal-error] {
+:is(.modal-form, .ui-form) ul.text-sm, :is(.modal-form, .ui-form) p[data-modal-error] {
     @apply text-[12.5px] font-medium text-red mt-1.5;
 }
 /* Bandeau en tête du formulaire : résumé des erreurs, droits, réseau. */
