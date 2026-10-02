@@ -187,7 +187,7 @@ class DashboardController extends Controller
             'mine' => $user->isDepartmentHead() ? $query->where('reported_by', $user->id) : null,
             'urgent' => $query->whereHas('priority', fn ($p) => $p->where('code', 'urgente')),
             'unassigned' => $query->whereNull('assigned_to'),
-            'late' => $query->where('sla_breached', true),
+            'late' => $query->late(),
             'to_review' => $query->where('status', 'resolu'),
             'waiting' => $query->where('status', 'en_attente'),
             default => null,

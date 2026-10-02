@@ -74,6 +74,27 @@ class WorkOrderIndexTest extends TestCase
             ->assertSee('Réinitialiser');
     }
 
+    public function test_list_has_the_same_tabs_and_counts_as_the_supervision(): void
+    {
+        $this->workOrder('Clim réparée', ['status' => 'resolu']);
+        $this->workOrder('Pièce commandée', ['status' => 'en_attente']);
+        $this->workOrder('Fuite en retard')->update(['sla_resolution_due_at' => now()->subHour()]);
+        $this->workOrder('Vieux retard clos', ['status' => 'ferme'])->update(['sla_breached' => true]);
+        $admin = User::factory()->admin()->create();
+
+        $list = $this->actingAs($admin)->get(route('work-orders.index', ['filter' => 'to_review']))
+            ->assertSee('Ordres à contrôler')
+            ->assertSee('Clim réparée')
+            ->assertDontSee('Pièce commandée');
+        $supervision = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        foreach (['urgent', 'unassigned', 'late', 'to_review', 'waiting'] as $key) {
+            $this->assertSame($supervision->viewData('filterCounts')[$key], $list->viewData('filterCounts')[$key], $key);
+        }
+        $this->assertSame(1, $list->viewData('filterCounts')['late']);   // le retard clos n'est plus à traiter
+        $this->assertSame(1, $list->viewData('filterCounts')['waiting']);
+    }
+
     public function test_unassigned_tab_only_lists_open_orders(): void
     {
         $this->workOrder('Volet bloqué');

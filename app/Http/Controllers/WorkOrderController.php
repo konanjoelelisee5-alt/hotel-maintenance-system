@@ -38,11 +38,13 @@ class WorkOrderController extends Controller
         $applyFilter = fn ($qr, string $key) => match ($key) {
             'mine' => $qr->when($authUser->isDepartmentHead(), fn ($m) => $m->where('reported_by', $authUser->id)),
             'open' => $qr->open(),
-            'urgent' => $qr->whereHas('priority', fn ($p) => $p->where('code', 'urgente')),
+            // Mêmes onglets et mêmes règles que la file de la Supervision : un OT réparé,
+            // fermé ou annulé ne figure plus parmi les urgents ou les retards.
+            'urgent' => $qr->open()->whereHas('priority', fn ($p) => $p->where('code', 'urgente')),
             'unassigned' => $qr->whereNull('assigned_to')->open(),
-            // En retard : signalé dépassé, ou échéance passée sans attendre la tâche planifiée.
-            'late' => $qr->where(fn ($l) => $l->where('sla_breached', true)
-                ->orWhere(fn ($o) => $o->slaResolutionOverdue())),
+            'late' => $qr->late(),
+            'to_review' => $qr->where('status', 'resolu'),
+            'waiting' => $qr->where('status', 'en_attente'),
             default => $qr,
         };
 
@@ -70,7 +72,7 @@ class WorkOrderController extends Controller
 
         $isSupervisor = $authUser->role->seesAllWorkOrders();
         $filters = $isSupervisor
-            ? [['key' => 'all', 'label' => 'Tous'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'unassigned', 'label' => 'Non affectés'], ['key' => 'late', 'label' => 'En retard SLA']]
+            ? [['key' => 'all', 'label' => 'Tous'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'unassigned', 'label' => 'Non affectés'], ['key' => 'late', 'label' => 'En retard SLA'], ['key' => 'to_review', 'label' => 'À contrôler'], ['key' => 'waiting', 'label' => 'En attente']]
             : [['key' => 'mine', 'label' => $authUser->role === UserRole::Technicien ? 'Mes ordres' : 'Mes signalements'], ['key' => 'urgent', 'label' => 'Urgents'], ['key' => 'all', 'label' => $authUser->isDepartmentHead() ? "Toute l'équipe" : 'Tous']];
 
         $count = fn (string $key) => $applyFilter(clone $query, $key)->count();
@@ -82,7 +84,7 @@ class WorkOrderController extends Controller
             ['label' => 'Total', 'value' => $total, 'sub' => 'tous statuts confondus', 'filter' => 'all', 'dot' => 'bg-navy'],
             ['label' => 'Ouverts', 'value' => $open, 'sub' => 'à traiter ou en cours', 'filter' => 'open', 'dot' => 'bg-blue'],
             ['label' => 'Non affectés', 'value' => $count('unassigned'), 'sub' => 'ouverts, sans technicien', 'filter' => 'unassigned', 'dot' => 'bg-gold'],
-            ['label' => 'En retard SLA', 'value' => $late = $count('late'), 'sub' => $total ? round($late / $total * 100).' % des ordres' : 'aucun ordre', 'filter' => 'late', 'dot' => 'bg-red'],
+            ['label' => 'En retard SLA', 'value' => $late = $count('late'), 'sub' => $open ? round($late / $open * 100).' % des ordres ouverts' : 'aucun ordre ouvert', 'filter' => 'late', 'dot' => 'bg-red'],
         ];
 
         $priorities = WorkOrderPriority::where('is_active', true)->orderBy('position')->get();

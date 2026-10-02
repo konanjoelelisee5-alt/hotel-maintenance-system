@@ -18,6 +18,8 @@
         'urgent' => 'Ordres urgents',
         'unassigned' => 'Ordres non affectés',
         'late' => 'Ordres en retard SLA',
+        'to_review' => 'Ordres à contrôler',
+        'waiting' => 'Ordres en attente',
         default => 'Tous les ordres',
     };
 @endphp

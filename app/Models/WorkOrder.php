@@ -187,6 +187,17 @@ class WorkOrder extends Model
             ->whereNotIn('status', self::FINISHED_STATUSES);
     }
 
+    /**
+     * En retard, encore à traiter : signalé dépassé, ou échéance passée sans attendre
+     * que la tâche planifiée pose sla_breached. Même règle sur la Supervision et la liste.
+     */
+    public function scopeLate(Builder $query): Builder
+    {
+        return $query->open()->where(fn (Builder $q) => $q
+            ->where('sla_breached', true)
+            ->orWhere(fn (Builder $o) => $o->slaResolutionOverdue()));
+    }
+
     public function scopePreventive(Builder $query): Builder
     {
         return $query->whereNotNull('maintenance_plan_id');
