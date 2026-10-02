@@ -6,7 +6,7 @@
     Structure : titre+référence / lieu+assigné / badges statut+priorité / [échéance] / barre SLA.
 --}}
 <a href="{{ route('work-orders.show', $w) }}"
-   class="block border-l-[3px] rounded-xl border border-line bg-white px-4 py-3.5 hover:bg-paper transition"
+   class="block border-l-[3px] rounded-2xl border border-line bg-white px-4 py-4 hover:bg-paper transition"
    style="border-left-color: {{ $w->priority->color }}">
 
     <div class="flex items-start justify-between gap-2">
