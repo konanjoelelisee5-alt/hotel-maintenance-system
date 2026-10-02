@@ -43,13 +43,21 @@ class PlanningController extends Controller
         return view('planning.technician', compact('technician'));
     }
 
+    /**
+     * Interventions planifiées entre deux dates, pour l'agenda (resources/js/agenda.js).
+     * Au-delà du titre et des horaires : de quoi afficher une carte complète sans
+     * ouvrir l'OT (référence, lieu, technicien, statut, priorité, durée).
+     */
     public function events(Request $request): JsonResponse
     {
-        $start = $request->query('start');
-        $end = $request->query('end');
+        $validated = $request->validate([
+            'start' => ['required', 'date'],
+            'end' => ['required', 'date', 'after:start'],
+            'technician_id' => ['nullable', 'integer'],
+        ]);
 
-        $query = WorkOrder::with(['room', 'assignee', 'priority'])
-            ->scheduledBetween($start, $end);
+        $query = WorkOrder::with(['room', 'equipment', 'assignee', 'priority'])
+            ->scheduledBetween($validated['start'], $validated['end']);
 
         /** @var User $user */
         $user = Auth::user();
@@ -60,18 +68,23 @@ class PlanningController extends Controller
             $query->where('assigned_to', $request->query('technician_id'));
         }
 
-        $workOrders = $query->get();
-
-        $events = $workOrders->map(function (WorkOrder $workOrder) {
-            return [
-                'id' => $workOrder->id,
-                'title' => $workOrder->title . ($workOrder->assignee ? ' — ' . $workOrder->assignee->name : ''),
-                'start' => $workOrder->scheduled_at->toIso8601String(),
-                'end' => $workOrder->scheduled_end_at?->toIso8601String(),
-                'url' => route('work-orders.show', $workOrder),
-                'color' => $workOrder->priority->color,
-            ];
-        });
+        $events = $query->orderBy('scheduled_at')->get()->map(fn (WorkOrder $workOrder) => [
+            'id' => $workOrder->id,
+            'code' => $workOrder->code(),
+            'title' => $workOrder->title,
+            'start' => $workOrder->scheduled_at->toIso8601String(),
+            'end' => $workOrder->scheduled_end_at?->toIso8601String(),
+            'minutes' => $workOrder->estimated_duration_minutes,
+            'url' => route('work-orders.show', $workOrder),
+            'color' => $workOrder->priority->color,
+            'priority' => $workOrder->priority->label,
+            'urgent' => $workOrder->priority->code === 'urgente',
+            'status' => $workOrder->status,
+            'status_label' => $workOrder->status_label,
+            'place' => $workOrder->room?->label ?? $workOrder->equipment?->name,
+            'technician' => $workOrder->assignee?->name,
+            'initials' => $workOrder->assignee?->initialsOrGenerated(),
+        ]);
 
         return response()->json($events);
     }
