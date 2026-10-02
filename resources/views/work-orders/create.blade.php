@@ -6,15 +6,9 @@
         @include('work-orders.partials.create-form', ['inModal' => true])
     </x-modal-panel>
 @else
-    <x-app-layout>
-        <x-slot name="header">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Nouvel ordre de travail') }}
-            </h2>
-        </x-slot>
-
-        <div class="py-12">
-            <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+    <x-app-layout :crumb="'Exploitation / Ordres de travail'" :page-title="'Nouvel ordre de travail'" :back-route="route('work-orders.index')">
+        <div>
+            <div class="w-full max-w-3xl">
                 <div class="bg-white p-6 shadow-sm rounded-lg">
                     @include('work-orders.partials.create-form')
                 </div>

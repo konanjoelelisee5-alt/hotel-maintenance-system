@@ -1,16 +1,7 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Disponibilités de') }} {{ $technician->name }}
-        </h2>
-    </x-slot>
+<x-app-layout :crumb="'Exploitation / Planning'" :page-title="'Disponibilités de '.$technician->name" :back-route="route('planning.technician', $technician)">
+    <div>
+        <div class="w-full max-w-3xl space-y-6">
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            @if (session('success'))
-                <div class="p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
 
             <!-- Formulaire d'ajout -->
             <div class="bg-white p-6 shadow-sm rounded-lg">

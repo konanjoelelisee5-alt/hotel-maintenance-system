@@ -1,10 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Modifier le type d\'OT') }}</h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+<x-app-layout :crumb="'Référentiels / Types d\'OT'" :page-title="'Modifier le type d\'OT'" :back-route="route('work-order-types.index')">
+    <div>
+        <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">
                 <form method="POST" action="{{ route('work-order-types.update', $workOrderType) }}" class="space-y-4">
                     @csrf

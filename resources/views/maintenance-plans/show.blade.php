@@ -1,32 +1,16 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $maintenancePlan->name }}</h2>
-            <div class="flex gap-2">
-                <form method="POST" action="{{ route('maintenance-plans.generate', $maintenancePlan) }}"
-                      onsubmit="return confirm('Générer un OT maintenant pour ce plan, sans attendre son échéance ?');">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-navy-700 text-white text-sm font-medium rounded-md hover:bg-navy-800">
-                        Générer un OT maintenant
-                    </button>
-                </form>
-                <a href="{{ route('maintenance-plans.edit', $maintenancePlan) }}"
-                   class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300">
-                    Modifier
-                </a>
-            </div>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Exploitation / Maintenance préventive'" :page-title="$maintenancePlan->name" :back-route="route('maintenance-plans.index')">
+    <x-slot:primaryAction>
+        <a href="{{ route('maintenance-plans.edit', $maintenancePlan) }}" class="btn btn-secondary">Modifier</a>
+            <form method="POST" action="{{ route('maintenance-plans.generate', $maintenancePlan) }}"
+                  onsubmit="return confirm('Générer un OT maintenant pour ce plan, sans attendre son échéance ?');">
+                @csrf
+                <button type="submit" class="btn btn-primary">Générer un OT maintenant</button>
+            </form>
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div>
+        <div class="w-full space-y-6">
 
-            @if (session('success'))
-                <div class="p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="p-4 bg-red-100 text-red-800 rounded-md">{{ session('error') }}</div>
-            @endif
 
             <div class="bg-white p-6 shadow-sm rounded-lg grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
                 <div>

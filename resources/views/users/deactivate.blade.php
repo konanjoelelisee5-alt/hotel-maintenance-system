@@ -1,8 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Désactiver {{ $user->name }}</h2>
-    </x-slot>
-
+<x-app-layout :crumb="'Administration / Utilisateurs'" :page-title="'Désactiver '.$user->name" :back-route="route('users.index')">
     @php
         // « Paul — 3 OT en cours · Plomberie, Électricité » : charge et compétences
         // aident à choisir le bon remplaçant sans ouvrir d'autre écran.
@@ -10,8 +6,8 @@
             .($t->skills->isNotEmpty() ? ' · '.$t->skills->pluck('name')->implode(', ') : '');
     @endphp
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+    <div>
+        <div class="w-full max-w-4xl">
             <form method="POST" action="{{ route('users.deactivate.store', $user) }}" class="space-y-6"
                   onsubmit="return confirm('Confirmer la désactivation de ce compte ?');">
                 @csrf

@@ -1,15 +1,10 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Contrôle qualité') }} — OT #{{ $qualityControl->workOrder->id }}
-            </h2>
-            <x-quality-control-status-badge :status="$qualityControl->status" />
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Ordres de travail / '.$qualityControl->workOrder->code()" :page-title="'Contrôle qualité'" :back-route="route('work-orders.show', $qualityControl->workOrder)">
+    <x-slot:primaryAction>
+        <x-quality-control-status-badge :status="$qualityControl->status" />
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+    <div>
+        <div class="w-full max-w-3xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">
 
                 <p class="text-sm text-gray-600 mb-6">

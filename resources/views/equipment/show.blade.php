@@ -1,34 +1,28 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-wrap justify-between items-center gap-3">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $equipment->name }}</h2>
-                <p class="text-sm text-gray-500 mt-1">
-                    {{ $equipment->type ?? 'Équipement' }} ·
-                    @if ($equipment->room)
-                        <a href="{{ route('rooms.show', $equipment->room) }}" class="hover:underline">{{ $equipment->room->label }}</a>
-                    @else
-                        <span class="text-orange-700">sans lieu</span>
-                    @endif
-                    · @include('rooms.partials.status-badge', ['status' => $equipment->status, 'label' => $equipment->status_label])
-                </p>
-            </div>
-            <div class="flex gap-2">
-                <a href="{{ route('equipment.edit', $equipment) }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Modifier</a>
-                @if ($equipment->status !== 'hors_service')
-                    <form method="POST" action="{{ route('equipment.destroy', $equipment) }}"
-                          onsubmit="return confirm('Mettre cet équipement hors service ? Son historique est conservé.');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-4 py-2 bg-white border border-red-300 text-red-700 text-sm font-medium rounded-md hover:bg-red-50">Mettre hors service</button>
-                    </form>
-                @endif
-            </div>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Référentiels / Équipements'" :page-title="$equipment->name" :back-route="route('equipment.index')">
+    <x-slot:primaryAction>
+        <a href="{{ route('equipment.edit', $equipment) }}" class="btn btn-secondary">Modifier</a>
+            @if ($equipment->status !== 'hors_service')
+                <form method="POST" action="{{ route('equipment.destroy', $equipment) }}"
+                      onsubmit="return confirm('Mettre cet équipement hors service ? Son historique est conservé.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Mettre hors service</button>
+                </form>
+            @endif
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <p class="flex items-center gap-1.5 flex-wrap text-[13.5px] text-ink-grey">
+        {{ $equipment->type ?? 'Équipement' }} ·
+        @if ($equipment->room)
+            <a href="{{ route('rooms.show', $equipment->room) }}" class="text-navy font-medium hover:underline">{{ $equipment->room->label }}</a>
+        @else
+            <span class="text-amber font-medium">sans lieu</span>
+        @endif
+        · @include('rooms.partials.status-badge', ['status' => $equipment->status, 'label' => $equipment->status_label])
+    </p>
+
+    <div>
+        <div class="w-full space-y-6">
 
             <div class="grid grid-cols-3 gap-4">
                 @foreach ([['OT ouverts', $stats['open']], ['OT sur 90 jours', $stats['last90']], ['OT au total', $stats['total']]] as [$label, $value])

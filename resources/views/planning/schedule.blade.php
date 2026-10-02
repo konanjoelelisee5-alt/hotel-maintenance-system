@@ -1,19 +1,8 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Planifier l\'OT') }} #{{ $workOrder->id }} — {{ $workOrder->title }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+<x-app-layout :crumb="'Ordres de travail / '.$workOrder->code()" :page-title="'Planifier l\'intervention'" :back-route="route('work-orders.show', $workOrder)">
+    <div>
+        <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">
 
-                @if (session('warning'))
-                    <div class="mb-4 p-4 bg-orange-100 text-orange-800 rounded-md text-sm">
-                        {{ session('warning') }}
-                    </div>
-                @endif
 
                 <form method="POST" action="{{ route('work-orders.schedule.store', $workOrder) }}" class="space-y-6">
                     @csrf

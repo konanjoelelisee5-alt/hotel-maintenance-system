@@ -1,17 +1,8 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Compétences de') }} {{ $technician->name }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+<x-app-layout :crumb="'Exploitation / Planning'" :page-title="'Compétences de '.$technician->name" :back-route="route('planning.technician', $technician)">
+    <div>
+        <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">
 
-                @if (session('success'))
-                    <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-                @endif
 
                 <form method="POST" action="{{ route('planning.skills.update', $technician) }}" class="space-y-4">
                     @csrf

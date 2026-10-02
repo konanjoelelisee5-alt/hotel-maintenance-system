@@ -1,10 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Nouveau bon de commande') }}</h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+<x-app-layout :crumb="'Stock & achats / Bons de commande'" :page-title="'Nouveau bon de commande'" :back-route="route('purchase-orders.index')">
+    <div>
+        <div class="w-full max-w-4xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">
 
                 <!--

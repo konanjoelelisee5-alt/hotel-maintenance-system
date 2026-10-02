@@ -1,10 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Astreinte') }}</h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+<x-app-layout :crumb="'Alertes & SLA'" :page-title="'Astreinte'">
+    <div>
+        <div class="w-full max-w-4xl space-y-6">
 
             {{-- Qui est prévenu en ce moment --}}
             <div class="bg-white p-6 shadow-sm rounded-lg">

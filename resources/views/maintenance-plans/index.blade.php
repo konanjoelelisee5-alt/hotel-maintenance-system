@@ -1,23 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Maintenance préventive') }}</h2>
-            <a href="{{ route('maintenance-plans.create') }}"
-               class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
-                + Nouveau plan
-            </a>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Exploitation'" :page-title="'Maintenance préventive'">
+    <x-slot:primaryAction>
+        <a href="{{ route('maintenance-plans.create') }}" class="btn btn-primary">+ Nouveau plan</a>
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div>
+        <div class="w-full">
 
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-md">{{ session('error') }}</div>
-            @endif
 
             <p class="text-sm text-gray-500 mb-4">
                 Chaque plan génère automatiquement un ordre de travail à son échéance, avec assignation

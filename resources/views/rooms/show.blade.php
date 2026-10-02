@@ -1,30 +1,24 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-wrap justify-between items-center gap-3">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $room->label }}</h2>
-                <p class="text-sm text-gray-500 mt-1">
-                    {{ $room->isCommonArea() ? 'Espace commun · code '.$room->number : 'Chambre' }}
-                    @if ($room->floor) · {{ $room->floor }} @endif
-                    · @include('rooms.partials.status-badge', ['status' => $room->status, 'label' => $room->status_label])
-                </p>
-            </div>
-            <div class="flex gap-2">
-                <a href="{{ route('rooms.edit', $room) }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Modifier</a>
-                @if ($room->status !== 'hors_service')
-                    <form method="POST" action="{{ route('rooms.destroy', $room) }}"
-                          onsubmit="return confirm('Mettre ce lieu hors service ? Il ne sera plus proposé pour les nouveaux signalements.');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-4 py-2 bg-white border border-red-300 text-red-700 text-sm font-medium rounded-md hover:bg-red-50">Mettre hors service</button>
-                    </form>
-                @endif
-            </div>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Référentiels / Lieux'" :page-title="$room->label" :back-route="route('rooms.index')">
+    <x-slot:primaryAction>
+        <a href="{{ route('rooms.edit', $room) }}" class="btn btn-secondary">Modifier</a>
+            @if ($room->status !== 'hors_service')
+                <form method="POST" action="{{ route('rooms.destroy', $room) }}"
+                      onsubmit="return confirm('Mettre ce lieu hors service ? Il ne sera plus proposé pour les nouveaux signalements.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Mettre hors service</button>
+                </form>
+            @endif
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <p class="flex items-center gap-1.5 flex-wrap text-[13.5px] text-ink-grey">
+        {{ $room->isCommonArea() ? 'Espace commun · code '.$room->number : 'Chambre' }}
+        @if ($room->floor) · {{ $room->floor }} @endif
+        · @include('rooms.partials.status-badge', ['status' => $room->status, 'label' => $room->status_label])
+    </p>
+
+    <div>
+        <div class="w-full space-y-6">
 
             {{-- Indicateurs : un lieu qui tombe souvent en panne est à rénover, pas à réparer encore. --}}
             <div class="grid grid-cols-3 gap-4">

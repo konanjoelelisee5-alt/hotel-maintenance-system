@@ -1,10 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Journal d\'activité') }}</h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-4">
+<x-app-layout :crumb="'Administration'" page-title="Journal d'activité">
+    <div>
+        <div class="w-full space-y-4">
 
             <div class="bg-white p-4 rounded-lg shadow-sm">
                 <form method="GET" class="flex flex-wrap gap-4">

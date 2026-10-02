@@ -1,12 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Démarrer un contrôle qualité') }} — OT #{{ $workOrder->id }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+<x-app-layout :crumb="'Ordres de travail / '.$workOrder->code()" :page-title="'Démarrer un contrôle qualité'" :back-route="route('work-orders.show', $workOrder)">
+    <div>
+        <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">
 
                 <form method="POST" action="{{ route('quality-controls.store', $workOrder) }}" class="space-y-4">

@@ -1,19 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $supplier->name }}</h2>
-            <a href="{{ route('suppliers.edit', $supplier) }}" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-md hover:bg-gray-300">
-                Modifier
-            </a>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Stock & achats / Fournisseurs'" :page-title="$supplier->name" :back-route="route('suppliers.index')">
+    <x-slot:primaryAction>
+        <a href="{{ route('suppliers.edit', $supplier) }}" class="btn btn-secondary">Modifier</a>
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div>
+        <div class="w-full space-y-6">
 
-            @if (session('success'))
-                <div class="p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
 
             <div class="bg-white p-6 shadow-sm rounded-lg grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
                 <div><span class="font-medium">Contact :</span> {{ $supplier->contact_person ?? '—' }}</div>

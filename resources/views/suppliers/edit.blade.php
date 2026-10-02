@@ -1,10 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Modifier') }} {{ $supplier->name }}</h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+<x-app-layout :crumb="'Stock & achats / Fournisseurs'" :page-title="'Modifier '.$supplier->name" :back-route="route('suppliers.show', $supplier)">
+    <div>
+        <div class="w-full max-w-2xl">
             <div class="bg-white p-6 shadow-sm rounded-lg">
                 <form method="POST" action="{{ route('suppliers.update', $supplier) }}" class="space-y-4">
                     @csrf

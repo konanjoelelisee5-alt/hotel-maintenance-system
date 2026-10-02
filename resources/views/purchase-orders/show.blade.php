@@ -1,16 +1,7 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Bon de commande {{ $purchaseOrder->number }}
-        </h2>
-    </x-slot>
+<x-app-layout :crumb="'Stock & achats / Bons de commande'" :page-title="'Bon de commande '.$purchaseOrder->number" :back-route="route('purchase-orders.index')">
+    <div>
+        <div class="w-full max-w-4xl space-y-6">
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            @if (session('success'))
-                <div class="p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
 
             <!-- Informations générales -->
             <div class="bg-white p-6 shadow-sm rounded-lg">

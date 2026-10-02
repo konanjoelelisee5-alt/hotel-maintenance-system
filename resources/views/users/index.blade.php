@@ -1,22 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Utilisateurs') }}</h2>
-            <a href="{{ route('users.create') }}" data-modal class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
-                + Nouvel utilisateur
-            </a>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Administration'" :page-title="'Utilisateurs'">
+    <x-slot:primaryAction>
+        <a href="{{ route('users.create') }}" data-modal class="btn btn-primary">+ Nouvel utilisateur</a>
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+    <div>
+        <div class="w-full">
 
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
-            @if (session('warning'))
-                <div class="mb-4 p-4 bg-orange-100 text-orange-800 rounded-md">{{ session('warning') }}</div>
-            @endif
             @if (session('temporary_password'))
                 <div class="mb-4 p-4 bg-amber-50 border border-amber-300 text-amber-900 rounded-md text-sm">
                     Mot de passe temporaire de <strong>{{ session('temporary_password')['name'] }}</strong> :

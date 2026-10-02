@@ -1,19 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $part->name }} <span class="text-gray-400 font-normal text-base">({{ $part->sku }})</span></h2>
-            <a href="{{ route('parts.edit', $part) }}" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-md hover:bg-gray-300">
-                Modifier
-            </a>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Stock & achats / Pièces & stock · '.$part->sku" :page-title="$part->name" :back-route="route('parts.index')">
+    <x-slot:primaryAction>
+        <a href="{{ route('parts.edit', $part) }}" class="btn btn-secondary">Modifier</a>
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div>
+        <div class="w-full max-w-4xl space-y-6">
 
-            @if (session('success'))
-                <div class="p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
 
             <!-- Aperçu du stock -->
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">

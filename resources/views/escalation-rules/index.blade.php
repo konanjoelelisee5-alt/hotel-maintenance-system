@@ -1,19 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Règles d\'escalade') }}</h2>
-            <a href="{{ route('escalation-rules.create') }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
-                + Nouvelle règle
-            </a>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Alertes & SLA'" page-title="Règles d'escalade">
+    <x-slot:primaryAction>
+        <a href="{{ route('escalation-rules.create') }}" class="btn btn-primary">+ Nouvelle règle</a>
+    </x-slot:primaryAction>
 
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+    <div>
+        <div class="w-full">
 
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-md">{{ session('success') }}</div>
-            @endif
 
             <div class="bg-white overflow-hidden shadow-sm rounded-lg">
                 <div class="overflow-x-auto">
