@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#E6E1D7;font-family:'Archivo',system-ui,sans-serif;color:#0E2136;-webkit-font-smoothing:antialiased}
+a{color:#0E2136;text-decoration:none}a:hover{color:#B58435}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<section style="padding:56px 64px 96px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <span style="font-size:13px;font-weight:700;letter-spacing:.1em;color:#6B6658">HOUSEKEEPING · DESKTOP · 1440 × 900</span>
+    <h1 style="margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em">Version Desktop</h1>
+    <p style="margin:0;font-size:15px;color:#5C6472;max-width:720px;line-height:1.5">Poste bureau de la gouvernante : navigation latérale fixe, vue d'ensemble de l'équipe, lecture en maître-détail et signalement sur une seule page.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:56px">
+
+    <!-- D1 -->
+    <div id="D1" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">D1</span><span style="font-weight:600;font-size:15px">Tableau de bord · Gouvernante</span></div>
+      <div style="width:1440px;height:900px;border-radius:14px;overflow:hidden;display:flex;background:#F4F1EB;border:1px solid #D3CBBC;box-shadow:0 30px 60px -30px rgba(14,33,54,.4)">
+        <aside style="width:248px;flex:none;background:#0E2136;display:flex;flex-direction:column;padding:22px 14px 16px">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 8px">
+            <svg width="38" height="38" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#14304F"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg>
+            <div style="display:flex;flex-direction:column;line-height:1.15"><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:-.01em">Président</span><span style="font-size:10px;font-weight:700;letter-spacing:.18em;color:#E4C58F">HOUSEKEEPING</span></div>
+          </div>
+          <nav style="margin-top:32px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ navDash }}" as="n" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:10px;background:{{ n.bg }};box-shadow:{{ n.bar }}">
+                <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span>
+                <span style="flex:1;font-size:14px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+                <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#B58435;color:#0E2136;display:grid;place-items:center">{{ n.badge }}</span></sc-if>
+              </div>
+            </sc-for>
+          </nav>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;background:rgba(255,255,255,.05)">
+            <span style="width:38px;height:38px;border-radius:999px;background:#E4C58F;color:#0E2136;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none">ML</span>
+            <div style="flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0"><span style="font-size:14px;font-weight:600;color:#fff">Mireille Loukou</span><span style="font-size:12px;color:#A9B6C6">Gouvernante générale</span></div>
+            <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8FA0B5">logout</span>
+          </div>
+        </aside>
+        <main style="flex:1;min-width:0;display:flex;flex-direction:column;padding:28px 32px;gap:24px">
+          <header style="display:flex;align-items:center;gap:12px">
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;color:#5C6472;font-weight:500">Mardi 1 octobre 2026 · Service du matin</span><h1 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-.025em">Bonjour, Mireille</h1></div>
+            <div style="width:320px;height:44px;border-radius:12px;background:#fff;border:1px solid #E8E2D6;display:flex;align-items:center;gap:10px;padding:0 14px;color:#8B909A;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">search</span>Chambre, lieu, agent…</div>
+            <span style="width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid #E8E2D6;display:grid;place-items:center;position:relative"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">notifications</span><span style="position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:#B3261E;color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid #F4F1EB">2</span></span>
+            <span style="height:44px;padding:0 18px 0 14px;border-radius:12px;background:#0E2136;color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#E4C58F;font-variation-settings:'FILL' 1">mic</span>Signaler un problème</span>
+          </header>
+          <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;display:grid;grid-template-columns:repeat(4,1fr)">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+              <div style="padding:18px 22px;display:flex;align-items:center;gap:16px;border-left:{{ k.bl }}">
+                <span style="width:46px;height:46px;border-radius:13px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:24px;line-height:1;background:{{ k.bg }};color:{{ k.c }}">{{ k.icon }}</span>
+                <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:{{ k.c }}">{{ k.v }}</span><span style="font-size:13px;color:#5C6472;font-weight:500">{{ k.l }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px">
+            <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:16px;padding:16px 20px 0">
+                <span style="flex:1;font-size:17px;font-weight:700;letter-spacing:-.01em">Signalements de l'équipe</span>
+                <span style="height:36px;padding:0 12px;border-radius:10px;border:1px solid #E8E2D6;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">tune</span>Filtres</span>
+                <span style="height:36px;padding:0 12px;border-radius:10px;border:1px solid #E8E2D6;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">swap_vert</span>Priorité</span>
+              </div>
+              <div style="display:flex;gap:4px;padding:6px 20px 0;border-bottom:1px solid #EEE8DE">
+                <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+                  <span style="display:flex;align-items:center;gap:7px;padding:10px 10px 11px;font-size:14px;color:{{ t.c }};font-weight:{{ t.w }};border-bottom:2px solid {{ t.bb }};margin-bottom:-1px">{{ t.l }}<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;min-width:22px;height:20px;padding:0 6px;border-radius:999px;display:grid;place-items:center;background:{{ t.pbg }};color:{{ t.pc }}">{{ t.n }}</span></span>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.1fr) 112px minmax(0,1.2fr) 52px 20px;gap:12px;padding:11px 20px;background:#FBF9F5;border-bottom:1px solid #EEE8DE;font-size:11px;font-weight:700;letter-spacing:.08em;color:#8B909A">
+                <span>LIEU</span><span>SIGNALÉ PAR</span><span>STATUT</span><span>TECHNICIEN</span><span>HEURE</span><span></span>
+              </div>
+              <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.1fr) 112px minmax(0,1.2fr) 52px 20px;gap:12px;align-items:center;padding:10px 20px;border-bottom:1px solid #F2EDE4">
+                  <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                    <span style="width:38px;height:38px;border-radius:11px;background:#F3EFE7;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:20px;line-height:1">{{ r.icon }}</span>
+                    <div style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700">{{ r.lieu }}<sc-if value="{{ r.urgent }}" hint-placeholder-val="{{ false }}"><span style="height:18px;padding:0 6px;border-radius:5px;background:#FBE7E5;color:#B3261E;font-size:10px;font-weight:700;letter-spacing:.04em;display:grid;place-items:center">URGENT</span></sc-if></span><span style="font-size:13px;color:#5C6472">{{ r.cat }} · {{ r.floor }}</span></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;min-width:0"><span style="width:26px;height:26px;border-radius:999px;display:grid;place-items:center;font-size:10px;font-weight:700;flex:none;background:{{ r.byBg }};color:{{ r.byC }}">{{ r.byIni }}</span><span style="font-size:13px;white-space:nowrap">{{ r.by }}</span></div>
+                  <span style="justify-self:start;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;color:{{ r.sc }};background:{{ r.sbg }}"><span style="width:6px;height:6px;border-radius:999px;background:{{ r.sdot }}"></span>{{ r.sl }}</span>
+                  <div style="min-width:0">
+                    <sc-if value="{{ r.hasTech }}" hint-placeholder-val="{{ true }}"><span style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#5C6472">engineering</span>{{ r.tech }}</span></sc-if>
+                    <sc-if value="{{ r.noTech }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#8B909A;font-style:italic">Non affecté</span></sc-if>
+                  </div>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5C6472">{{ r.time }}</span>
+                  <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#B9B3A7">chevron_right</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+              <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;padding:16px 20px 8px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px"><span style="font-size:17px;font-weight:700;letter-spacing:-.01em">Charge de l'équipe</span><span style="font-size:12px;color:#8B909A">OT ouverts</span></div>
+                <sc-for list="{{ agents }}" as="a" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #F2EDE4">
+                    <span style="width:32px;height:32px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:700;flex:none;background:{{ a.bg }};color:{{ a.fc }}">{{ a.ini }}</span>
+                    <span style="flex:1;font-size:14px;font-weight:600">{{ a.name }}</span>
+                    <span style="width:80px;height:6px;border-radius:999px;background:#EEE9DF;overflow:hidden"><span style="display:block;height:100%;border-radius:999px;width:{{ a.w }};background:{{ a.c }}"></span></span>
+                    <span style="width:18px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:{{ a.c }}">{{ a.n }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="flex:1;background:#fff;border:1px solid #E8E2D6;border-radius:16px;padding:16px 20px">
+                <span style="font-size:17px;font-weight:700;letter-spacing:-.01em">Activité récente</span>
+                <div style="display:flex;flex-direction:column;margin-top:8px">
+                  <sc-for list="{{ activity }}" as="e" hint-placeholder-count="4">
+                    <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F2EDE4">
+                      <span style="width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1;background:{{ e.bg }};color:{{ e.c }}">{{ e.icon }}</span>
+                      <span style="flex:1;font-size:13px;line-height:1.4">{{ e.text }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A;padding-top:2px">{{ e.t }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- D2 -->
+    <div id="D2" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">D2</span><span style="font-weight:600;font-size:15px">Signalements · liste et fiche OT</span></div>
+      <div style="width:1440px;height:900px;border-radius:14px;overflow:hidden;display:flex;background:#F4F1EB;border:1px solid #D3CBBC;box-shadow:0 30px 60px -30px rgba(14,33,54,.4)">
+        <aside style="width:248px;flex:none;background:#0E2136;display:flex;flex-direction:column;padding:22px 14px 16px">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 8px">
+            <svg width="38" height="38" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#14304F"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg>
+            <div style="display:flex;flex-direction:column;line-height:1.15"><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:-.01em">Président</span><span style="font-size:10px;font-weight:700;letter-spacing:.18em;color:#E4C58F">HOUSEKEEPING</span></div>
+          </div>
+          <nav style="margin-top:32px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ navList }}" as="n" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:10px;background:{{ n.bg }};box-shadow:{{ n.bar }}">
+                <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span>
+                <span style="flex:1;font-size:14px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+                <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#B58435;color:#0E2136;display:grid;place-items:center">{{ n.badge }}</span></sc-if>
+              </div>
+            </sc-for>
+          </nav>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;background:rgba(255,255,255,.05)">
+            <span style="width:38px;height:38px;border-radius:999px;background:#E4C58F;color:#0E2136;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none">ML</span>
+            <div style="flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0"><span style="font-size:14px;font-weight:600;color:#fff">Mireille Loukou</span><span style="font-size:12px;color:#A9B6C6">Gouvernante générale</span></div>
+            <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8FA0B5">logout</span>
+          </div>
+        </aside>
+        <main style="flex:1;min-width:0;display:flex;flex-direction:column;padding:28px 32px;gap:20px">
+          <header style="display:flex;align-items:center;gap:12px">
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;color:#5C6472;font-weight:500">14 ouverts · 4 réparés aujourd'hui</span><h1 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-.025em">Signalements</h1></div>
+            <span style="width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid #E8E2D6;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">download</span></span>
+            <span style="height:44px;padding:0 18px 0 14px;border-radius:12px;background:#0E2136;color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#E4C58F;font-variation-settings:'FILL' 1">mic</span>Signaler un problème</span>
+          </header>
+          <div style="flex:1;min-height:0;display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px">
+            <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+              <div style="padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid #EEE8DE">
+                <div style="height:42px;border-radius:12px;background:#F4F1EB;display:flex;align-items:center;gap:10px;padding:0 12px;color:#8B909A;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">search</span>Chercher une chambre ou un lieu</div>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4"><span style="display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ c.bg }};color:{{ c.c }};border:1px solid {{ c.b }}"><span style="width:6px;height:6px;border-radius:999px;background:{{ c.dot }}"></span>{{ c.l }}</span></sc-for>
+                </div>
+              </div>
+              <sc-for list="{{ listRows }}" as="r" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #F2EDE4;background:{{ r.selBg }};box-shadow:{{ r.selSh }}">
+                  <span style="width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:21px;line-height:1;background:{{ r.tileBg }};color:{{ r.tileC }}">{{ r.icon }}</span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:700">{{ r.lieu }}</span><span style="font-size:12px;color:#5C6472;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.cat }} · {{ r.by }}</span></div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:600;color:{{ r.sc }};background:{{ r.sbg }}"><span style="width:5px;height:5px;border-radius:999px;background:{{ r.sdot }}"></span>{{ r.sl }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A">{{ r.time }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:16px;padding:20px 24px;border-bottom:1px solid #EEE8DE">
+                <span style="width:56px;height:56px;border-radius:16px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:28px;line-height:1">ac_unit</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:24px;font-weight:800;letter-spacing:-.02em">Chambre 305</span><span style="font-size:14px;color:#5C6472">Climatisation · 3ᵉ étage · Aile Jardin</span></div>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#5C6472">OT-0098</span>
+                <span style="display:flex;align-items:center;gap:4px;height:28px;padding:0 10px 0 8px;border-radius:999px;background:#EAE5DB;color:#5C6472;font-size:12px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">lock</span>Lecture seule</span>
+              </div>
+              <div style="flex:1;min-height:0;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px">
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#FBEFD9">
+                    <span style="width:40px;height:40px;border-radius:12px;background:#fff;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#9A5F0C;font-variation-settings:'FILL' 1">build</span>
+                    <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:700;color:#9A5F0C">En cours</span><span style="font-size:13px;color:#3E4552">Karim D. est sur place · passage prévu à 11:00</span></div>
+                  </div>
+                  <div style="border:1px solid #E8E2D6;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                    <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">MESSAGE VOCAL</span>
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <span style="width:44px;height:44px;border-radius:999px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">play_arrow</span>
+                      <div style="flex:1;display:flex;align-items:center;gap:3px;height:30px"><sc-for list="{{ wave }}" as="w" hint-placeholder-count="40"><span style="width:3px;border-radius:999px;background:#9AA3B0;height:{{ w }}"></span></sc-for></div>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600">0:41</span>
+                    </div>
+                  </div>
+                  <div style="flex:1;min-height:200px;border-radius:14px;background:repeating-linear-gradient(135deg,#EFEBE3 0 10px,#E7E2D8 10px 20px);display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6B6658">photo du signalement</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="border:1px solid #E8E2D6;border-radius:14px;padding:4px 16px;display:grid;grid-template-columns:1fr 1fr;column-gap:16px">
+                    <sc-for list="{{ info }}" as="i" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:3px;padding:11px 0;border-bottom:1px solid #F2EDE4"><span style="font-size:12px;color:#8B909A">{{ i.k }}</span><span style="font-size:14px;font-weight:600">{{ i.v }}</span></div></sc-for>
+                  </div>
+                  <div style="border:1px solid #E8E2D6;border-radius:14px;padding:14px 16px 4px">
+                    <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">SUIVI</span>
+                    <div style="display:flex;flex-direction:column;margin-top:10px">
+                      <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+                        <div style="display:grid;grid-template-columns:22px 1fr auto;gap:10px;min-height:54px">
+                          <div style="display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:999px;margin-top:4px;flex:none;background:{{ h.c }};box-shadow:0 0 0 4px {{ h.ring }}"></span><span style="flex:1;width:2px;margin:6px 0 2px;background:{{ h.line }}"></span></div>
+                          <div style="display:flex;flex-direction:column;gap:2px;padding-bottom:10px"><span style="font-size:14px;font-weight:600;color:{{ h.tc }}">{{ h.l }}</span><span style="font-size:12px;color:#5C6472">{{ h.d }}</span></div>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A;padding-top:2px">{{ h.t }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- D3 -->
+    <div id="D3" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">D3</span><span style="font-weight:600;font-size:15px">Nouveau signalement · une seule page</span></div>
+      <div style="width:1440px;height:900px;border-radius:14px;overflow:hidden;display:flex;background:#F4F1EB;border:1px solid #D3CBBC;box-shadow:0 30px 60px -30px rgba(14,33,54,.4)">
+        <aside style="width:248px;flex:none;background:#0E2136;display:flex;flex-direction:column;padding:22px 14px 16px">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 8px">
+            <svg width="38" height="38" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#14304F"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg>
+            <div style="display:flex;flex-direction:column;line-height:1.15"><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:-.01em">Président</span><span style="font-size:10px;font-weight:700;letter-spacing:.18em;color:#E4C58F">HOUSEKEEPING</span></div>
+          </div>
+          <nav style="margin-top:32px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ navNew }}" as="n" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:10px;background:{{ n.bg }};box-shadow:{{ n.bar }}">
+                <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span>
+                <span style="flex:1;font-size:14px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+                <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#B58435;color:#0E2136;display:grid;place-items:center">{{ n.badge }}</span></sc-if>
+              </div>
+            </sc-for>
+          </nav>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;background:rgba(255,255,255,.05)">
+            <span style="width:38px;height:38px;border-radius:999px;background:#E4C58F;color:#0E2136;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none">ML</span>
+            <div style="flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0"><span style="font-size:14px;font-weight:600;color:#fff">Mireille Loukou</span><span style="font-size:12px;color:#A9B6C6">Gouvernante générale</span></div>
+            <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8FA0B5">logout</span>
+          </div>
+        </aside>
+        <main style="flex:1;min-width:0;display:flex;flex-direction:column;padding:28px 32px;gap:20px">
+          <header style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#8B909A"><span>Signalements</span><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">chevron_right</span><span style="color:#0E2136;font-weight:600">Nouveau</span></div>
+            <h1 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-.025em">Nouveau signalement</h1>
+          </header>
+          <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start">
+            <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;display:flex;flex-direction:column">
+              <div style="padding:20px 24px;display:flex;gap:16px;border-bottom:1px solid #EEE8DE">
+                <span style="width:28px;height:28px;border-radius:999px;background:#1E7A55;color:#fff;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:18px;line-height:1">check</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+                  <span style="font-size:16px;font-weight:700">Lieu</span>
+                  <div style="display:flex;gap:16px;align-items:center">
+                    <div style="width:220px;height:56px;border-radius:12px;border:2px solid #1E7A55;display:flex;align-items:center;gap:10px;padding:0 14px"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#8B909A">meeting_room</span><span style="font-size:24px;font-weight:800;letter-spacing:.1em">214</span></div>
+                    <span style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#1E7A55"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;font-variation-settings:'FILL' 1">check_circle</span>Chambre 214 · 2ᵉ étage</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;color:#8B909A;margin-right:4px">ou espace commun</span>
+                    <sc-for list="{{ spaces }}" as="s" hint-placeholder-count="8"><span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 9px;border-radius:999px;border:1px solid #E8E2D6;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#5C6472">{{ s.i }}</span>{{ s.l }}</span></sc-for>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:20px 24px;display:flex;gap:16px;border-bottom:1px solid #EEE8DE">
+                <span style="width:28px;height:28px;border-radius:999px;background:#1E7A55;color:#fff;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:18px;line-height:1">check</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+                  <span style="font-size:16px;font-weight:700">Type de problème</span>
+                  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px">
+                    <sc-for list="{{ cats }}" as="c" hint-placeholder-count="7">
+                      <div style="height:92px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:{{ c.bg }};border:1.5px solid {{ c.b }}">
+                        <span style="width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;background:{{ c.tile }};color:{{ c.ic }}">{{ c.i }}</span>
+                        <span style="font-size:12px;font-weight:600;text-align:center;line-height:1.2;color:{{ c.c }}">{{ c.l }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;border:1px solid #E8E2D6">
+                    <span style="width:38px;height:38px;border-radius:11px;background:#FBE7E5;color:#B3261E;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1">emergency_home</span>
+                    <span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:14px;font-weight:700;color:#B3261E">Urgent</span><span style="font-size:13px;color:#5C6472">La maintenance de garde est alertée tout de suite.</span></span>
+                    <span style="width:46px;height:28px;border-radius:999px;padding:3px;background:#D9D2C5;display:flex"><span style="width:22px;height:22px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)"></span></span>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:20px 24px;display:flex;gap:16px;border-bottom:1px solid #EEE8DE">
+                <span style="width:28px;height:28px;border-radius:999px;background:#0E2136;color:#fff;display:grid;place-items:center;flex:none;font-size:13px;font-weight:700">3</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+                  <span style="font-size:16px;font-weight:700">Message vocal</span>
+                  <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:#F4F1EB">
+                    <span style="width:48px;height:48px;border-radius:999px;background:#B3261E;display:grid;place-items:center;flex:none;box-shadow:0 0 0 6px rgba(179,38,30,.14)"><span style="width:16px;height:16px;border-radius:4px;background:#fff"></span></span>
+                    <div style="flex:1;display:flex;align-items:center;gap:3px;height:34px"><sc-for list="{{ liveWave }}" as="w" hint-placeholder-count="48"><span style="width:3px;border-radius:999px;background:#B3261E;height:{{ w }}"></span></sc-for></div>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600">0:37<span style="color:#8B909A"> / 2:00</span></span>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:20px 24px;display:flex;gap:16px">
+                <span style="width:28px;height:28px;border-radius:999px;background:#EAE5DB;color:#5C6472;display:grid;place-items:center;flex:none;font-size:13px;font-weight:700">4</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+                  <span style="font-size:16px;font-weight:700">Photo et commentaire <span style="font-size:13px;font-weight:500;color:#8B909A">· facultatif</span></span>
+                  <div style="display:flex;gap:12px">
+                    <div style="width:180px;height:84px;border-radius:14px;border:1.5px dashed #C4BCAD;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">add_a_photo</span>Ajouter une photo</div>
+                    <div style="flex:1;height:84px;border-radius:14px;border:1px solid #E8E2D6;padding:12px 14px;font-size:14px;color:#8B909A">Ajouter un mot pour le technicien…</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">RÉCAPITULATIF</span>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ recap }}" as="r" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F2EDE4">
+                    <span style="width:34px;height:34px;border-radius:10px;background:#F3EFE7;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:19px;line-height:1">{{ r.i }}</span>
+                    <span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:12px;color:#8B909A">{{ r.k }}</span><span style="font-size:14px;font-weight:600">{{ r.v }}</span></span>
+                    <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;font-variation-settings:'FILL' 1;color:{{ r.c }}">{{ r.m }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <span style="height:52px;border-radius:14px;background:#DCD5C8;color:#8B909A;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700">Envoyer le signalement<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">send</span></span>
+              <span style="font-size:12px;color:#8B909A;text-align:center;line-height:1.4">Terminez le message vocal pour envoyer.</span>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:24px 64px 96px;display:flex;flex-direction:column;gap:32px;border-top:1px solid #D3CBBC;margin:0 64px;padding-left:0;padding-right:0">
+  <div style="display:flex;flex-direction:column;gap:6px;padding-top:32px">
+    <span style="font-size:13px;font-weight:700;letter-spacing:.1em;color:#6B6658">HOUSEKEEPING · TABLETTE · 820 × 1180 ET 1180 × 820</span>
+    <h1 style="margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em">Version Tablette</h1>
+    <p style="margin:0;font-size:15px;color:#5C6472;max-width:720px;line-height:1.5">Tablette d'étage partagée : rail de navigation compact, cibles tactiles de 48 px minimum, maître-détail en paysage et parcours de signalement plein écran.</p>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+
+    <!-- T1 -->
+    <div id="T1" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">T1</span><span style="font-weight:600;font-size:15px">Accueil · portrait</span></div>
+      <div style="width:820px;height:1180px;border-radius:40px;background:#0B1622;padding:14px;box-shadow:0 0 0 1px #3A4757,0 40px 80px -30px rgba(14,33,54,.5)">
+        <div style="width:100%;height:100%;border-radius:28px;overflow:hidden;background:#F4F1EB;display:flex;flex-direction:column">
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600"><span>9:41  Mar. 1 oct.</span><span style="display:flex;gap:4px;font-family:'Material Symbols Rounded';font-size:16px;line-height:1;font-variation-settings:'FILL' 1"><span>wifi</span><span>battery_full</span></span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            <aside style="width:96px;flex:none;background:#0E2136;display:flex;flex-direction:column;align-items:center;padding:18px 0 20px">
+              <svg width="44" height="44" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#14304F"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg>
+              <div style="margin-top:28px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ railHome }}" as="n" hint-placeholder-count="4">
+                  <div style="width:80px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative">
+                    <span style="width:56px;height:32px;border-radius:999px;display:grid;place-items:center;background:{{ n.pill }}"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span></span>
+                    <span style="font-size:11px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+                    <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:2px;right:12px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B58435;color:#0E2136;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid #0E2136">{{ n.badge }}</span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <span style="margin-top:auto;width:44px;height:44px;border-radius:999px;background:#B58435;color:#0E2136;display:grid;place-items:center;font-size:15px;font-weight:700">AB</span>
+            </aside>
+            <main style="flex:1;min-width:0;padding:24px 28px;display:flex;flex-direction:column;gap:24px">
+              <header style="display:flex;align-items:center;gap:12px">
+                <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;color:#5C6472;font-weight:500">Mardi 1 octobre · Service du matin</span><span style="font-size:30px;font-weight:800;letter-spacing:-.025em;line-height:1.1">Bonjour, Aïcha</span></div>
+                <span style="width:48px;height:48px;border-radius:14px;background:#fff;border:1px solid #E8E2D6;display:grid;place-items:center;position:relative"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1">notifications</span><span style="position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:999px;background:#B3261E;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid #F4F1EB">2</span></span>
+              </header>
+              <div style="position:relative;overflow:hidden;background:#0E2136;border-radius:22px;padding:24px;display:flex;align-items:center;gap:24px;box-shadow:0 20px 36px -20px rgba(14,33,54,.7)">
+                <svg style="position:absolute;right:220px;top:-30px" width="180" height="180" viewBox="0 0 40 40"><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-opacity=".2" stroke-width="1.2" fill="none"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#B58435" stroke-opacity=".2" stroke-width="1" fill="none"></path></svg>
+                <div style="flex:1;display:flex;flex-direction:column;gap:6px;position:relative"><span style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-.01em">Une panne à signaler ?</span><span style="font-size:15px;color:#A9B6C6">Un message vocal suffit, moins d'une minute.</span></div>
+                <span style="position:relative;height:60px;padding:0 26px;border-radius:16px;background:#B58435;color:#0E2136;display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">mic</span>Signaler un problème</span>
+              </div>
+              <div style="background:#fff;border:1px solid #E8E2D6;border-radius:20px;display:grid;grid-template-columns:repeat(4,1fr)">
+                <sc-for list="{{ tKpis }}" as="k" hint-placeholder-count="4">
+                  <div style="padding:18px;display:flex;flex-direction:column;gap:12px;border-left:{{ k.bl }}">
+                    <span style="width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;background:{{ k.bg }};color:{{ k.c }}">{{ k.icon }}</span>
+                    <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1;color:{{ k.c }}">{{ k.v }}</span><span style="font-size:13px;color:#5C6472;font-weight:500;line-height:1.3">{{ k.l }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:16px">
+                <span style="flex:1;font-size:20px;font-weight:700;letter-spacing:-.01em">Signalements</span>
+                <div style="display:flex;gap:4px;background:#EAE5DB;border-radius:12px;padding:4px">
+                  <span style="height:40px;padding:0 18px;border-radius:9px;display:grid;place-items:center;font-size:14px;font-weight:600;color:#5C6472">Les miens</span>
+                  <span style="height:40px;padding:0 18px;border-radius:9px;display:grid;place-items:center;font-size:14px;font-weight:600;color:#5C6472">Urgents</span>
+                  <span style="height:40px;padding:0 18px;border-radius:9px;display:grid;place-items:center;font-size:14px;font-weight:700;background:#fff;box-shadow:0 1px 3px rgba(14,33,54,.12)">Tous</span>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <sc-for list="{{ tCards }}" as="o" hint-placeholder-count="6">
+                  <div style="background:#fff;border:1px solid #E8E2D6;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <span style="width:48px;height:48px;border-radius:14px;background:#F3EFE7;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:24px;line-height:1">{{ o.icon }}</span>
+                      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:17px;font-weight:700;letter-spacing:-.01em">{{ o.lieu }}</span><span style="font-size:13px;color:#5C6472">{{ o.cat }} · {{ o.floor }}</span></div>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A;align-self:flex-start">{{ o.time }}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                      <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ o.sc }};background:{{ o.sbg }}"><span style="width:6px;height:6px;border-radius:999px;background:{{ o.sdot }}"></span>{{ o.sl }}</span>
+                      <sc-if value="{{ o.urgent }}" hint-placeholder-val="{{ false }}"><span style="height:26px;padding:0 8px;border-radius:7px;background:#FBE7E5;color:#B3261E;font-size:12px;font-weight:700;display:flex;align-items:center;gap:3px"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;font-variation-settings:'FILL' 1">priority_high</span>Urgent</span></sc-if>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid #F2EDE4;font-size:13px;color:#5C6472"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">{{ o.footIcon }}</span><span style="flex:1">{{ o.foot }}</span><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#B9B3A7">chevron_right</span></div>
+                  </div>
+                </sc-for>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T3 -->
+    <div id="T3" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">T3</span><span style="font-weight:600;font-size:15px">Signaler · étape 1 Lieu · portrait</span></div>
+      <div style="width:820px;height:1180px;border-radius:40px;background:#0B1622;padding:14px;box-shadow:0 0 0 1px #3A4757,0 40px 80px -30px rgba(14,33,54,.5)">
+        <div style="width:100%;height:100%;border-radius:28px;overflow:hidden;background:#F4F1EB;display:flex;flex-direction:column">
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600;background:#fff"><span>9:41  Mar. 1 oct.</span><span style="display:flex;gap:4px;font-family:'Material Symbols Rounded';font-size:16px;line-height:1;font-variation-settings:'FILL' 1"><span>wifi</span><span>battery_full</span></span></div>
+          <div style="flex:none;background:#fff;border-bottom:1px solid #E8E2D6;padding:12px 32px 22px;display:flex;flex-direction:column;gap:22px">
+            <div style="display:flex;align-items:center;gap:14px">
+              <span style="width:48px;height:48px;border-radius:14px;background:#F4F1EB;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1">close</span></span>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;line-height:1.2"><span style="font-size:12px;font-weight:700;letter-spacing:.12em;color:#8B909A">ÉTAPE 1 SUR 4</span><span style="font-size:20px;font-weight:700;letter-spacing:-.01em">Nouveau signalement</span></div>
+              <span style="flex:none;white-space:nowrap;height:48px;padding:0 16px 0 12px;border-radius:14px;border:1.5px solid #0E2136;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">qr_code_scanner</span>Scanner le QR</span>
+            </div>
+            <div style="display:flex;align-items:center">
+              <sc-for list="{{ tSteps }}" as="s" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px;flex:{{ s.flex }}">
+                  <span style="width:32px;height:32px;border-radius:999px;display:grid;place-items:center;flex:none;font-size:14px;font-weight:700;background:{{ s.nbg }};color:{{ s.nc }};box-shadow:{{ s.ring }}">{{ s.n }}</span>
+                  <span style="font-size:14px;white-space:nowrap;font-weight:{{ s.w }};color:{{ s.c }}">{{ s.l }}</span>
+                  <span style="flex:1;height:2px;border-radius:999px;margin:0 14px 0 4px;background:{{ s.line }}"></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;padding:36px 32px;display:flex;flex-direction:column;gap:28px">
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center"><span style="font-size:34px;font-weight:800;letter-spacing:-.025em">Où se trouve le problème ?</span><span style="font-size:16px;color:#5C6472">Tapez le numéro de la chambre.</span></div>
+            <div style="width:468px;align-self:center;display:flex;flex-direction:column;gap:14px">
+              <div style="background:#fff;border:2px solid #1E7A55;border-radius:22px;padding:18px 20px;display:flex;align-items:center;gap:16px;box-shadow:0 0 0 5px rgba(30,122,85,.08)">
+                <span style="width:52px;height:52px;border-radius:15px;background:#E3F1EA;color:#1E7A55;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:28px;line-height:1">meeting_room</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;font-weight:600;color:#8B909A">Chambre</span><span style="font-size:44px;font-weight:800;letter-spacing:.1em;line-height:1">214</span></div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#1E7A55"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;font-variation-settings:'FILL' 1">check_circle</span>Chambre valide</span><span style="font-size:13px;color:#5C6472">2ᵉ étage · Aile Lagune</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                <sc-for list="{{ tKeys }}" as="k" hint-placeholder-count="12">
+                  <span style="height:76px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:600;background:{{ k.bg }};color:{{ k.c }};border:1px solid {{ k.b }};box-shadow:0 2px 0 rgba(14,33,54,.05)"><span>{{ k.txt }}</span><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1">{{ k.icon }}</span></span>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;padding-top:4px"><span style="flex:1;height:1px;background:#DCD5C8"></span><span style="font-size:13px;font-weight:700;letter-spacing:.1em;color:#8B909A">OU UN ESPACE COMMUN</span><span style="flex:1;height:1px;background:#DCD5C8"></span></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+              <sc-for list="{{ tSpaces }}" as="s" hint-placeholder-count="8">
+                <div style="height:92px;border-radius:18px;background:#fff;border:1px solid #E8E2D6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+                  <span style="width:42px;height:42px;border-radius:12px;background:#F3EFE7;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:23px;line-height:1">{{ s.i }}</span>
+                  <span style="font-size:14px;font-weight:600">{{ s.l }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex:none;padding:18px 32px 26px;display:flex;align-items:center;gap:12px;border-top:1px solid #E8E2D6;background:#fff">
+            <div style="flex:1;display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:12px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:21px;line-height:1;font-variation-settings:'FILL' 1">location_on</span><span style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:12px;color:#8B909A">Lieu sélectionné</span><span style="font-size:15px;font-weight:700">Chambre 214</span></span></div>
+            <span style="height:60px;padding:0 24px;border-radius:16px;border:1.5px solid #0E2136;display:grid;place-items:center;font-size:16px;font-weight:700">Annuler</span>
+            <span style="width:260px;height:60px;border-radius:16px;background:#0E2136;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:700;box-shadow:0 12px 24px -12px rgba(14,33,54,.6)">Continuer<span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_forward</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T2 -->
+    <div id="T2" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">T2</span><span style="font-weight:600;font-size:15px">Signalements · liste et fiche OT · paysage</span></div>
+      <div style="width:1180px;height:820px;border-radius:40px;background:#0B1622;padding:14px;box-shadow:0 0 0 1px #3A4757,0 40px 80px -30px rgba(14,33,54,.5)">
+        <div style="width:100%;height:100%;border-radius:28px;overflow:hidden;background:#F4F1EB;display:flex;flex-direction:column">
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600"><span>9:41  Mar. 1 oct.</span><span style="display:flex;gap:4px;font-family:'Material Symbols Rounded';font-size:16px;line-height:1;font-variation-settings:'FILL' 1"><span>wifi</span><span>battery_full</span></span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            <aside style="width:96px;flex:none;background:#0E2136;display:flex;flex-direction:column;align-items:center;padding:18px 0 20px">
+              <svg width="44" height="44" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#14304F"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg>
+              <div style="margin-top:28px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ railList }}" as="n" hint-placeholder-count="4">
+                  <div style="width:80px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative">
+                    <span style="width:56px;height:32px;border-radius:999px;display:grid;place-items:center;background:{{ n.pill }}"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span></span>
+                    <span style="font-size:11px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+                    <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:2px;right:12px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B58435;color:#0E2136;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid #0E2136">{{ n.badge }}</span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <span style="margin-top:auto;width:44px;height:44px;border-radius:999px;background:#B58435;color:#0E2136;display:grid;place-items:center;font-size:15px;font-weight:700">AB</span>
+            </aside>
+            <div style="width:370px;flex:none;border-right:1px solid #E8E2D6;background:#fff;display:flex;flex-direction:column;min-height:0">
+              <div style="padding:20px 18px 14px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #EEE8DE">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:22px;font-weight:800;letter-spacing:-.02em">Signalements</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8B909A">8</span></div>
+                <div style="height:46px;border-radius:14px;background:#F4F1EB;display:flex;align-items:center;gap:10px;padding:0 14px;color:#8B909A;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">search</span>Chercher une chambre</div>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4"><span style="display:flex;align-items:center;gap:6px;height:36px;padding:0 11px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ c.bg }};color:{{ c.c }};border:1px solid {{ c.b }}"><span style="width:6px;height:6px;border-radius:999px;background:{{ c.dot }}"></span>{{ c.l }}</span></sc-for>
+                </div>
+              </div>
+              <sc-for list="{{ listRows }}" as="r" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;min-height:68px;border-bottom:1px solid #F2EDE4;background:{{ r.selBg }};box-shadow:{{ r.selSh }}">
+                  <span style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;background:{{ r.tileBg }};color:{{ r.tileC }}">{{ r.icon }}</span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700">{{ r.lieu }}</span><span style="font-size:12px;color:#5C6472;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.cat }}</span></div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:600;color:{{ r.sc }};background:{{ r.sbg }}"><span style="width:5px;height:5px;border-radius:999px;background:{{ r.sdot }}"></span>{{ r.sl }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A">{{ r.time }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:1;min-width:0;padding:22px 26px;display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;gap:14px">
+                <span style="width:60px;height:60px;border-radius:18px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:30px;line-height:1">ac_unit</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:26px;font-weight:800;letter-spacing:-.02em">Chambre 305</span><span style="font-size:14px;color:#5C6472">Climatisation · 3ᵉ étage · <span style="font-family:'IBM Plex Mono',monospace">OT-0098</span></span></div>
+                <span style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px 0 8px;border-radius:999px;background:#EAE5DB;color:#5C6472;font-size:12px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">lock</span>Lecture seule</span>
+              </div>
+              <div style="border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#FBEFD9">
+                <span style="width:42px;height:42px;border-radius:12px;background:#fff;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#9A5F0C;font-variation-settings:'FILL' 1">build</span>
+                <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:700;color:#9A5F0C">En cours</span><span style="font-size:13px;color:#3E4552">Karim D. est sur place · passage prévu à 11:00</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;flex:1;min-height:0">
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                    <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">MESSAGE VOCAL</span>
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <span style="width:48px;height:48px;border-radius:999px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1">play_arrow</span>
+                      <div style="flex:1;display:flex;align-items:center;gap:3px;height:30px;overflow:hidden"><sc-for list="{{ wave }}" as="w" hint-placeholder-count="40"><span style="width:3px;flex:none;border-radius:999px;background:#9AA3B0;height:{{ w }}"></span></sc-for></div>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600">0:41</span>
+                    </div>
+                  </div>
+                  <div style="flex:1;border-radius:16px;background:repeating-linear-gradient(135deg,#E9E4DA 0 10px,#E1DBCF 10px 20px);display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6B6658">photo du signalement</div>
+                </div>
+                <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;padding:14px 16px 4px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">SUIVI</span>
+                  <div style="display:flex;flex-direction:column;margin-top:10px">
+                    <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+                      <div style="display:grid;grid-template-columns:22px 1fr auto;gap:10px;min-height:62px">
+                        <div style="display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:999px;margin-top:4px;flex:none;background:{{ h.c }};box-shadow:0 0 0 4px {{ h.ring }}"></span><span style="flex:1;width:2px;margin:6px 0 2px;background:{{ h.line }}"></span></div>
+                        <div style="display:flex;flex-direction:column;gap:2px;padding-bottom:10px"><span style="font-size:15px;font-weight:600;color:{{ h.tc }}">{{ h.l }}</span><span style="font-size:13px;color:#5C6472">{{ h.d }}</span></div>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A;padding-top:2px">{{ h.t }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section></x-dc>
+<script type="text/x-dc" data-dc-script>
+const ST = { r:['En attente','#B3261E','#FBE7E5','#B3261E'], o:['En cours','#9A5F0C','#FBEFD9','#B4740F'], g:['Réparé','#1E7A55','#E3F1EA','#1E7A55'] };
+const PEOPLE = { 'Fatou K.':['FK','#E9E1F3','#5A3D86'], 'Lina M.':['LM','#E3EBF7','#2B5AA6'], 'Aïcha B.':['AB','#F5EAD6','#8A6224'], 'Jean P.':['JP','#E3F1EA','#1E7A55'], 'Sofia R.':['SR','#F8E4E0','#9C3D2E'] };
+const ROWS = [
+  ['Chambre 412','4ᵉ étage','bolt','Électricité','Fatou K.','r',null,'09:32',true],
+  ['Chambre 516','5ᵉ étage','water_drop','Eau / fuite','Lina M.','r',null,'08:20',true],
+  ['Chambre 214','2ᵉ étage','water_drop','Eau / fuite','Aïcha B.','r',null,'09:18',false],
+  ['Chambre 305','3ᵉ étage','ac_unit','Climatisation','Aïcha B.','o','Karim D.','09:05',false],
+  ['Chambre 507','5ᵉ étage','bed','Mobilier','Lina M.','o','Karim D.','08:55',false],
+  ['Chambre 420','4ᵉ étage','door_front','Porte / serrure','Fatou K.','r',null,'08:40',false],
+  ['Chambre 408','4ᵉ étage','tv','Télévision','Fatou K.','o','Samir B.','Hier',false],
+  ['Buanderie','Rez-de-chaussée','door_front','Porte / serrure','Jean P.','g','Samir B.','08:12',false],
+];
+const NAV = [['space_dashboard','Tableau de bord'],['assignment','Signalements','14'],['meeting_room','Chambres'],['groups','Équipe'],['notifications','Notifications','2']];
+const nav = a => NAV.map(([icon,l,badge],i)=>{ const on = i===a; return { icon, l, badge:badge||'', hasBadge:!!badge, bg: on?'rgba(181,132,53,.16)':'transparent', bar: on?'inset 3px 0 0 #B58435':'none', ic: on?'#E4C58F':'#8FA0B5', fill: on?1:0, c: on?'#fff':'#C9D1DC', w: on?700:500 }; });
+const row = r => { const [lieu,floor,icon,cat,by,s,tech,time,urgent] = r, st = ST[s], p = PEOPLE[by];
+  return { lieu, floor, icon, cat, by, time, urgent, tech, hasTech:!!tech, noTech:!tech, sl:st[0], sc:st[1], sbg:st[2], sdot:st[3], byIni:p[0], byBg:p[1], byC:p[2] }; };
+const tile = (on) => ({ bg: on?'#0E2136':'#fff', b: on?'#0E2136':'#E8E2D6', c: on?'#fff':'#0E2136', tile: on?'rgba(228,197,143,.16)':'#F3EFE7', ic: on?'#E4C58F':'#0E2136' });
+
+class Component extends DCLogic {
+  renderVals() {
+    const rows = ROWS.map(row);
+    const rail = a => [['home','Accueil'],['mic','Signaler'],['assignment','Mes OT','3'],['person','Profil']].map(([icon,l,badge],i)=>{ const on = i===a; return { icon, l, badge:badge||'', hasBadge:!!badge, pill: on?'rgba(181,132,53,.22)':'transparent', ic: on?'#E4C58F':'#8FA0B5', fill: on?1:0, c: on?'#fff':'#A9B6C6', w: on?700:500 }; });
+    return {
+      railHome: rail(0), railList: rail(2),
+      tKpis: [
+        { v:'3', l:'Mes signalements ouverts', icon:'assignment', c:'#0E2136', bg:'#EDF0F4' },
+        { v:'1', l:"En attente d'un technicien", icon:'hourglass_top', c:'#B3261E', bg:'#FBE7E5' },
+        { v:'5', l:'Résolus cette semaine', icon:'task_alt', c:'#1E7A55', bg:'#E3F1EA' },
+        { v:'4', l:'Chambres suivies', icon:'meeting_room', c:'#0E2136', bg:'#F3EFE7' },
+      ].map((k,i)=>({ ...k, bl: i ? '1px solid #F0EBE2' : '0' })),
+      tCards: rows.slice(0,6).map(r=>({ ...r, footIcon: r.hasTech ? 'engineering' : 'person', foot: r.hasTech ? `${r.tech} · passage prévu` : `Signalé par ${r.by}` })),
+      tSteps: [['1','Lieu','cur'],['2','Problème'],['3','Message vocal'],['4','Photo']].map(([n,l,cur],i)=>({ n, l, flex: i===3?'none':'1', line: i===3?'transparent':(cur?'#B58435':'#DCD5C8'), w: cur?700:500, c: cur?'#0E2136':'#8B909A', nbg: cur?'#0E2136':'#fff', nc: cur?'#E4C58F':'#8B909A', ring: cur?'0 0 0 4px rgba(181,132,53,.2)':'inset 0 0 0 1.5px #DCD5C8' })),
+      tKeys: ['1','2','3','4','5','6','7','8','9','del','0','ok'].map(k=>{ const ok = k==='ok', del = k==='del'; return { txt: ok||del ? '' : k, icon: ok ? 'check' : del ? 'backspace' : '', bg: ok ? '#1E7A55' : del ? '#EAE5DB' : '#fff', c: ok ? '#fff' : '#0E2136', b: ok ? '#1E7A55' : del ? '#EAE5DB' : '#E8E2D6' }; }),
+      tSpaces: [['room_service','Hall'],['pool','Piscine'],['soup_kitchen','Cuisine'],['restaurant','Restaurant'],['elevator','Ascenseur'],['local_laundry_service','Buanderie'],['local_parking','Parking'],['local_fire_department','Chaufferie']].map(([i,l])=>({ i, l })),
+      navDash: nav(0), navList: nav(1), navNew: nav(1),
+      kpis: [
+        { v:'14', l:'Signalements ouverts', icon:'assignment', c:'#0E2136', bg:'#EDF0F4' },
+        { v:'6', l:"En attente d'un technicien", icon:'hourglass_top', c:'#B3261E', bg:'#FBE7E5' },
+        { v:'2', l:'Urgents en cours', icon:'emergency_home', c:'#B3261E', bg:'#FBE7E5' },
+        { v:'22', l:'Résolus cette semaine', icon:'task_alt', c:'#1E7A55', bg:'#E3F1EA' },
+      ].map((k,i)=>({ ...k, bl: i ? '1px solid #F0EBE2' : '0' })),
+      tabs: [['Tous','14',true],['En attente','6'],['En cours','4'],['Réparés','4']].map(([l,n,on])=>({ l, n, c: on?'#0E2136':'#5C6472', w: on?700:500, bb: on?'#B58435':'transparent', pbg: on?'#0E2136':'#EEE9DF', pc: on?'#fff':'#5C6472' })),
+      rows,
+      agents: [['Fatou K.',5],['Lina M.',4],['Aïcha B.',3],['Jean P.',1],['Sofia R.',0]].map(([name,n])=>{ const p = PEOPLE[name]; return { name, n:String(n), ini:p[0], bg:p[1], fc:p[2], w: Math.min(100,n/6*100)+'%', c: n>=5?'#B3261E':n>=3?'#B4740F':'#1E7A55' }; }),
+      activity: [
+        { icon:'emergency_home', c:'#B3261E', bg:'#FBE7E5', text:'Fatou K. a signalé un problème urgent en chambre 412', t:'09:32' },
+        { icon:'engineering', c:'#9A5F0C', bg:'#FBEFD9', text:'Karim D. a pris en charge la chambre 305', t:'09:50' },
+        { icon:'check_circle', c:'#1E7A55', bg:'#E3F1EA', text:'Samir B. a réparé la porte de la buanderie', t:'08:58' },
+        { icon:'mic', c:'#0E2136', bg:'#EDF0F4', text:'Aïcha B. a signalé une fuite en chambre 214', t:'09:18' },
+      ],
+      chips: [['Tous','#E4C58F',true],['En attente','#B3261E'],['En cours','#B4740F'],['Réparé','#1E7A55']].map(([l,dot,on])=>({ l, dot, bg: on?'#0E2136':'#fff', c: on?'#fff':'#0E2136', b: on?'#0E2136':'#E8E2D6' })),
+      listRows: rows.map(r=>{ const sel = r.lieu==='Chambre 305'; return { ...r, selBg: sel?'#FBF6EC':'transparent', selSh: sel?'inset 0 0 0 1.5px #E4C58F':'none', tileBg: sel?'#0E2136':'#F3EFE7', tileC: sel?'#E4C58F':'#0E2136' }; }),
+      wave: [12,20,14,26,18,30,22,12,24,28,18,10,16,26,22,14,28,18,12,24,20,12,18,10,14,22,16,26,20,12,18,24,14,20,28,16,12,22,18,10].map(h=>h+'px'),
+      info: [{ k:'Signalé par', v:'Aïcha B.' },{ k:'Heure', v:'09:05' },{ k:'Technicien', v:'Karim D.' },{ k:'Priorité', v:'Normale' }],
+      history: [
+        { l:'Signalé', d:'par Aïcha B. · avec photo', t:'09:05', c:'#B3261E', ring:'#FBE7E5', tc:'#0E2136', line:'#D9D2C5' },
+        { l:'Technicien affecté', d:'Karim D. · passage prévu à 11:00', t:'09:50', c:'#0E2136', ring:'#E2DCD0', tc:'#0E2136', line:'#D9D2C5' },
+        { l:'Intervention en cours', d:'Karim D. est sur place', t:'10:42', c:'#B4740F', ring:'#FBEFD9', tc:'#0E2136', line:'#EEE9DF' },
+        { l:'Réparé', d:'À venir', t:'', c:'#D9D2C5', ring:'transparent', tc:'#8B909A', line:'transparent' },
+      ],
+      spaces: [['room_service','Hall'],['pool','Piscine'],['soup_kitchen','Cuisine'],['restaurant','Restaurant'],['elevator','Ascenseur'],['local_laundry_service','Buanderie'],['local_parking','Parking'],['local_fire_department','Chaufferie']].map(([i,l])=>({ i, l })),
+      cats: [['water_drop','Eau / fuite'],['bolt','Électricité'],['ac_unit','Climatisation'],['tv','Télévision'],['bed','Mobilier'],['door_front','Porte / serrure'],['more_horiz','Autre']].map(([i,l],k)=>({ i, l, ...tile(k===0) })),
+      liveWave: Array.from({ length:48 }, (_,i)=> (6 + ((i*37) % 26)) + 'px'),
+      recap: [
+        { i:'location_on', k:'Lieu', v:'Chambre 214', m:'check_circle', c:'#1E7A55' },
+        { i:'water_drop', k:'Problème', v:'Eau / fuite', m:'check_circle', c:'#1E7A55' },
+        { i:'mic', k:'Message vocal', v:'Enregistrement…', m:'radio_button_checked', c:'#B3261E' },
+        { i:'photo_camera', k:'Photo', v:'Aucune', m:'remove', c:'#B9B3A7' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

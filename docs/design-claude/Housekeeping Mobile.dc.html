@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#D9D4C9;font-family:'Archivo',system-ui,sans-serif;color:#0E2136;-webkit-font-smoothing:antialiased}
+a{color:#0E2136;text-decoration:none}a:hover{color:#B58435}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<section style="padding:56px 64px 96px;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <span style="font-size:13px;font-weight:600;letter-spacing:.08em;color:#6B6658">TOUR 1 — PÉRIMÈTRE HOUSEKEEPING · MOBILE 390 PX</span>
+    <h1 style="margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em">Housekeeping — signaler, suivre, vérifier</h1>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+    <!-- 1a Tableau de bord agent -->
+    <div id="1a" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1a</span><span style="font-weight:600;font-size:15px">Tableau de bord · Agent HK</span></div>
+      <div style="width:390px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA;padding-bottom:88px">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px 16px">
+          <div style="width:44px;height:44px;border-radius:999px;background:#B58435;color:#0E2136;display:grid;place-items:center;font-weight:800;font-size:16px">AB</div>
+          <div style="flex:1;display:flex;flex-direction:column;line-height:1.2">
+            <span style="font-size:19px;font-weight:700">Bonjour, Aïcha</span>
+            <span style="font-size:13px;color:#8A8578">Housekeeping · Mardi 1 oct.</span>
+          </div>
+          <div style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;position:relative">🔔<span style="position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:999px;background:#B3261E;border:2px solid #FAF8F4"></span></div>
+        </div>
+        <div style="margin:0 16px;background:#0E2136;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <span style="color:#C9CFD8;font-size:14px">Une panne dans une chambre ?</span>
+          <a href="#1c" style="display:flex;align-items:center;justify-content:center;gap:12px;height:68px;border-radius:16px;background:#B58435;color:#0E2136;font-size:20px;font-weight:800">🎤 Signaler un problème</a>
+          <a href="#" style="color:#E4C58F;font-size:14px;font-weight:600;text-align:center;text-decoration:underline">ou formulaire détaillé</a>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px">
+          <sc-for list="{{ kpisAgent }}" as="k" hint-placeholder-count="4">
+            <div style="background:#FAF8F4;border:1px solid #E2DCD0;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:30px;font-weight:800;line-height:1;color:{{ k.color }}">{{ k.value }}</span>
+              <span style="font-size:13px;line-height:1.3;color:#4A4F5C;font-weight:500">{{ k.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:4px 16px 0;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:6px;background:#E2DCD0;border-radius:14px;padding:4px">
+            <span style="flex:1;text-align:center;padding:11px 0;border-radius:11px;background:#FAF8F4;font-weight:700;font-size:14px;box-shadow:0 1px 2px rgba(14,33,54,.12)">Mes signalements</span>
+            <span style="flex:1;text-align:center;padding:11px 0;font-weight:600;font-size:14px;color:#6B6658">Urgents</span>
+            <span style="flex:1;text-align:center;padding:11px 0;font-weight:600;font-size:14px;color:#6B6658">Tous</span>
+          </div>
+          <sc-for list="{{ myOrders }}" as="o" hint-placeholder-count="3">
+            <a href="#1i" style="display:flex;gap:12px;background:#FAF8F4;border:1px solid #E2DCD0;border-radius:18px;padding:14px;box-shadow:inset 5px 0 0 {{ o.c }}">
+              <div style="width:52px;height:52px;border-radius:14px;background:#EDEAE3;display:grid;place-items:center;font-size:26px;flex:none">{{ o.emoji }}</div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                  <span style="font-size:18px;font-weight:700">{{ o.lieu }}</span>
+                  <span style="font-size:12px;color:#8A8578;font-weight:500">{{ o.code }}</span>
+                </div>
+                <span style="font-size:14px;color:#4A4F5C">{{ o.cat }}</span>
+                <span style="align-self:flex-start;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:{{ o.c }};background:{{ o.bg }};padding:4px 10px;border-radius:999px;margin-top:2px"><span style="width:8px;height:8px;border-radius:999px;background:{{ o.c }}"></span>{{ o.status }}</span>
+                <span style="font-size:13px;color:#6B6658">{{ o.info }}</span>
+              </div>
+            </a>
+          </sc-for>
+        </div>
+        <div style="margin:18px 16px 0;background:#FAF8F4;border:1px solid #E2DCD0;border-radius:18px;padding:16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="font-size:17px;font-weight:700">État de mes chambres</span><span style="font-size:13px;color:#8A8578">4 suivies</span></div>
+          <sc-for list="{{ rooms }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #E2DCD0">
+              <span style="font-size:20px;font-weight:800;width:52px">{{ r.n }}</span>
+              <span style="flex:1;font-size:14px;color:#4A4F5C">{{ r.what }}</span>
+              <span style="font-size:13px;font-weight:700;color:{{ r.c }}">{{ r.st }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:72px;background:#FAF8F4;border-top:1px solid #E2DCD0;display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:8px">
+          <sc-for list="{{ navHome }}" as="n" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:{{ n.w }};color:{{ n.c }}"><span style="font-size:22px;opacity:{{ n.o }}">{{ n.i }}</span>{{ n.l }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1b Tableau de bord gouvernante -->
+    <div id="1b" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1b</span><span style="font-weight:600;font-size:15px">Tableau de bord · Gouvernante</span></div>
+      <div style="width:390px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA;padding-bottom:88px">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px 16px">
+          <div style="width:44px;height:44px;border-radius:999px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;font-weight:800;font-size:16px">ML</div>
+          <div style="flex:1;display:flex;flex-direction:column;line-height:1.2">
+            <span style="font-size:19px;font-weight:700">Bonjour, Mireille</span>
+            <span style="font-size:13px;color:#8A8578">Responsable Housekeeping</span>
+          </div>
+          <div style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;position:relative">🔔<span style="position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:999px;background:#B3261E;border:2px solid #FAF8F4"></span></div>
+        </div>
+        <div style="margin:0 16px;background:#0E2136;border-radius:20px;padding:14px;display:flex;gap:10px;align-items:center">
+          <a href="#1c" style="flex:1;display:flex;align-items:center;justify-content:center;gap:10px;height:60px;border-radius:14px;background:#B58435;color:#0E2136;font-size:18px;font-weight:800">🎤 Signaler un problème</a>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px">
+          <sc-for list="{{ kpisTeam }}" as="k" hint-placeholder-count="4">
+            <div style="background:#FAF8F4;border:1px solid #E2DCD0;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:30px;font-weight:800;line-height:1;color:{{ k.color }}">{{ k.value }}</span>
+              <span style="font-size:13px;line-height:1.3;color:#4A4F5C;font-weight:500">{{ k.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin:0 16px;background:#FAF8F4;border:1px solid #E2DCD0;border-radius:18px;padding:16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="font-size:17px;font-weight:700">Signalements de l'équipe</span><span style="font-size:13px;color:#8A8578">OT ouverts</span></div>
+          <sc-for list="{{ agents }}" as="a" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #E2DCD0">
+              <span style="width:36px;height:36px;border-radius:999px;background:#E2DCD0;display:grid;place-items:center;font-size:13px;font-weight:700;flex:none">{{ a.ini }}</span>
+              <span style="flex:1;font-size:15px;font-weight:500">{{ a.name }}</span>
+              <span style="min-width:40px;height:32px;padding:0 10px;border-radius:999px;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;background:{{ a.c }}">{{ a.n }}</span>
+            </div>
+          </sc-for>
+          <div style="display:flex;gap:14px;padding-top:10px;font-size:12px;color:#6B6658">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:999px;background:#1E7A55"></span>moins de 3</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:999px;background:#B4740F"></span>3 à 4</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:999px;background:#B3261E"></span>5 et plus</span>
+          </div>
+        </div>
+        <div style="padding:16px 16px 0;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:6px;background:#E2DCD0;border-radius:14px;padding:4px">
+            <span style="flex:1;text-align:center;padding:11px 0;font-weight:600;font-size:14px;color:#6B6658">Mes signalements</span>
+            <span style="flex:1;text-align:center;padding:11px 0;font-weight:600;font-size:14px;color:#6B6658">Urgents</span>
+            <span style="flex:1;text-align:center;padding:11px 0;border-radius:11px;background:#FAF8F4;font-weight:700;font-size:14px;box-shadow:0 1px 2px rgba(14,33,54,.12)">Toute l'équipe</span>
+          </div>
+          <span style="font-size:17px;font-weight:700;padding-top:4px">Derniers signalements de l'équipe</span>
+          <sc-for list="{{ teamOrders }}" as="o" hint-placeholder-count="3">
+            <a href="#1i" style="display:flex;gap:12px;align-items:center;background:#FAF8F4;border:1px solid #E2DCD0;border-radius:16px;padding:12px 14px;box-shadow:inset 5px 0 0 {{ o.c }}">
+              <span style="font-size:24px">{{ o.emoji }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                <span style="font-size:16px;font-weight:700">{{ o.lieu }} · <span style="font-weight:500;color:#4A4F5C">{{ o.cat }}</span></span>
+                <span style="font-size:13px;color:#6B6658">par {{ o.by }} · {{ o.time }}</span>
+              </div>
+              <span style="font-size:12px;font-weight:700;color:{{ o.c }}">{{ o.status }}</span>
+            </a>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:72px;background:#FAF8F4;border-top:1px solid #E2DCD0;display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:8px">
+          <sc-for list="{{ navHome }}" as="n" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:{{ n.w }};color:{{ n.c }}"><span style="font-size:22px;opacity:{{ n.o }}">{{ n.i }}</span>{{ n.l }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1c Étape 1 : Où ? -->
+    <div id="1c" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1c</span><span style="font-weight:600;font-size:15px">Signaler ① Où ? · numéro de chambre</span></div>
+      <div style="width:390px;height:844px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px">
+          <span style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;font-weight:700">✕</span>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span></div>
+          <span style="font-size:15px;font-weight:700;color:#6B6658">1/4</span>
+        </div>
+        <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-size:34px">📍</span><span style="font-size:30px;font-weight:800">Où ?</span></div>
+          <div style="background:#FAF8F4;border:3px solid #1E7A55;border-radius:20px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <span style="font-size:64px;font-weight:800;letter-spacing:.08em;line-height:1">214</span>
+            <span style="font-size:16px;font-weight:700;color:#1E7A55">✓ Chambre 214 · 2ᵉ étage</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
+              <span style="height:58px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:26px;font-weight:700">{{ k }}</span>
+            </sc-for>
+          </div>
+          <a href="#1d" style="height:58px;border-radius:14px;border:2px solid #0E2136;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:700">🏨 Hall, piscine…</a>
+        </div>
+        <div style="position:absolute;left:16px;right:16px;bottom:24px">
+          <a href="#1e" style="height:64px;border-radius:16px;background:#0E2136;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">Suivant →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1d Étape 1 : espaces communs -->
+    <div id="1d" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1d</span><span style="font-weight:600;font-size:15px">Signaler ① Où ? · espaces communs</span></div>
+      <div style="width:390px;height:844px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px">
+          <span style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;font-weight:700">←</span>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span></div>
+          <span style="font-size:15px;font-weight:700;color:#6B6658">1/4</span>
+        </div>
+        <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-size:34px">📍</span><span style="font-size:30px;font-weight:800">Où ?</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ spaces }}" as="s" hint-placeholder-count="9">
+              <div style="height:96px;border-radius:18px;background:{{ s.bg }};border:{{ s.b }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+                <span style="font-size:30px">{{ s.i }}</span><span style="font-size:16px;font-weight:700;color:{{ s.c }}">{{ s.l }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:16px;right:16px;bottom:24px">
+          <a href="#1e" style="height:64px;border-radius:16px;background:#0E2136;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">Suivant →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1e Étape 2 : Quel problème ? -->
+    <div id="1e" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1e</span><span style="font-weight:600;font-size:15px">Signaler ② Quel problème ?</span></div>
+      <div style="width:390px;height:844px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px">
+          <span style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;font-weight:700">←</span>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span></div>
+          <span style="font-size:15px;font-weight:700;color:#6B6658">2/4</span>
+        </div>
+        <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:30px;font-weight:800">Quel problème ?</span>
+            <span style="font-size:14px;font-weight:700;background:#0E2136;color:#fff;padding:6px 12px;border-radius:999px">Ch. 214</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ cats }}" as="c" hint-placeholder-count="7">
+              <div style="height:100px;border-radius:18px;background:{{ c.bg }};border:{{ c.b }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative">
+                <span style="font-size:34px">{{ c.i }}</span><span style="font-size:16px;font-weight:700;color:{{ c.c }}">{{ c.l }}</span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ urgentOn }}" hint-placeholder-val="{{ false }}">
+              <div style="height:100px;border-radius:18px;background:#B3261E;border:3px solid #7A1712;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;box-shadow:0 0 0 4px rgba(179,38,30,.25)">
+                <span style="font-size:30px">🚨</span><span style="font-size:18px;font-weight:800;letter-spacing:.04em">URGENT ✓</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ urgentOff }}" hint-placeholder-val="{{ true }}">
+              <div style="height:100px;border-radius:18px;background:#FAF8F4;border:3px solid #B3261E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#B3261E">
+                <span style="font-size:30px">🚨</span><span style="font-size:18px;font-weight:800;letter-spacing:.04em">URGENT</span>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="position:absolute;left:16px;right:16px;bottom:24px">
+          <a href="#1f" style="height:64px;border-radius:16px;background:#0E2136;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">Suivant →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1f Étape 3 : Message vocal -->
+    <div id="1f" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1f</span><span style="font-weight:600;font-size:15px">Signaler ③ Message vocal</span></div>
+      <div style="width:390px;height:844px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px">
+          <span style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;font-weight:700">←</span>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#D8D1C3"></span></div>
+          <span style="font-size:15px;font-weight:700;color:#6B6658">3/4</span>
+        </div>
+        <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:30px;font-weight:800">Dites le problème</span>
+          <div style="display:flex;gap:8px"><span style="font-size:14px;font-weight:700;background:#0E2136;color:#fff;padding:6px 12px;border-radius:999px">Ch. 214</span><span style="font-size:14px;font-weight:700;background:#FAF8F4;border:1px solid #E2DCD0;padding:6px 12px;border-radius:999px">💧 Eau / fuite</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:22px;padding-top:44px">
+          <sc-if value="{{ vReady }}" hint-placeholder-val="{{ false }}">
+            <div style="width:190px;height:190px;border-radius:999px;background:#0E2136;display:grid;place-items:center;font-size:72px;box-shadow:0 0 0 14px rgba(14,33,54,.08)">🎤</div>
+            <span style="font-size:22px;font-weight:800">Appuyez pour parler</span>
+            <span style="font-size:15px;color:#6B6658">2 minutes maximum</span>
+          </sc-if>
+          <sc-if value="{{ vRec }}" hint-placeholder-val="{{ true }}">
+            <div style="width:190px;height:190px;border-radius:999px;background:#B3261E;display:grid;place-items:center;box-shadow:0 0 0 14px rgba(179,38,30,.18),0 0 0 30px rgba(179,38,30,.08)"><span style="width:58px;height:58px;border-radius:12px;background:#fff"></span></div>
+            <span style="font-size:40px;font-weight:800;letter-spacing:.02em">0:37 <span style="font-size:18px;color:#8A8578;font-weight:600">/ 2:00</span></span>
+            <div style="display:flex;align-items:center;gap:4px;height:44px">
+              <sc-for list="{{ wave }}" as="w" hint-placeholder-count="24"><span style="width:5px;border-radius:999px;background:#B3261E;height:{{ w }}"></span></sc-for>
+            </div>
+            <span style="font-size:17px;font-weight:700;color:#B3261E">● Enregistrement… appuyez pour arrêter</span>
+          </sc-if>
+          <sc-if value="{{ vPlay }}" hint-placeholder-val="{{ false }}">
+            <div style="width:340px;background:#FAF8F4;border:2px solid #1E7A55;border-radius:20px;padding:18px;display:flex;align-items:center;gap:14px">
+              <span style="width:64px;height:64px;border-radius:999px;background:#1E7A55;color:#fff;display:grid;place-items:center;font-size:26px;flex:none">▶</span>
+              <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;gap:3px;height:32px"><sc-for list="{{ wave }}" as="w" hint-placeholder-count="24"><span style="width:4px;border-radius:999px;background:#1E7A55;height:{{ w }}"></span></sc-for></div>
+                <span style="font-size:15px;font-weight:700">0:52</span>
+              </div>
+            </div>
+            <span style="font-size:20px;font-weight:800;color:#1E7A55">✓ Message enregistré</span>
+            <div style="display:flex;gap:10px;width:340px">
+              <span style="flex:1;height:58px;border-radius:14px;border:2px solid #0E2136;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700">▶ Réécouter</span>
+              <span style="flex:1;height:58px;border-radius:14px;border:2px solid #0E2136;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700">↺ Recommencer</span>
+            </div>
+          </sc-if>
+        </div>
+        <div style="position:absolute;left:16px;right:16px;bottom:24px">
+          <a href="#1g" style="height:64px;border-radius:16px;background:#0E2136;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">Suivant →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1g Étape 4 : Photo -->
+    <div id="1g" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1g</span><span style="font-weight:600;font-size:15px">Signaler ④ Photo (facultatif) et envoi</span></div>
+      <div style="width:390px;height:844px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px">
+          <span style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;font-weight:700">←</span>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#B58435"></span><span style="height:8px;border-radius:999px;background:#B58435"></span></div>
+          <span style="font-size:15px;font-weight:700;color:#6B6658">4/4</span>
+        </div>
+        <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:30px;font-weight:800">Une photo ?</span><span style="font-size:15px;color:#8A8578;font-weight:600">facultatif</span></div>
+          <div style="height:200px;border-radius:20px;border:2px dashed #B9B1A2;background:repeating-linear-gradient(135deg,#F3F0EA 0 10px,#EAE5DB 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+            <span style="width:76px;height:76px;border-radius:999px;background:#0E2136;display:grid;place-items:center;font-size:32px">📷</span>
+            <span style="font-size:18px;font-weight:700">Prendre une photo</span>
+          </div>
+          <div style="height:64px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;padding:0 16px;display:flex;align-items:center;gap:10px;font-size:15px;color:#8A8578">✏️ Écrire un mot (facultatif)</div>
+          <div style="background:#FAF8F4;border:1px solid #E2DCD0;border-radius:18px;padding:6px 16px">
+            <sc-for list="{{ recap }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EFEBE3">
+                <span style="font-size:22px;width:28px;text-align:center">{{ r.i }}</span>
+                <span style="flex:1;font-size:16px;font-weight:600">{{ r.v }}</span>
+                <span style="font-size:18px;color:#1E7A55;font-weight:800">✓</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:16px;right:16px;bottom:24px">
+          <a href="#1h" style="height:68px;border-radius:16px;background:#1E7A55;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:21px;font-weight:800">📤 Envoyer</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1h Confirmation -->
+    <div id="1h" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1h</span><span style="font-weight:600;font-size:15px">Confirmation d'envoi</span></div>
+      <div style="width:390px;height:844px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:96px 24px 0">
+          <div style="width:160px;height:160px;border-radius:999px;background:#1E7A55;color:#fff;display:grid;place-items:center;font-size:88px;font-weight:800;box-shadow:0 0 0 16px rgba(30,122,85,.14)">✓</div>
+          <span style="font-size:32px;font-weight:800;margin-top:12px">C'est envoyé !</span>
+          <span style="font-size:17px;color:#4A4F5C;line-height:1.45">La maintenance a reçu votre signalement.<br>Vous serez prévenue dans 🔔.</span>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <span style="font-size:17px;font-weight:700;background:#0E2136;color:#fff;padding:10px 16px;border-radius:999px">📍 Chambre 214</span>
+            <span style="font-size:17px;font-weight:700;background:#FAF8F4;border:1px solid #E2DCD0;padding:10px 16px;border-radius:999px">OT-00104</span>
+          </div>
+        </div>
+        <div style="position:absolute;left:16px;right:16px;bottom:24px;display:flex;flex-direction:column;gap:10px">
+          <a href="#1c" style="height:64px;border-radius:16px;background:#B58435;color:#0E2136;display:flex;align-items:center;justify-content:center;gap:10px;font-size:19px;font-weight:800">🎤 Nouveau signalement</a>
+          <a href="#1a" style="height:60px;border-radius:16px;border:2px solid #0E2136;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">Mes signalements</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1i Fiche OT -->
+    <div id="1i" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="background:#0E2136;color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:6px">1i</span><span style="font-weight:600;font-size:15px">Fiche OT · lecture seule</span></div>
+      <div style="width:390px;background:#EDEAE3;border-radius:36px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(14,33,54,.45);border:1px solid #CFC8BA;padding-bottom:88px">
+        <div style="display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:14px;font-weight:600"><span>9:41</span><span>●●● 100%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px">
+          <span style="width:48px;height:48px;border-radius:14px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:20px;font-weight:700">←</span>
+          <span style="flex:1;font-size:16px;font-weight:700;color:#6B6658">OT-00098</span>
+          <span style="font-size:12px;font-weight:600;color:#6B6658;background:#E2DCD0;padding:5px 10px;border-radius:999px">🔒 Lecture seule</span>
+        </div>
+        <div style="padding:10px 16px 0;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;gap:14px;align-items:center">
+            <span style="width:64px;height:64px;border-radius:18px;background:#FAF8F4;border:1px solid #E2DCD0;display:grid;place-items:center;font-size:32px">❄️</span>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:26px;font-weight:800">Chambre 305</span><span style="font-size:15px;color:#4A4F5C">Climatisation · 3ᵉ étage</span></div>
+          </div>
+          <div style="background:#FBEFD9;border:2px solid #B4740F;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+            <span style="font-size:28px">🟠</span>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:18px;font-weight:800;color:#8A580B">En cours</span><span style="font-size:14px;color:#4A4F5C">Karim D. s'en occupe · passage prévu 11:00</span></div>
+          </div>
+          <div style="background:#FAF8F4;border:1px solid #E2DCD0;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:14px;font-weight:700;color:#6B6658">MESSAGE VOCAL</span>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:52px;height:52px;border-radius:999px;background:#0E2136;color:#fff;display:grid;place-items:center;font-size:20px;flex:none">▶</span>
+              <div style="flex:1;display:flex;align-items:center;gap:3px;height:28px"><sc-for list="{{ wave }}" as="w" hint-placeholder-count="24"><span style="width:4px;border-radius:999px;background:#8A8578;height:{{ w }}"></span></sc-for></div>
+              <span style="font-size:14px;font-weight:700">0:41</span>
+            </div>
+          </div>
+          <div style="height:160px;border-radius:18px;background:repeating-linear-gradient(135deg,#F3F0EA 0 10px,#EAE5DB 10px 20px);border:1px solid #E2DCD0;display:grid;place-items:center;font-family:ui-monospace,monospace;font-size:12px;color:#6B6658">photo du signalement</div>
+          <div style="background:#FAF8F4;border:1px solid #E2DCD0;border-radius:18px;padding:14px 16px">
+            <span style="font-size:14px;font-weight:700;color:#6B6658">HISTORIQUE</span>
+            <div style="display:flex;flex-direction:column;margin-top:8px">
+              <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:20px 1fr auto;gap:10px;padding:9px 0">
+                  <span style="width:14px;height:14px;border-radius:999px;margin-top:3px;background:{{ h.c }};border:3px solid {{ h.ring }}"></span>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700;color:{{ h.tc }}">{{ h.l }}</span><span style="font-size:13px;color:#6B6658">{{ h.d }}</span></div>
+                  <span style="font-size:13px;color:#8A8578;font-weight:600">{{ h.t }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:72px;background:#FAF8F4;border-top:1px solid #E2DCD0;display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:8px">
+          <sc-for list="{{ navOT }}" as="n" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:{{ n.w }};color:{{ n.c }}"><span style="font-size:22px;opacity:{{ n.o }}">{{ n.i }}</span>{{ n.l }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;etatVocal&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;prêt&quot;,&quot;enregistrement&quot;,&quot;réécoute&quot;],&quot;default&quot;:&quot;enregistrement&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;urgent&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const P = this.props, v = P.etatVocal ?? 'enregistrement', urgent = P.urgent ?? false;
+    const S = { r:['#B3261E','#FBE7E5','En attente'], o:['#B4740F','#FBEFD9','En cours'], g:['#1E7A55','#E3F1EA','Réparé'] };
+    const nav = a => [['🏠','Accueil'],['🎤','Signaler'],['📋','Mes OT'],['👤','Profil']].map(([i,l],k)=>({ i, l, c:k===a?'#0E2136':'#8A8578', w:k===a?800:500, o:k===a?1:.55 }));
+    const ord = (emoji,lieu,cat,code,s,info)=>({ emoji,lieu,cat,code,info,c:S[s][0],bg:S[s][1],status:S[s][2] });
+    const sel = (i,l,on)=>({ i,l, bg:on?'#0E2136':'#FAF8F4', c:on?'#fff':'#0E2136', b:on?'3px solid #0E2136':'1px solid #E2DCD0' });
+    return {
+      vReady:v==='prêt', vRec:v==='enregistrement', vPlay:v==='réécoute', urgentOn:urgent, urgentOff:!urgent,
+      navHome:nav(0), navOT:nav(2),
+      kpisAgent:[
+        { value:'3', label:'Mes signalements ouverts', color:'#0E2136' },
+        { value:'1', label:"En attente d'affectation", color:'#B3261E' },
+        { value:'5', label:'Résolus cette semaine', color:'#1E7A55' },
+        { value:'4', label:'Chambres suivies', color:'#0E2136' },
+      ],
+      kpisTeam:[
+        { value:'14', label:"Signalements de l'équipe", color:'#0E2136' },
+        { value:'4', label:"En attente d'affectation", color:'#B3261E' },
+        { value:'22', label:'Résolus cette semaine', color:'#1E7A55' },
+        { value:'11', label:'Chambres suivies', color:'#0E2136' },
+      ],
+      myOrders:[
+        ord('💧','Chambre 214','Eau / fuite','OT-00104','r','En attente d\'un technicien'),
+        ord('❄️','Chambre 305','Climatisation','OT-00098','o','Karim D. · passage prévu 11:00'),
+        ord('📺','Chambre 118','Télévision','OT-00091','g','Réparé par Samir B. · vous pouvez vérifier'),
+      ],
+      rooms:[
+        { n:'214', what:'💧 Eau / fuite', st:'En attente', c:'#B3261E' },
+        { n:'305', what:'❄️ Climatisation', st:'En cours', c:'#B4740F' },
+        { n:'118', what:'📺 Télévision', st:'Réparé', c:'#1E7A55' },
+        { n:'221', what:'🔑 Porte', st:'Réparé', c:'#1E7A55' },
+      ],
+      agents:[['FK','Fatou K.',5,'#B3261E'],['AB','Aïcha B.',3,'#B4740F'],['LM','Lina M.',4,'#B4740F'],['JP','Jean P.',1,'#1E7A55'],['SR','Sofia R.',0,'#1E7A55']].map(([ini,name,n,c])=>({ini,name,n,c})),
+      teamOrders:[
+        { emoji:'⚡', lieu:'Chambre 412', cat:'Électricité', by:'Fatou K.', time:'09:32', ...{c:S.r[0],status:'En attente'} },
+        { emoji:'💧', lieu:'Chambre 214', cat:'Eau / fuite', by:'Aïcha B.', time:'09:18', ...{c:S.r[0],status:'En attente'} },
+        { emoji:'🛏️', lieu:'Chambre 507', cat:'Mobilier', by:'Lina M.', time:'08:55', ...{c:S.o[0],status:'En cours'} },
+        { emoji:'🔑', lieu:'Buanderie', cat:'Porte', by:'Jean P.', time:'08:12', ...{c:S.g[0],status:'Réparé'} },
+      ],
+      keys:['1','2','3','4','5','6','7','8','9','⌫','0','✓'],
+      spaces:[['🛎️','Hall'],['🏊','Piscine'],['🍳','Cuisine'],['🍽️','Restaurant'],['🛗','Ascenseur'],['🧺','Buanderie'],['🅿️','Parking'],['🔥','Chaufferie']].map(([i,l])=>sel(i,l,l==='Piscine')).concat([{ i:'❓', l:'Autre endroit', bg:'#FAF8F4', c:'#0E2136', b:'2px dashed #B9B1A2' }]),
+      cats:[['💧','Eau / fuite'],['⚡','Électricité'],['❄️','Climatisation'],['📺','Télévision'],['🛏️','Mobilier'],['🔑','Porte'],['❓','Autre']].map(([i,l])=>sel(i,l,l==='Eau / fuite')),
+      wave:[14,26,18,34,22,40,28,16,30,44,24,12,20,36,28,18,38,22,14,30,26,16,22,12].map(h=>h+'px'),
+      recap:[{ i:'📍', v:'Chambre 214' },{ i:'💧', v:urgent?'Eau / fuite · 🚨 Urgent':'Eau / fuite' },{ i:'🎤', v:'Message vocal · 0:52' },{ i:'📷', v:'Pas de photo' }],
+      history:[
+        { l:'En cours', d:'Karim D. a commencé', t:'10:42', c:'#B4740F', ring:'#FBEFD9', tc:'#0E2136' },
+        { l:'Technicien affecté', d:'Karim D. · passage prévu 11:00', t:'09:50', c:'#0E2136', ring:'#E2DCD0', tc:'#0E2136' },
+        { l:'Signalé', d:'par vous · message vocal + photo', t:'09:05', c:'#B3261E', ring:'#FBE7E5', tc:'#0E2136' },
+        { l:'Réparé', d:'à venir', t:'—', c:'#E2DCD0', ring:'#EDEAE3', tc:'#8A8578' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

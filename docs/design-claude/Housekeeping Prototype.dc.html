@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+html,body{margin:0;height:100%;background:#F4F1EB;font-family:'Archivo',system-ui,sans-serif;color:#0E2136;-webkit-font-smoothing:antialiased}
+a{color:#0E2136;text-decoration:none}a:hover{color:#B58435}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+input{font:inherit;color:#0E2136}
+input::placeholder{color:#8B909A}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#D9D2C5;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+<div style="height:100vh;height:100dvh;display:flex;background:#F4F1EB;overflow:hidden;position:relative">
+
+  <!-- SIDEBAR DESKTOP -->
+  <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}">
+    <aside style="width:248px;flex:none;background:#0E2136;display:flex;flex-direction:column;padding:22px 14px 16px">
+      <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:12px;padding:0 8px;border:0;background:transparent;cursor:pointer;text-align:left">
+        <svg width="38" height="38" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#14304F"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        <span style="display:flex;flex-direction:column;line-height:1.15"><span style="font-size:17px;font-weight:700;color:#fff;letter-spacing:-.01em">Président</span><span style="font-size:10px;font-weight:700;letter-spacing:.18em;color:#E4C58F">HOUSEKEEPING</span></span>
+      </button>
+      <nav style="margin-top:32px;display:flex;flex-direction:column;gap:2px">
+        <sc-for list="{{ navSide }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.on }}" style="display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border:0;border-radius:10px;cursor:pointer;text-align:left;background:{{ n.bg }};box-shadow:{{ n.bar }};transition:background .15s" style-hover="background:rgba(255,255,255,.06)">
+            <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span>
+            <span style="flex:1;font-size:14px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+            <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#B58435;color:#0E2136;display:grid;place-items:center">{{ n.badge }}</span></sc-if>
+          </button>
+        </sc-for>
+      </nav>
+      <button onClick="{{ goProfile }}" style="margin-top:auto;display:flex;align-items:center;gap:12px;padding:12px 10px;border:0;border-radius:12px;cursor:pointer;text-align:left;background:{{ profileBg }}" style-hover="background:rgba(255,255,255,.1)">
+        <span style="width:38px;height:38px;border-radius:999px;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none;background:{{ me.avBg2 }};color:#0E2136">{{ me.ini }}</span>
+        <span style="flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0"><span style="font-size:14px;font-weight:600;color:#fff">{{ me.name }}</span><span style="font-size:12px;color:#A9B6C6">{{ me.role }}</span></span>
+        <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8FA0B5">chevron_right</span>
+      </button>
+    </aside>
+  </sc-if>
+
+  <!-- RAIL TABLETTE -->
+  <sc-if value="{{ showRail }}" hint-placeholder-val="{{ false }}">
+    <aside style="width:96px;flex:none;background:#0E2136;display:flex;flex-direction:column;align-items:center;padding:18px 0 20px">
+      <button onClick="{{ goHome }}" style="border:0;background:transparent;cursor:pointer;padding:0"><svg width="44" height="44" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#14304F"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg></button>
+      <div style="margin-top:28px;display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ navRail }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.on }}" style="width:80px;height:64px;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative">
+            <span style="width:56px;height:32px;border-radius:999px;display:grid;place-items:center;background:{{ n.pill }};transition:background .2s"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span></span>
+            <span style="font-size:11px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+            <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:2px;right:12px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B58435;color:#0E2136;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid #0E2136">{{ n.badge }}</span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+      <button onClick="{{ goProfile }}" style="margin-top:auto;width:44px;height:44px;border-radius:999px;border:0;cursor:pointer;display:grid;place-items:center;font-size:15px;font-weight:700;background:{{ me.avBg2 }};color:#0E2136;box-shadow:{{ profileRing }}">{{ me.ini }}</button>
+    </aside>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;position:relative">
+
+    <!-- EN-TÊTE PARCOURS · MOBILE -->
+    <sc-if value="{{ flowHeadMob }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;padding:14px 20px 0;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button onClick="{{ flowBack }}" style="width:44px;height:44px;flex:none;border-radius:14px;background:#fff;border:1px solid #E8E2D6;cursor:pointer;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ backIcon }}</span></button>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;line-height:1.2"><span style="font-size:11px;font-weight:700;letter-spacing:.12em;color:#8B909A">ÉTAPE {{ stepNum }} SUR 4</span><span style="font-size:15px;font-weight:700">{{ stepName }}</span></div>
+          <sc-if value="{{ isWhere }}" hint-placeholder-val="{{ false }}"><button onClick="{{ scanQR }}" style="width:44px;height:44px;flex:none;border-radius:14px;background:#fff;border:1px solid #E8E2D6;cursor:pointer;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">qr_code_scanner</span></button></sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><sc-for list="{{ steps }}" as="p" hint-placeholder-count="4"><span style="height:4px;border-radius:999px;background:{{ p.bar }};transition:background .3s"></span></sc-for></div>
+      </div>
+    </sc-if>
+
+    <!-- EN-TÊTE PARCOURS · TABLETTE / DESKTOP -->
+    <sc-if value="{{ flowHeadWide }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;background:#fff;border-bottom:1px solid #E8E2D6;padding:16px 32px 20px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <button onClick="{{ flowBack }}" style="width:48px;height:48px;flex:none;border-radius:14px;background:#F4F1EB;border:0;cursor:pointer;display:grid;place-items:center" style-hover="background:#EAE5DB"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1">{{ backIcon }}</span></button>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;line-height:1.2"><span style="font-size:12px;font-weight:700;letter-spacing:.12em;color:#8B909A">ÉTAPE {{ stepNum }} SUR 4</span><span style="font-size:20px;font-weight:700;letter-spacing:-.01em">Nouveau signalement</span></div>
+          <sc-if value="{{ isWhere }}" hint-placeholder-val="{{ false }}"><button onClick="{{ scanQR }}" style="flex:none;white-space:nowrap;height:48px;padding:0 16px 0 12px;border-radius:14px;border:1.5px solid #0E2136;background:transparent;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">qr_code_scanner</span>Scanner le QR</button></sc-if>
+        </div>
+        <div style="display:flex;align-items:center">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;flex:{{ s.flex }}">
+              <span style="width:32px;height:32px;border-radius:999px;display:grid;place-items:center;flex:none;font-size:14px;font-weight:700;background:{{ s.nbg }};color:{{ s.nc }};box-shadow:{{ s.ring }};transition:background .3s"><span>{{ s.n }}</span><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">{{ s.done }}</span></span>
+              <span style="font-size:14px;white-space:nowrap;font-weight:{{ s.w }};color:{{ s.c }}">{{ s.l }}</span>
+              <span style="flex:1;height:2px;border-radius:999px;margin:0 14px 0 4px;background:{{ s.line }};transition:background .3s"></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="flex:1;min-height:0;overflow-x:hidden;overflow-y:{{ scrollY }};position:relative">
+
+      <!-- ===== ACCUEIL ===== -->
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:{{ padTop }} {{ padX }} 32px;display:flex;flex-direction:column;gap:24px;max-width:1440px;margin:0 auto">
+          <sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px">
+              <svg width="36" height="36" viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="#0E2136"></rect><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-width="2.4" fill="none" stroke-linecap="round"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#E4C58F" stroke-width="2" fill="none" stroke-linecap="round"></path><path d="M9 30h22" stroke="#B58435" stroke-width="2.4" stroke-linecap="round"></path></svg>
+              <div style="flex:1;display:flex;flex-direction:column;line-height:1.15"><span style="font-size:16px;font-weight:700;letter-spacing:-.01em">Président</span><span style="font-size:10px;font-weight:700;letter-spacing:.18em;color:#9A6E28">HOUSEKEEPING</span></div>
+              <button onClick="{{ openNotifs }}" style="width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid #E8E2D6;display:grid;place-items:center;position:relative;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1">notifications</span><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#B3261E;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid #F4F1EB">{{ unread }}</span></sc-if></button>
+              <button onClick="{{ goProfile }}" style="width:44px;height:44px;border-radius:999px;border:0;cursor:pointer;display:grid;place-items:center;font-weight:700;font-size:15px;background:{{ me.avBg }};color:{{ me.avC }}">{{ me.ini }}</button>
+            </div>
+          </sc-if>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;color:#5C6472;font-weight:500">Mardi 1 octobre · Service du matin</span><span style="font-size:{{ helloSize }};font-weight:800;letter-spacing:-.025em;line-height:1.12">Bonjour, {{ me.first }}</span></div>
+            <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goList }}" style="width:300px;height:44px;border-radius:12px;background:#fff;border:1px solid #E8E2D6;display:flex;align-items:center;gap:10px;padding:0 14px;color:#8B909A;font-size:14px;cursor:pointer;text-align:left" style-hover="border-color:#0E2136"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">search</span>Chercher une chambre ou un lieu</button></sc-if>
+            <sc-if value="{{ notMob }}" hint-placeholder-val="{{ false }}"><button onClick="{{ openNotifs }}" style="width:48px;height:48px;border-radius:14px;background:#fff;border:1px solid #E8E2D6;display:grid;place-items:center;position:relative;cursor:pointer" style-hover="border-color:#0E2136"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1">notifications</span><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#B3261E;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid #F4F1EB">{{ unread }}</span></sc-if></button></sc-if>
+            <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}"><button onClick="{{ startReport }}" style="height:48px;padding:0 20px 0 16px;border-radius:14px;border:0;background:#0E2136;color:#fff;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700" style-hover="background:#1B3352"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#E4C58F;font-variation-settings:'FILL' 1">mic</span>Signaler un problème</button></sc-if>
+          </div>
+
+          <sc-if value="{{ showCtaCard }}" hint-placeholder-val="{{ true }}">
+            <div style="position:relative;overflow:hidden;background:#0E2136;border-radius:22px;padding:{{ ctaPad }};display:flex;flex-direction:{{ ctaDir }};align-items:{{ ctaAlign }};gap:18px;box-shadow:0 20px 36px -20px rgba(14,33,54,.7)">
+              <svg style="position:absolute;right:-26px;top:-18px" width="170" height="170" viewBox="0 0 40 40"><path d="M12 30V19a8 8 0 0 1 16 0v11" stroke="#B58435" stroke-opacity=".22" stroke-width="1.2" fill="none"></path><path d="M17 30v-7.5a3 3 0 0 1 6 0V30" stroke="#B58435" stroke-opacity=".22" stroke-width="1" fill="none"></path></svg>
+              <div style="flex:1;display:flex;flex-direction:column;gap:4px;position:relative"><span style="font-size:{{ ctaTitle }};font-weight:700;color:#fff;letter-spacing:-.01em">Une panne à signaler ?</span><span style="font-size:14px;color:#A9B6C6;line-height:1.4">Un message vocal suffit, moins d'une minute.</span></div>
+              <button onClick="{{ startReport }}" style="position:relative;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;height:58px;padding:0 26px;border-radius:16px;background:#B58435;color:#0E2136;font-size:17px;font-weight:700;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)" style-hover="background:#C4934A" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1">mic</span>Signaler un problème</button>
+            </div>
+          </sc-if>
+
+          <div style="background:#fff;border:1px solid #E8E2D6;border-radius:20px;display:grid;grid-template-columns:{{ kpiCols }};overflow:hidden">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+              <div style="padding:{{ kpiPad }};display:flex;flex-direction:{{ kpiDir }};align-items:{{ kpiAlign }};gap:14px;border-left:{{ k.bl }};border-top:{{ k.bt }}">
+                <span style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;background:{{ k.bg }};color:{{ k.color }}">{{ k.icon }}</span>
+                <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums;color:{{ k.color }}">{{ k.value }}</span><span style="font-size:13px;color:#5C6472;line-height:1.3;font-weight:500">{{ k.label }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:{{ homeGrid }};gap:24px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <span style="flex:1;font-size:19px;font-weight:700;letter-spacing:-.01em;white-space:nowrap">{{ ordersTitle }}</span>
+                <div style="display:flex;gap:4px;background:#EAE5DB;border-radius:12px;padding:4px;flex:{{ tabsFlex }}">
+                  <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+                    <button onClick="{{ t.on }}" style="flex:1;border:0;cursor:pointer;height:38px;padding:0 14px;border-radius:9px;font-size:13px;font-weight:600;white-space:nowrap;background:{{ t.bg }};color:{{ t.c }};box-shadow:{{ t.sh }};transition:background .2s">{{ t.l }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ noOrders }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:36px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;border:1px solid #E8E2D6;border-radius:20px">
+                  <span style="width:48px;height:48px;border-radius:999px;background:#E3F1EA;color:#1E7A55;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:26px;line-height:1">task_alt</span>
+                  <span style="font-size:15px;font-weight:600">Rien à signaler ici</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ showTable }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#fff;border:1px solid #E8E2D6;border-radius:16px;overflow:hidden">
+                  <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.1fr) 112px minmax(0,1.2fr) 52px 20px;gap:12px;padding:11px 20px;background:#FBF9F5;border-bottom:1px solid #EEE8DE;font-size:11px;font-weight:700;letter-spacing:.08em;color:#8B909A"><span>LIEU</span><span>SIGNALÉ PAR</span><span>STATUT</span><span>TECHNICIEN</span><span>HEURE</span><span></span></div>
+                  <sc-for list="{{ homeOrders }}" as="r" hint-placeholder-count="6">
+                    <button onClick="{{ r.open }}" style="width:100%;border:0;border-bottom:1px solid #F2EDE4;background:transparent;cursor:pointer;text-align:left;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.1fr) 112px minmax(0,1.2fr) 52px 20px;gap:12px;align-items:center;padding:10px 20px" style-hover="background:#FBF9F5">
+                      <span style="display:flex;align-items:center;gap:12px;min-width:0"><span style="width:38px;height:38px;border-radius:11px;background:#F3EFE7;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:20px;line-height:1">{{ r.icon }}</span><span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700">{{ r.lieu }}<sc-if value="{{ r.urgent }}" hint-placeholder-val="{{ false }}"><span style="height:18px;padding:0 6px;border-radius:5px;background:#FBE7E5;color:#B3261E;font-size:10px;font-weight:700;letter-spacing:.04em;display:grid;place-items:center">URGENT</span></sc-if></span><span style="font-size:13px;color:#5C6472;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.cat }}</span></span></span>
+                      <span style="display:flex;align-items:center;gap:8px;min-width:0"><span style="width:26px;height:26px;border-radius:999px;display:grid;place-items:center;font-size:10px;font-weight:700;flex:none;background:{{ r.byBg }};color:{{ r.byC }}">{{ r.byIni }}</span><span style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.byLabel }}</span></span>
+                      <span style="justify-self:start;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;color:{{ r.c }};background:{{ r.bg }}"><span style="width:6px;height:6px;border-radius:999px;background:{{ r.c }}"></span>{{ r.status }}</span>
+                      <span style="font-size:13px;color:{{ r.techC }};font-style:{{ r.techFs }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.techLabel }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5C6472">{{ r.time }}</span>
+                      <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#B9B3A7">chevron_right</span>
+                    </button>
+                  </sc-for>
+                  <button onClick="{{ goList }}" style="width:100%;height:48px;border:0;background:transparent;cursor:pointer;font-size:14px;font-weight:600;color:#9A6E28;display:flex;align-items:center;justify-content:center;gap:4px" style-hover="background:#FBF9F5">Voir tous les signalements<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">arrow_forward</span></button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ showCards }}" hint-placeholder-val="{{ true }}">
+                <div style="display:grid;grid-template-columns:{{ cardCols }};gap:12px">
+                  <sc-for list="{{ homeOrders }}" as="o" hint-placeholder-count="3">
+                    <button onClick="{{ o.open }}" style="text-align:left;cursor:pointer;display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #E8E2D6;border-radius:20px;padding:14px;min-width:0" style-hover="border-color:#CFC6B5" style-active="transform:scale(.99)">
+                      <span style="width:48px;height:48px;border-radius:14px;background:#F3EFE7;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:24px;line-height:1">{{ o.icon }}</span>
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                        <span style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:16px;font-weight:700;letter-spacing:-.01em">{{ o.lieu }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:#8B909A">{{ o.code }}</span></span>
+                        <span style="font-size:14px;color:#5C6472;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.catLine }}</span>
+                        <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ o.c }};background:{{ o.bg }}"><span style="width:6px;height:6px;border-radius:999px;background:{{ o.c }}"></span>{{ o.status }}</span><sc-if value="{{ o.urgent }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:3px;height:24px;padding:0 8px;border-radius:7px;font-size:12px;font-weight:700;color:#B3261E;background:#FBE7E5"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;font-variation-settings:'FILL' 1">priority_high</span>Urgent</span></sc-if></span>
+                        <span style="font-size:13px;color:#5C6472;line-height:1.35">{{ o.info }}</span>
+                      </span>
+                      <span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#B9B3A7;flex:none">chevron_right</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+              <sc-if value="{{ isGov }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#fff;border:1px solid #E8E2D6;border-radius:20px;padding:16px 18px 6px">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px"><span style="font-size:17px;font-weight:700;letter-spacing:-.01em">Charge de l'équipe</span><span style="font-size:12px;color:#8B909A">OT ouverts</span></div>
+                  <sc-for list="{{ agents }}" as="a" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F2EDE4">
+                      <span style="width:32px;height:32px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:700;flex:none;background:{{ a.bg }};color:{{ a.fc }}">{{ a.ini }}</span>
+                      <span style="flex:1;font-size:14px;font-weight:600">{{ a.name }}</span>
+                      <span style="width:80px;height:6px;border-radius:999px;background:#EEE9DF;overflow:hidden"><span style="display:block;height:100%;border-radius:999px;width:{{ a.w }};background:{{ a.c }};transition:width .4s"></span></span>
+                      <span style="width:18px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:{{ a.c }}">{{ a.n }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ showActivity }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#fff;border:1px solid #E8E2D6;border-radius:20px;padding:16px 18px 6px">
+                  <span style="font-size:17px;font-weight:700;letter-spacing:-.01em">Activité récente</span>
+                  <div style="display:flex;flex-direction:column;margin-top:6px">
+                    <sc-for list="{{ activity }}" as="e" hint-placeholder-count="4">
+                      <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F2EDE4">
+                        <span style="width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1;background:{{ e.bg }};color:{{ e.c }}">{{ e.icon }}</span>
+                        <span style="flex:1;font-size:13px;line-height:1.4">{{ e.text }}</span>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A;padding-top:2px">{{ e.t }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== PARCOURS DE SIGNALEMENT ===== -->
+      <sc-if value="{{ inFlow }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:{{ flowGrid }};gap:28px;align-items:start;padding:{{ flowPad }};max-width:{{ flowMax }};margin:0 auto">
+          <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+
+            <sc-if value="{{ isWhere }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;text-align:{{ titleAlign }}"><span style="font-size:{{ stepTitle }};font-weight:800;letter-spacing:-.025em;line-height:1.15">Où se trouve le problème ?</span><span style="font-size:15px;color:#5C6472">{{ whereSub }}</span></div>
+              <div style="width:100%;max-width:{{ padMax }};align-self:center;display:flex;flex-direction:column;gap:12px">
+                <div style="background:#fff;border-radius:22px;padding:16px 18px;display:flex;align-items:center;gap:14px;border:2px solid {{ roomBorder }};box-shadow:{{ roomGlow }};transition:border-color .2s,box-shadow .2s">
+                  <span style="width:50px;height:50px;border-radius:15px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:27px;line-height:1;background:{{ placeTileBg }};color:{{ placeTileC }}">{{ placeIcon }}</span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;font-weight:600;color:#8B909A">{{ placeKind }}</span><span style="font-size:{{ placeSize }};font-weight:800;letter-spacing:{{ placeLs }};line-height:1;font-variant-numeric:tabular-nums;color:{{ roomDigitC }}">{{ roomDisplay }}</span></div>
+                  <span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;text-align:right;color:{{ roomMsgC }}"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;font-variation-settings:'FILL' 1">{{ roomIcon }}</span>{{ roomMsg }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:{{ keyGap }}">
+                  <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
+                    <button onClick="{{ k.on }}" style="height:{{ keyH }};border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;background:{{ k.bg }};color:{{ k.c }};border:1px solid {{ k.b }};box-shadow:0 2px 0 rgba(14,33,54,.05);transition:background .15s" style-hover="filter:brightness(.98)" style-active="transform:scale(.95)"><span>{{ k.txt }}</span><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1">{{ k.icon }}</span></button>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ goSpaces }}" style="height:52px;border-radius:16px;border:1.5px solid #0E2136;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">apartment</span>Hall, piscine, espaces communs</button>
+              </sc-if>
+              <sc-if value="{{ notMob }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:16px;padding-top:6px"><span style="flex:1;height:1px;background:#DCD5C8"></span><span style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#8B909A">OU UN ESPACE COMMUN</span><span style="flex:1;height:1px;background:#DCD5C8"></span></div>
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+                  <sc-for list="{{ spacesWide }}" as="s" hint-placeholder-count="8">
+                    <button onClick="{{ s.on }}" style="height:92px;border-radius:18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:{{ s.bg }};border:1.5px solid {{ s.b }};transition:background .15s" style-active="transform:scale(.97)">
+                      <span style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:23px;line-height:1;background:{{ s.tile }};color:{{ s.ic }}">{{ s.i }}</span>
+                      <span style="font-size:14px;font-weight:600;color:{{ s.c }}">{{ s.l }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </sc-if>
+
+            <sc-if value="{{ isSpaces }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1.15">Quel espace ?</span><span style="font-size:15px;color:#5C6472">Choisissez l'endroit concerné.</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <sc-for list="{{ spaces }}" as="s" hint-placeholder-count="9">
+                  <button onClick="{{ s.on }}" style="min-height:{{ s.h }};grid-column:{{ s.gc }};flex-direction:{{ s.fd }};border-radius:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;background:{{ s.bg }};border:1.5px solid {{ s.b }};transition:background .15s" style-active="transform:scale(.97)">
+                    <span style="width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:23px;line-height:1;background:{{ s.tile }};color:{{ s.ic }}">{{ s.i }}</span>
+                    <span style="font-size:15px;font-weight:600;color:{{ s.c }}">{{ s.l }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <button onClick="{{ goRoom }}" style="height:52px;border-radius:16px;border:1.5px solid #0E2136;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">dialpad</span>Taper un numéro de chambre</button>
+            </sc-if>
+
+            <sc-if value="{{ isWhat }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:10px;align-items:{{ titleItems }};text-align:{{ titleAlign }}">
+                <span style="font-size:{{ stepTitle }};font-weight:800;letter-spacing:-.025em;line-height:1.15">Quel est le problème ?</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 8px;border-radius:999px;background:#0E2136;color:#fff;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:#E4C58F;font-variation-settings:'FILL' 1">location_on</span>{{ placeLong }}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:{{ catCols }};gap:10px">
+                <sc-for list="{{ cats }}" as="c" hint-placeholder-count="7">
+                  <button onClick="{{ c.on }}" style="min-height:{{ c.h }};grid-column:{{ c.gc }};flex-direction:{{ c.fd }};border-radius:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px;background:{{ c.bg }};border:1.5px solid {{ c.b }};transition:background .15s" style-active="transform:scale(.97)">
+                    <span style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:25px;line-height:1;background:{{ c.tile }};color:{{ c.ic }}">{{ c.i }}</span>
+                    <span style="font-size:14px;font-weight:600;text-align:center;line-height:1.2;color:{{ c.c }}">{{ c.l }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <button onClick="{{ toggleUrgent }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;cursor:pointer;text-align:left;background:{{ urg.bg }};border:1.5px solid {{ urg.b }};transition:background .2s,border-color .2s">
+                <span style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1;background:{{ urg.tile }};color:{{ urg.ic }}">emergency_home</span>
+                <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:700;color:#B3261E">Urgent</span><span style="font-size:13px;color:#5C6472;line-height:1.35">La maintenance de garde est alertée tout de suite.</span></span>
+                <span style="width:50px;height:30px;flex:none;border-radius:999px;padding:3px;display:flex;background:{{ urg.track }};transition:background .2s"><span style="width:24px;height:24px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transform:translateX({{ urg.x }});transition:transform .2s"></span></span>
+              </button>
+            </sc-if>
+
+            <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:10px;align-items:{{ titleItems }};text-align:{{ titleAlign }}">
+                <span style="font-size:{{ stepTitle }};font-weight:800;letter-spacing:-.025em;line-height:1.15">Décrivez le problème</span>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:{{ titleItems }}">
+                  <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 8px;border-radius:999px;background:#0E2136;color:#fff;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:#E4C58F;font-variation-settings:'FILL' 1">location_on</span>{{ placeLong }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 8px;border-radius:999px;background:#fff;border:1px solid #E8E2D6;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">{{ catIcon }}</span>{{ catLabel }}</span>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding-top:36px;width:100%;max-width:480px;align-self:center">
+                <sc-if value="{{ vReady }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ startRec }}" style="width:168px;height:168px;border-radius:999px;border:0;cursor:pointer;background:#0E2136;display:grid;place-items:center;box-shadow:0 0 0 12px rgba(14,33,54,.07),0 0 0 26px rgba(14,33,54,.04),0 20px 40px -16px rgba(14,33,54,.6)" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:64px;line-height:1;color:#E4C58F;font-variation-settings:'FILL' 1">mic</span></button>
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:12px"><span style="font-size:19px;font-weight:700">Appuyez pour parler</span><span style="font-size:14px;color:#5C6472">2 minutes maximum</span></div>
+                </sc-if>
+                <sc-if value="{{ vRec }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ stopRec }}" style="width:168px;height:168px;border-radius:999px;border:0;cursor:pointer;background:#B3261E;display:grid;place-items:center;box-shadow:0 0 0 12px rgba(179,38,30,.14),0 0 0 26px rgba(179,38,30,.07),0 20px 40px -16px rgba(179,38,30,.6)"><span style="width:52px;height:52px;border-radius:12px;background:#fff"></span></button>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:600;padding-top:8px">{{ recTime }}<span style="font-size:16px;color:#8B909A"> / 2:00</span></span>
+                  <div style="display:flex;align-items:center;gap:4px;height:44px"><sc-for list="{{ liveWave }}" as="w" hint-placeholder-count="24"><span style="width:4px;border-radius:999px;background:#B3261E;height:{{ w }};transition:height .15s"></span></sc-for></div>
+                  <span style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#B3261E"><span style="width:8px;height:8px;border-radius:999px;background:#B3261E"></span>Enregistrement · appuyez pour arrêter</span>
+                </sc-if>
+                <sc-if value="{{ vDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="width:100%;background:#fff;border:1px solid #E8E2D6;border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px">
+                    <button onClick="{{ togglePlay }}" style="width:56px;height:56px;border-radius:999px;border:0;cursor:pointer;background:#0E2136;color:#E4C58F;display:grid;place-items:center;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;font-variation-settings:'FILL' 1">{{ playIcon }}</span></button>
+                    <div style="flex:1;display:flex;align-items:center;gap:3px;height:36px;overflow:hidden"><sc-for list="{{ doneWave }}" as="w" hint-placeholder-count="24"><span style="width:4px;flex:none;border-radius:999px;height:{{ w.h }};background:{{ w.c }}"></span></sc-for></div>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">{{ recTime }}</span>
+                  </div>
+                  <span style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:#1E7A55"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1">check_circle</span>Message enregistré</span>
+                  <button onClick="{{ restartRec }}" style="height:48px;padding:0 18px;border-radius:14px;border:1.5px solid #0E2136;background:transparent;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">replay</span>Recommencer</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isPhoto }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:10px;justify-content:{{ titleItems }}"><span style="font-size:{{ stepTitle }};font-weight:800;letter-spacing:-.025em;line-height:1.15">Ajouter une photo</span><span style="height:24px;padding:0 9px;border-radius:7px;background:#EAE5DB;color:#5C6472;font-size:12px;font-weight:600;display:grid;place-items:center">Facultatif</span></div>
+              <div style="display:grid;grid-template-columns:{{ photoCols }};gap:14px">
+                <sc-if value="{{ noPhoto }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ takePhoto }}" style="height:180px;border-radius:20px;cursor:pointer;border:1.5px dashed #C4BCAD;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px" style-hover="border-color:#0E2136">
+                    <span style="width:64px;height:64px;border-radius:999px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:30px;line-height:1;font-variation-settings:'FILL' 1">photo_camera</span>
+                    <span style="font-size:16px;font-weight:700">Prendre une photo</span>
+                  </button>
+                </sc-if>
+                <sc-if value="{{ photo }}" hint-placeholder-val="{{ false }}">
+                  <div style="height:180px;border-radius:20px;overflow:hidden;position:relative;background:repeating-linear-gradient(135deg,#E9E4DA 0 10px,#E1DBCF 10px 20px);display:grid;place-items:center">
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6B6658">photo jointe</span>
+                    <span style="position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:4px;height:28px;padding:0 10px 0 6px;border-radius:999px;background:#1E7A55;color:#fff;font-size:12px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'FILL' 1">check_circle</span>Ajoutée</span>
+                    <button onClick="{{ removePhoto }}" style="position:absolute;top:10px;right:10px;height:36px;padding:0 12px;border-radius:10px;border:0;cursor:pointer;background:#fff;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;box-shadow:0 2px 6px rgba(14,33,54,.15)"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">replay</span>Reprendre</button>
+                  </div>
+                </sc-if>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <span style="font-size:13px;font-weight:600;color:#5C6472">Un mot pour le technicien</span>
+                  <textarea value="{{ note }}" onChange="{{ setNote }}" placeholder="Ex. le client est présent jusqu'à 11 h" style="flex:1;min-height:96px;border-radius:16px;background:#fff;border:1px solid #E8E2D6;padding:14px 16px;font:inherit;font-size:15px;color:#0E2136;outline:none;resize:none" style-focus="border-color:#0E2136;box-shadow:0 0 0 3px rgba(14,33,54,.08)"></textarea>
+                </div>
+              </div>
+              <sc-if value="{{ showRecapInline }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <span style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#8B909A">RÉCAPITULATIF</span>
+                  <div style="background:#fff;border:1px solid #E8E2D6;border-radius:20px;padding:4px 16px">
+                    <sc-for list="{{ recap }}" as="r" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F0EBE2">
+                        <span style="width:36px;height:36px;border-radius:10px;background:#F3EFE7;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;flex:none">{{ r.i }}</span>
+                        <span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:12px;color:#8B909A">{{ r.k }}</span><span style="font-size:15px;font-weight:600">{{ r.v }}</span></span>
+                        <span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1;color:{{ r.c }}">{{ r.m }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}">
+            <div style="position:sticky;top:0;background:#fff;border:1px solid #E8E2D6;border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">RÉCAPITULATIF</span>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ recap }}" as="r" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F2EDE4">
+                    <span style="width:34px;height:34px;border-radius:10px;background:#F3EFE7;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:19px;line-height:1">{{ r.i }}</span>
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px"><span style="font-size:12px;color:#8B909A">{{ r.k }}</span><span style="font-size:14px;font-weight:600">{{ r.v }}</span></span>
+                    <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;font-variation-settings:'FILL' 1;color:{{ r.c }}">{{ r.m }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <span style="font-size:12px;color:#8B909A;line-height:1.45">La maintenance est notifiée dès l'envoi. Vous suivrez l'avancement dans Signalements.</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== CONFIRMATION ===== -->
+      <sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}">
+        <div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:40px 24px">
+          <div style="width:100%;max-width:460px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+            <span style="width:112px;height:112px;border-radius:999px;background:#1E7A55;color:#fff;display:grid;place-items:center;box-shadow:0 0 0 14px rgba(30,122,85,.12),0 0 0 30px rgba(30,122,85,.06)"><span style="font-family:'Material Symbols Rounded';font-size:60px;line-height:1;font-variation-settings:'wght' 600">check</span></span>
+            <span style="font-size:28px;font-weight:800;letter-spacing:-.025em;margin-top:28px">Signalement envoyé</span>
+            <span style="font-size:15px;color:#5C6472;line-height:1.5;text-wrap:pretty">La maintenance l'a bien reçu. Vous serez notifiée dès qu'un technicien s'en occupe.</span>
+            <div style="width:100%;margin-top:10px;background:#fff;border:1px solid #E8E2D6;border-radius:18px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+              <span style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#9A6E28;font-variation-settings:'FILL' 1">location_on</span>{{ lastSent.lieu }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#5C6472">{{ lastSent.code }}</span>
+            </div>
+            <div style="width:100%;display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <button onClick="{{ openLast }}" style="height:56px;border-radius:16px;border:0;cursor:pointer;background:#0E2136;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:700" style-hover="background:#1B3352">Suivre ce signalement<span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">arrow_forward</span></button>
+              <div style="display:flex;gap:10px">
+                <button onClick="{{ startReport }}" style="flex:1;height:52px;border-radius:16px;border:1.5px solid #0E2136;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;font-variation-settings:'FILL' 1">mic</span>Nouveau</button>
+                <button onClick="{{ goHome }}" style="flex:1;height:52px;border-radius:16px;border:1.5px solid #0E2136;background:transparent;cursor:pointer;font-size:15px;font-weight:700">Accueil</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== SIGNALEMENTS : LISTE + FICHE ===== -->
+      <sc-if value="{{ isListArea }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;height:{{ listAreaH }}">
+          <sc-if value="{{ showListPane }}" hint-placeholder-val="{{ false }}">
+            <div style="width:{{ listPaneW }};flex:none;display:flex;flex-direction:column;min-height:0;overflow-y:{{ paneScroll }};background:{{ listPaneBg }};border-right:{{ listPaneBr }}">
+              <div style="width:100%;max-width:{{ listMax }};margin:0 auto;display:flex;flex-direction:column;gap:14px;padding:{{ listPad }}">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="flex:1;font-size:{{ listTitleSize }};font-weight:800;letter-spacing:-.025em">{{ listTitle }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8B909A">{{ listCount }}</span>
+                </div>
+                <div style="position:relative;display:flex;align-items:center">
+                  <span style="position:absolute;left:14px;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#8B909A;pointer-events:none">search</span>
+                  <input value="{{ search }}" onChange="{{ setSearch }}" placeholder="Chercher une chambre ou un lieu" style="width:100%;height:48px;border-radius:14px;background:{{ searchBg }};border:1px solid {{ searchB }};padding:0 16px 0 46px;font-size:15px;outline:none" style-focus="border-color:#0E2136;box-shadow:0 0 0 3px rgba(14,33,54,.08)">
+                </div>
+                <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
+                  <sc-for list="{{ statusFilters }}" as="f" hint-placeholder-count="4">
+                    <button onClick="{{ f.on }}" style="flex:none;display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;background:{{ f.bg }};color:{{ f.c }};border:1px solid {{ f.b }}"><span style="width:7px;height:7px;border-radius:999px;background:{{ f.dot }}"></span>{{ f.l }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ noList }}" hint-placeholder-val="{{ false }}">
+                <div style="margin:8px 20px;padding:32px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
+                  <span style="width:48px;height:48px;border-radius:999px;background:#F3EFE7;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:26px;line-height:1;color:#8B909A">search_off</span>
+                  <span style="font-size:15px;font-weight:600">Aucun résultat</span>
+                </div>
+              </sc-if>
+              <div style="width:100%;max-width:{{ listMax }};margin:0 auto;padding:{{ rowsPad }}">
+                <div style="background:#fff;border:{{ rowsBorder }};border-radius:{{ rowsRadius }};overflow:hidden">
+                  <sc-for list="{{ listOrders }}" as="o" hint-placeholder-count="6">
+                    <button onClick="{{ o.open }}" style="width:100%;text-align:left;cursor:pointer;display:flex;gap:12px;align-items:center;border:0;border-bottom:1px solid #F2EDE4;padding:12px 16px;min-height:68px;background:{{ o.selBg }};box-shadow:{{ o.selSh }}" style-hover="background:#FBF9F5">
+                      <span style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:21px;line-height:1;background:{{ o.tileBg }};color:{{ o.tileC }}">{{ o.icon }}</span>
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700">{{ o.lieu }}<sc-if value="{{ o.urgent }}" hint-placeholder-val="{{ false }}"><span style="height:18px;padding:0 6px;border-radius:5px;background:#FBE7E5;color:#B3261E;font-size:10px;font-weight:700;letter-spacing:.04em;display:grid;place-items:center">URGENT</span></sc-if></span><span style="font-size:12px;color:#5C6472;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.cat }} · {{ o.byLabel }}</span></span>
+                      <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none"><span style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:600;color:{{ o.c }};background:{{ o.bg }}"><span style="width:5px;height:5px;border-radius:999px;background:{{ o.c }}"></span>{{ o.status }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A">{{ o.time }}</span></span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showDetailPane }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;min-width:0;overflow-y:{{ paneScroll }};min-height:0">
+              <div style="width:100%;max-width:{{ detailMax }};margin:0 auto;padding:{{ detailPad }};display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <sc-if value="{{ detailBack }}" hint-placeholder-val="{{ true }}"><button onClick="{{ back }}" style="width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid #E8E2D6;display:grid;place-items:center;cursor:pointer;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_back</span></button></sc-if>
+                  <span style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#5C6472">{{ d.code }}</span>
+                  <span style="display:flex;align-items:center;gap:4px;height:28px;padding:0 10px 0 8px;border-radius:999px;background:#EAE5DB;color:#5C6472;font-size:12px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">lock</span>Lecture seule</span>
+                </div>
+                <div style="display:flex;gap:14px;align-items:center">
+                  <span style="width:60px;height:60px;border-radius:18px;background:#0E2136;color:#E4C58F;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:30px;line-height:1">{{ d.icon }}</span>
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15">{{ d.lieu }}</span><span style="font-size:14px;color:#5C6472">{{ d.catLine }}</span></div>
+                </div>
+                <div style="border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:{{ d.bg }}">
+                  <span style="width:42px;height:42px;border-radius:12px;background:#fff;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1;color:{{ d.c }}">{{ d.sIcon }}</span>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:700;color:{{ d.c }}">{{ d.status }}</span><span style="font-size:13px;color:#3E4552;line-height:1.35">{{ d.info }}</span></div>
+                </div>
+                <div style="display:grid;grid-template-columns:{{ detailGrid }};gap:16px;align-items:start">
+                  <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                    <sc-if value="{{ d.hasVoice }}" hint-placeholder-val="{{ true }}">
+                      <div style="background:#fff;border:1px solid #E8E2D6;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                        <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">MESSAGE VOCAL</span>
+                        <div style="display:flex;align-items:center;gap:12px">
+                          <button onClick="{{ togglePlay }}" style="width:48px;height:48px;border-radius:999px;border:0;cursor:pointer;background:#0E2136;color:#E4C58F;display:grid;place-items:center;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">{{ playIcon }}</span></button>
+                          <div style="flex:1;display:flex;align-items:center;gap:3px;height:30px;overflow:hidden"><sc-for list="{{ doneWave }}" as="w" hint-placeholder-count="24"><span style="width:3px;flex:none;border-radius:999px;height:{{ w.h }};background:{{ w.c }}"></span></sc-for></div>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600">{{ d.dur }}</span>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ d.hasPhoto }}" hint-placeholder-val="{{ true }}">
+                      <div style="height:180px;border-radius:18px;background:repeating-linear-gradient(135deg,#E9E4DA 0 10px,#E1DBCF 10px 20px);display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6B6658">photo du signalement</div>
+                    </sc-if>
+                    <sc-if value="{{ d.hasNote }}" hint-placeholder-val="{{ false }}">
+                      <div style="background:#fff;border:1px solid #E8E2D6;border-radius:18px;padding:14px 16px;display:flex;gap:10px"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8B909A">edit_note</span><span style="font-size:15px;line-height:1.45">{{ d.note }}</span></div>
+                    </sc-if>
+                    <div style="background:#fff;border:1px solid #E8E2D6;border-radius:18px;padding:4px 16px;display:grid;grid-template-columns:1fr 1fr;column-gap:16px">
+                      <sc-for list="{{ d.infoRows }}" as="i" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:3px;padding:11px 0;border-bottom:1px solid #F2EDE4"><span style="font-size:12px;color:#8B909A">{{ i.k }}</span><span style="font-size:14px;font-weight:600">{{ i.v }}</span></div></sc-for>
+                    </div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #E8E2D6;border-radius:18px;padding:14px 16px 4px">
+                    <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B909A">SUIVI</span>
+                    <div style="display:flex;flex-direction:column;margin-top:10px">
+                      <sc-for list="{{ d.history }}" as="h" hint-placeholder-count="4">
+                        <div style="display:grid;grid-template-columns:22px 1fr auto;gap:10px;min-height:58px">
+                          <div style="display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:999px;margin-top:4px;flex:none;background:{{ h.c }};box-shadow:0 0 0 4px {{ h.ring }}"></span><span style="flex:1;width:2px;margin:6px 0 2px;background:{{ h.line }}"></span></div>
+                          <div style="display:flex;flex-direction:column;gap:2px;padding-bottom:10px"><span style="font-size:15px;font-weight:600;color:{{ h.tc }}">{{ h.l }}</span><span style="font-size:13px;color:#5C6472">{{ h.d }}</span></div>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B909A;padding-top:2px">{{ h.t }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== NOTIFICATIONS ===== -->
+      <sc-if value="{{ isNotifs }}" hint-placeholder-val="{{ false }}">
+        <div style="width:100%;max-width:760px;margin:0 auto;padding:{{ padTop }} {{ padX }} 32px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><button onClick="{{ back }}" style="width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid #E8E2D6;display:grid;place-items:center;cursor:pointer;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_back</span></button></sc-if>
+            <span style="flex:1;font-size:{{ pageTitle }};font-weight:800;letter-spacing:-.025em">Notifications</span>
+            <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><button onClick="{{ readAll }}" style="border:0;background:transparent;cursor:pointer;font-size:14px;font-weight:600;color:#9A6E28">Tout marquer comme lu</button></sc-if>
+          </div>
+          <div style="background:#fff;border:1px solid #E8E2D6;border-radius:20px;overflow:hidden">
+            <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3">
+              <button onClick="{{ n.open }}" style="width:100%;text-align:left;cursor:pointer;display:flex;gap:12px;border:0;border-bottom:1px solid #F0EBE2;padding:16px;background:{{ n.rowBg }}" style-hover="background:#FBF9F5">
+                <span style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1;background:{{ n.bg }};color:{{ n.c }}">{{ n.icon }}</span>
+                <span style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;line-height:1.4;font-weight:{{ n.w }}">{{ n.text }}</span><span style="font-size:12px;color:#8B909A">{{ n.time }}</span></span>
+                <sc-if value="{{ n.unread }}" hint-placeholder-val="{{ false }}"><span style="width:9px;height:9px;border-radius:999px;background:#B58435;margin-top:6px;flex:none"></span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== PROFIL ===== -->
+      <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+        <div style="width:100%;max-width:600px;margin:0 auto;padding:{{ padTop }} {{ padX }} 32px;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="width:88px;height:88px;border-radius:999px;display:grid;place-items:center;font-weight:800;font-size:30px;margin-top:12px;background:{{ me.avBg }};color:{{ me.avC }}">{{ me.ini }}</div>
+          <span style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:10px">{{ me.name }}</span>
+          <span style="font-size:14px;color:#5C6472">{{ me.role }}</span>
+          <div style="width:100%;margin-top:24px;display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#8B909A">PROFIL DE DÉMONSTRATION</span>
+            <div style="display:flex;gap:4px;background:#EAE5DB;border-radius:14px;padding:4px">
+              <sc-for list="{{ roles }}" as="r" hint-placeholder-count="2">
+                <button onClick="{{ r.on }}" style="flex:1;border:0;cursor:pointer;height:44px;border-radius:11px;font-size:14px;font-weight:700;background:{{ r.bg }};box-shadow:{{ r.sh }};transition:background .2s">{{ r.l }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="width:100%;margin-top:14px;background:#fff;border:1px solid #E8E2D6;border-radius:20px;overflow:hidden">
+            <button onClick="{{ simulateRepair }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;border:0;border-bottom:1px solid #F0EBE2;background:transparent;cursor:pointer;text-align:left" style-hover="background:#FBF9F5"><span style="width:36px;height:36px;border-radius:10px;background:#FBEFD9;color:#9A5F0C;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:20px;line-height:1">engineering</span><span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:15px;font-weight:600">Simuler « technicien affecté »</span><span style="font-size:12px;color:#5C6472">Envoie une notification</span></span></button>
+            <button onClick="{{ reset }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;border:0;background:transparent;cursor:pointer;text-align:left" style-hover="background:#FBF9F5"><span style="width:36px;height:36px;border-radius:10px;background:#F3EFE7;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:20px;line-height:1">restart_alt</span><span style="flex:1;font-size:15px;font-weight:600">Réinitialiser la démo</span></button>
+          </div>
+          <div style="width:100%;margin-top:12px;background:#fff;border:1px solid #E8E2D6;border-radius:20px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #F0EBE2"><span style="width:36px;height:36px;border-radius:10px;background:#F3EFE7;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:20px;line-height:1">translate</span><span style="flex:1;font-size:15px;font-weight:600">Langue</span><span style="font-size:14px;color:#5C6472">Français</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px"><span style="width:36px;height:36px;border-radius:10px;background:#FBE7E5;color:#B3261E;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:20px;line-height:1">logout</span><span style="flex:1;font-size:15px;font-weight:600;color:#B3261E">Se déconnecter</span></div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- BARRE D'ACTION DU PARCOURS -->
+    <sc-if value="{{ ctaMob }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;padding:14px 20px 22px;margin-top:-40px;position:relative;background:linear-gradient(rgba(244,241,235,0),#F4F1EB 34%)">
+        <button onClick="{{ cta.on }}" style="width:100%;height:58px;border-radius:16px;border:0;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:700;cursor:{{ cta.cursor }};background:{{ cta.bg }};color:{{ cta.c }};box-shadow:{{ cta.sh }};transition:background .2s">{{ cta.l }}<span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ cta.icon }}</span></button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ ctaWide }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;padding:16px 32px 20px;display:flex;align-items:center;gap:12px;border-top:1px solid #E8E2D6;background:#fff">
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:21px;line-height:1;font-variation-settings:'FILL' 1;background:{{ footLocBg }};color:{{ footLocC }}">location_on</span><span style="display:flex;flex-direction:column;line-height:1.25;min-width:0"><span style="font-size:12px;color:#8B909A">Lieu sélectionné</span><span style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ footLoc }}</span></span></div>
+        <button onClick="{{ flowBack }}" style="height:56px;padding:0 24px;border-radius:16px;border:1.5px solid #0E2136;background:transparent;cursor:pointer;font-size:16px;font-weight:700">{{ secondaryL }}</button>
+        <button onClick="{{ cta.on }}" style="min-width:240px;height:56px;padding:0 24px;border-radius:16px;border:0;display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:700;cursor:{{ cta.cursor }};background:{{ cta.bg }};color:{{ cta.c }};box-shadow:{{ cta.sh }};transition:background .2s">{{ cta.l }}<span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ cta.icon }}</span></button>
+      </div>
+    </sc-if>
+
+    <!-- NAVIGATION BASSE MOBILE -->
+    <sc-if value="{{ showBottomNav }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;background:#fff;border-top:1px solid #E8E2D6;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(10px + env(safe-area-inset-bottom))">
+        <sc-for list="{{ navBottom }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.on }}" style="border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;height:56px">
+            <span style="width:56px;height:30px;border-radius:999px;display:grid;place-items:center;background:{{ n.pill }};transition:background .2s"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;color:{{ n.ic }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span></span>
+            <span style="font-size:12px;color:{{ n.c }};font-weight:{{ n.w }}">{{ n.l }}</span>
+            <sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:calc(50% + 8px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B58435;color:#0E2136;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid #fff">{{ n.badge }}</span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- TOAST -->
+  <div style="position:fixed;left:50%;bottom:{{ toastBottom }};z-index:100;max-width:calc(100% - 32px);display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;background:#0E2136;color:#fff;box-shadow:0 16px 40px -12px rgba(14,33,54,.5);pointer-events:none;transition:opacity .2s,transform .25s;opacity:{{ toastOp }};transform:translate(-50%,{{ toastY }})">
+    <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#E4C58F;font-variation-settings:'FILL' 1">{{ toastIcon }}</span>
+    <span style="font-size:14px;font-weight:600">{{ toastMsg }}</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+// ── Données ───────────────────────────────────────────────
+const ST = { r:['#B3261E','#FBE7E5','En attente','schedule'], o:['#9A5F0C','#FBEFD9','En cours','build'], g:['#1E7A55','#E3F1EA','Réparé','check_circle'] };
+const CATS = [['eau','water_drop','Eau / fuite'],['electricite','bolt','Électricité'],['clim','ac_unit','Climatisation'],['tv','tv','Télévision'],['mobilier','bed','Mobilier'],['porte','door_front','Porte / serrure'],['autre','more_horiz','Autre problème']];
+const SPACES = [['HALL','room_service','Hall'],['PISC','pool','Piscine'],['CUIS','soup_kitchen','Cuisine'],['REST','restaurant','Restaurant'],['ASC','elevator','Ascenseur'],['BUAN','local_laundry_service','Buanderie'],['PARK','local_parking','Parking'],['CHAUF','local_fire_department','Chaufferie'],['AUTRE','more_horiz','Autre endroit']];
+const PEOPLE = { 'Fatou K.':['FK','#E9E1F3','#5A3D86'], 'Lina M.':['LM','#E3EBF7','#2B5AA6'], 'Aïcha B.':['AB','#F5EAD6','#8A6224'], 'Jean P.':['JP','#E3F1EA','#1E7A55'], 'Sofia R.':['SR','#F8E4E0','#9C3D2E'] };
+const ME = 'Aïcha B.';
+const seed = () => [
+  { id:104, lieu:'Chambre 214', floor:2, cat:'eau', s:'r', by:ME, time:'09:18', urgent:false, tech:null, dur:'0:52', photo:true, note:'', hasVoice:true },
+  { id:98, lieu:'Chambre 305', floor:3, cat:'clim', s:'o', by:ME, time:'09:05', urgent:false, tech:'Karim D.', eta:'11:00', dur:'0:41', photo:true, note:'', hasVoice:true },
+  { id:91, lieu:'Chambre 118', floor:1, cat:'tv', s:'g', by:ME, time:'Hier', urgent:false, tech:'Samir B.', eta:'15:30', dur:'0:23', photo:false, note:'', hasVoice:true },
+  { id:103, lieu:'Chambre 412', floor:4, cat:'electricite', s:'r', by:'Fatou K.', time:'09:32', urgent:true, tech:null, dur:'1:04', photo:true, note:'', hasVoice:true },
+  { id:101, lieu:'Chambre 507', floor:5, cat:'mobilier', s:'o', by:'Lina M.', time:'08:55', urgent:false, tech:'Karim D.', eta:'10:30', dur:'0:30', photo:false, note:'', hasVoice:true },
+  { id:100, lieu:'Chambre 420', floor:4, cat:'porte', s:'r', by:'Fatou K.', time:'08:40', urgent:false, tech:null, dur:'0:18', photo:false, note:'', hasVoice:true },
+  { id:99, lieu:'Chambre 516', floor:5, cat:'eau', s:'r', by:'Lina M.', time:'08:20', urgent:true, tech:null, dur:'0:45', photo:true, note:'', hasVoice:true },
+  { id:96, lieu:'Buanderie', floor:null, cat:'porte', s:'g', by:'Jean P.', time:'08:12', urgent:false, tech:'Samir B.', eta:'09:00', dur:'0:20', photo:false, note:'', hasVoice:true },
+  { id:95, lieu:'Chambre 408', floor:4, cat:'tv', s:'o', by:'Fatou K.', time:'Hier', urgent:false, tech:'Samir B.', eta:'12:00', dur:'0:15', photo:false, note:'', hasVoice:true },
+  { id:94, lieu:'Chambre 610', floor:6, cat:'clim', s:'r', by:'Fatou K.', time:'Hier', urgent:false, tech:null, dur:'0:33', photo:false, note:'', hasVoice:true },
+];
+const seedNotifs = () => [
+  { icon:'check_circle', c:'#1E7A55', bg:'#E3F1EA', text:'Chambre 118 réparée par Samir B. Vous pouvez vérifier.', time:'Hier · 15:42', read:false, oid:91 },
+  { icon:'engineering', c:'#9A5F0C', bg:'#FBEFD9', text:"Chambre 305 : Karim D. s'en occupe, passage prévu à 11:00.", time:"Aujourd'hui · 09:50", read:false, oid:98 },
+];
+const seedActivity = () => [
+  { icon:'emergency_home', c:'#B3261E', bg:'#FBE7E5', text:'Fatou K. a signalé un problème urgent · Chambre 412', t:'09:32' },
+  { icon:'mic', c:'#0E2136', bg:'#EDF0F4', text:'Aïcha B. a signalé une fuite · Chambre 214', t:'09:18' },
+  { icon:'engineering', c:'#9A5F0C', bg:'#FBEFD9', text:'Karim D. a pris en charge la chambre 305', t:'09:05' },
+  { icon:'check_circle', c:'#1E7A55', bg:'#E3F1EA', text:'Samir B. a réparé la porte de la buanderie', t:'08:58' },
+];
+const blank = () => ({ room:'', space:null, cat:null, urgent:false, voice:'ready', sec:0, photo:false, note:'' });
+const ordinal = fl => fl === 1 ? '1ᵉʳ étage' : fl + 'ᵉ étage';
+const FLOW = ['where','spaces','what','voice','photo'];
+const now = () => new Date().toTimeString().slice(0,5);
+
+// ── Composant ─────────────────────────────────────────────
+class Component extends DCLogic {
+  state = { vw: window.innerWidth, role: window.innerWidth >= 1200 ? 'gov' : 'agent', screen:'home', prev:'home', tab:'mine', orders:seed(), notifs:seedNotifs(), activity:seedActivity(),
+    f:blank(), detailId:null, lastSent:null, search:'', sf:'all', playing:false, tick:0, nextId:105, fromQR:false, toast:null };
+
+  componentDidMount() { this.onResize = () => this.setState({ vw: window.innerWidth }); window.addEventListener('resize', this.onResize); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); clearInterval(this.t); clearInterval(this.p); clearTimeout(this.tt); }
+
+  // navigation
+  go = (screen, extra={}) => { clearInterval(this.p); this.setState(s => ({ prev:s.screen, screen, playing:false, tick:0, ...extra })); };
+  setF = patch => this.setState(s => ({ f:{ ...s.f, ...patch } }));
+  toast = (msg, icon='check_circle') => { clearTimeout(this.tt); this.setState({ toast:{ msg, icon } }); this.tt = setTimeout(() => this.setState({ toast:null }), 2600); };
+  newReport = (extra={}) => { clearInterval(this.t); this.setState(s => ({ f:{ ...blank(), ...extra.f }, screen:'where', prev:s.screen === 'sent' ? 'home' : s.screen, fromQR:!!extra.qr })); };
+
+  roomCheck(r) {
+    if (r.length < 3) return { ok:false, msg: r.length ? 'Continuez' : '3 chiffres', tone:'idle', icon:'dialpad' };
+    const fl = +r[0], n = +r.slice(1);
+    if (r === '410') return { ok:false, msg:'Hors service', tone:'bad', icon:'block' };
+    if (fl < 1 || fl > 6 || n < 1 || n > 20) return { ok:false, msg:'Inexistante', tone:'bad', icon:'error' };
+    return { ok:true, msg:ordinal(fl), tone:'ok', icon:'check_circle' };
+  }
+  startRec = () => { clearInterval(this.t); this.setF({ voice:'rec', sec:0 }); this.t = setInterval(() => {
+    const sec = this.state.f.sec + 1; if (sec >= 120) { clearInterval(this.t); this.setF({ voice:'done', sec:120 }); } else this.setF({ sec }); this.setState(s => ({ tick:s.tick+1 })); }, 1000); };
+  stopRec = () => { clearInterval(this.t); this.setF({ voice:'done', sec:Math.max(this.state.f.sec,1) }); };
+  togglePlay = () => { if (this.state.playing) { clearInterval(this.p); this.setState({ playing:false, tick:0 }); return; }
+    this.setState({ playing:true, tick:0 }); this.p = setInterval(() => { const t = this.state.tick + 1; if (t > 24) { clearInterval(this.p); this.setState({ playing:false, tick:0 }); } else this.setState({ tick:t }); }, 160); };
+  fmt = sec => Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0');
+  send = () => { const s = this.state, f = s.f, sp = SPACES.find(x => x[0] === f.space), cat = CATS.find(c => c[0] === f.cat);
+    const lieu = f.space ? sp[2] : 'Chambre ' + f.room;
+    const o = { id:s.nextId, lieu, floor: f.space ? null : +f.room[0], cat:f.cat, s:'r', by: s.role === 'gov' ? 'Mireille L.' : ME, time:now(), urgent:f.urgent, tech:null, dur: f.voice === 'done' ? this.fmt(f.sec) : '', photo:f.photo, note:f.note, hasVoice: f.voice === 'done' };
+    clearInterval(this.t);
+    const act = { icon: f.urgent ? 'emergency_home' : 'mic', c: f.urgent ? '#B3261E' : '#0E2136', bg: f.urgent ? '#FBE7E5' : '#EDF0F4', text:`${o.by} a signalé ${cat[2].toLowerCase()} · ${lieu}`, t:o.time };
+    this.setState({ orders:[o, ...s.orders], activity:[act, ...s.activity].slice(0,6), nextId:s.nextId+1, lastSent:{ lieu, code:'OT-0'+o.id, id:o.id }, screen:'sent', f:blank(), fromQR:false, tab:'mine' }); };
+
+  renderVals() {
+    const s = this.state, f = s.f, gov = s.role === 'gov', scr = s.screen;
+    // ── mise en page selon la largeur ──
+    const mob = s.vw < 700, desk = s.vw >= 1200, tab = !mob && !desk, split = s.vw >= 1000;
+    const wide = !mob;
+    const inFlow = FLOW.includes(scr), isListArea = scr === 'list' || scr === 'detail';
+
+    const meName = gov ? 'Mireille L.' : ME;
+    const mine = s.orders.filter(o => o.by === meName);
+    const visible = gov ? s.orders : mine;
+    const catOf = c => CATS.find(x => x[0] === c) || CATS[6];
+    const dec = o => { const [c,bg,status,sIcon] = ST[o.s], k = catOf(o.cat), p = PEOPLE[o.by] || ['ML','#0E2136','#E4C58F'];
+      const info = o.s === 'r' ? "En attente d'un technicien" : o.s === 'o' ? `${o.tech} · passage prévu à ${o.eta}` : `Réparé par ${o.tech} · à vérifier`;
+      return { ...o, c, bg, status, sIcon, icon:k[1], cat:k[2], code:'OT-0'+o.id, info, urgent: o.urgent && o.s !== 'g',
+        byLabel: o.by === meName ? 'Vous' : o.by, byIni:p[0], byBg:p[1], byC:p[2],
+        techLabel: o.tech || 'Non affecté', techC: o.tech ? '#0E2136' : '#8B909A', techFs: o.tech ? 'normal' : 'italic',
+        catLine: k[2] + (o.by !== meName ? ` · par ${o.by}` : ''),
+        open: () => this.go('detail', { detailId:o.id }) }; };
+    const rank = o => (o.s === 'g' ? 10 : 0) + (o.urgent ? 0 : 1) + (o.s === 'o' ? 2 : 0);
+    const tabSel = { mine, urgent:visible.filter(o => o.urgent && o.s !== 'g'), all:visible }[s.tab] || visible;
+    const homeOrders = [...tabSel].sort((a,b) => rank(a)-rank(b)).slice(0, desk ? 7 : 6).map(dec);
+    const open = visible.filter(o => o.s !== 'g');
+    const unread = s.notifs.filter(n => !n.read).length;
+
+    // ── parcours ──
+    const rc = this.roomCheck(f.room);
+    const flowIdx = { where:0, spaces:0, what:1, voice:2, photo:3 }[scr];
+    const sp = SPACES.find(x => x[0] === f.space);
+    const placeLong = f.space ? sp[2] : 'Chambre ' + f.room;
+    const placeOk = f.space ? true : rc.ok;
+    const ctaCfg = inFlow && {
+      0:{ l:'Continuer', ok:placeOk, on:() => this.go('what'), icon:'arrow_forward' },
+      1:{ l:'Continuer', ok:!!f.cat, on:() => this.go('voice'), icon:'arrow_forward' },
+      2:{ l: f.voice === 'done' ? 'Continuer' : f.voice === 'rec' ? "Arrêtez l'enregistrement" : 'Continuer sans message', ok: f.voice !== 'rec', on:() => this.go('photo'), icon: f.voice === 'rec' ? '' : 'arrow_forward' },
+      3:{ l:'Envoyer le signalement', ok:true, on:this.send, green:true, icon:'send' },
+    }[flowIdx];
+    const cta = ctaCfg ? { l:ctaCfg.l, icon:ctaCfg.icon, on: ctaCfg.ok ? ctaCfg.on : () => {}, cursor: ctaCfg.ok ? 'pointer' : 'not-allowed',
+      bg: !ctaCfg.ok ? '#DCD5C8' : ctaCfg.green ? '#1E7A55' : '#0E2136', c: ctaCfg.ok ? '#fff' : '#8B909A', sh: ctaCfg.ok ? '0 12px 24px -12px rgba(14,33,54,.6)' : 'none' } : {};
+    const backMap = { where:null, spaces:'where', what: (f.space && mob) ? 'spaces' : 'where', voice:'what', photo:'voice' };
+    const flowBack = () => { if (scr === 'voice') clearInterval(this.t); const t = backMap[scr]; if (t) this.go(t); else { clearInterval(this.t); this.go(s.prev && !FLOW.includes(s.prev) && s.prev !== 'sent' ? s.prev : 'home'); } };
+    const tile = (on, span) => ({ bg: on ? '#0E2136' : '#fff', b: on ? '#0E2136' : '#E8E2D6', c: on ? '#fff' : '#0E2136', tile: on ? 'rgba(228,197,143,.16)' : '#F3EFE7', ic: on ? '#E4C58F' : '#0E2136', gc: span ? 'span 2' : 'auto', fd: span ? 'row' : 'column', h: span ? '64px' : '104px' });
+
+    // ── liste / fiche ──
+    const listSrc = visible.filter(o => (s.sf === 'all' || o.s === s.sf) && (!s.search || o.lieu.toLowerCase().includes(s.search.toLowerCase())));
+    const selId = scr === 'detail' ? s.detailId : (split ? (listSrc.find(o => o.id === s.detailId) || listSrc[0] || {}).id : null);
+    const dO = s.orders.find(o => o.id === selId);
+    let d = null;
+    if (dO) { const x = dec(dO);
+      const steps = [
+        { l:'Signalé', d:`par ${dO.by === meName ? 'vous' : dO.by}` + (dO.photo ? ' · avec photo' : ''), t:dO.time, k:'r' },
+        { l:'Technicien affecté', d: dO.tech ? `${dO.tech} · passage prévu à ${dO.eta}` : 'En attente', t: dO.tech ? '09:50' : '', k:'n' },
+        { l:'Intervention en cours', d: dO.s !== 'r' ? `${dO.tech} est sur place` : 'À venir', t: dO.s !== 'r' ? '10:42' : '', k:'o' },
+        { l:'Réparé', d: dO.s === 'g' ? `par ${dO.tech}` : 'À venir', t: dO.s === 'g' ? '15:30' : '', k:'g' } ];
+      const reached = [true, !!dO.tech, dO.s !== 'r', dO.s === 'g'];
+      const col = { r:['#B3261E','#FBE7E5'], n:['#0E2136','#E2DCD0'], o:['#B4740F','#FBEFD9'], g:['#1E7A55','#E3F1EA'] };
+      d = { ...x, catLine: x.cat + (dO.floor ? ` · ${ordinal(dO.floor)}` : '') + (x.urgent ? ' · Urgent' : ''),
+        dur:dO.dur, hasVoice:!!dO.hasVoice, hasPhoto:dO.photo, hasNote:!!dO.note, note:dO.note,
+        infoRows:[{ k:'Signalé par', v: dO.by === meName ? 'Vous' : dO.by }, { k:'Heure', v:dO.time }, { k:'Technicien', v: dO.tech || 'Non affecté' }, { k:'Priorité', v: dO.urgent ? 'Urgente' : 'Normale' }],
+        history: steps.map((st,i) => ({ ...st, c: reached[i] ? col[st.k][0] : '#D9D2C5', ring: reached[i] ? col[st.k][1] : 'transparent', tc: reached[i] ? '#0E2136' : '#8B909A', line: i === 3 ? 'transparent' : (reached[i+1] ? '#D9D2C5' : '#EEE9DF') })) }; }
+
+    // ── navigation ──
+    const navKey = isListArea ? 'list' : inFlow ? 'where' : scr === 'sent' ? 'where' : scr;
+    const mk = (items, onStyle, offStyle) => items.map(([key,icon,l,badge]) => { const on = navKey === key;
+      return { icon, l, badge:String(badge||''), hasBadge: !!badge, ...(on ? onStyle : offStyle),
+        on:() => { if (key === 'where') this.newReport(); else this.go(key); } }; });
+    const sideOn = { bg:'rgba(181,132,53,.16)', bar:'inset 3px 0 0 #B58435', ic:'#E4C58F', fill:1, c:'#fff', w:700 }, sideOff = { bg:'transparent', bar:'none', ic:'#8FA0B5', fill:0, c:'#C9D1DC', w:500 };
+    const railOn = { pill:'rgba(181,132,53,.22)', ic:'#E4C58F', fill:1, c:'#fff', w:700 }, railOff = { pill:'transparent', ic:'#8FA0B5', fill:0, c:'#A9B6C6', w:500 };
+    const botOn = { pill:'rgba(181,132,53,.16)', ic:'#9A6E28', fill:1, c:'#0E2136', w:700 }, botOff = { pill:'transparent', ic:'#6B7280', fill:0, c:'#6B7280', w:500 };
+    const otLabel = gov ? 'Signalements' : 'Mes signalements';
+
+    const kv = [
+      { value:String(open.length), label: gov ? "Signalements ouverts" : 'Mes signalements ouverts', color:'#0E2136', bg:'#EDF0F4', icon:'assignment' },
+      { value:String(visible.filter(o => o.s === 'r').length), label:"En attente d'un technicien", color:'#B3261E', bg:'#FBE7E5', icon:'hourglass_top' },
+      { value:String(visible.filter(o => o.s === 'g').length + (gov ? 20 : 4)), label:'Résolus cette semaine', color:'#1E7A55', bg:'#E3F1EA', icon:'task_alt' },
+      { value:String(new Set(visible.filter(o => o.floor).map(o => o.lieu)).size), label:'Chambres suivies', color:'#0E2136', bg:'#F3EFE7', icon:'meeting_room' },
+    ];
+    const agentsMap = {}; s.orders.filter(o => o.s !== 'g').forEach(o => { if (PEOPLE[o.by]) agentsMap[o.by] = (agentsMap[o.by]||0) + 1; });
+    Object.keys(PEOPLE).forEach(n => agentsMap[n] = agentsMap[n] || 0);
+
+    return {
+      // layout flags
+      isMob:mob, notMob:wide, isDesk:desk, isTab:tab,
+      showRail: tab && !inFlow, showBottomNav: mob && !inFlow && scr !== 'sent',
+      flowHeadMob: inFlow && mob, flowHeadWide: inFlow && wide, ctaMob: inFlow && mob, ctaWide: inFlow && wide,
+      scrollY: split && isListArea ? 'hidden' : 'auto',
+      padX: mob ? '20px' : '32px', padTop: mob ? '16px' : '28px', helloSize: mob ? '28px' : '30px', pageTitle: mob ? '22px' : '28px',
+      profileBg: scr === 'profile' ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.05)', profileRing: scr === 'profile' ? '0 0 0 3px rgba(228,197,143,.5)' : 'none',
+
+      // identité
+      me: gov ? { ini:'ML', first:'Mireille', name:'Mireille Loukou', role:'Gouvernante générale', avBg:'#0E2136', avC:'#E4C58F', avBg2:'#E4C58F' } : { ini:'AB', first:'Aïcha', name:'Aïcha Bamba', role:'Agent Housekeeping', avBg:'#B58435', avC:'#0E2136', avBg2:'#B58435' },
+      isGov:gov, unread:String(unread), hasUnread:unread > 0,
+      roles:[['agent','Agent HK'],['gov','Gouvernante']].map(([k,l]) => ({ l, on:() => { this.setState({ role:k, tab: k === 'gov' ? 'all' : 'mine', detailId:null }); this.toast(`Profil : ${l}`, 'badge'); }, bg: s.role === k ? '#fff' : 'transparent', sh: s.role === k ? '0 1px 3px rgba(14,33,54,.15)' : 'none' })),
+
+      // nav
+      navSide: mk([['home','space_dashboard','Tableau de bord'],['where','mic','Signaler'],['list','assignment',otLabel,open.length],['notifs','notifications','Notifications',unread]], sideOn, sideOff),
+      navRail: mk([['home','home','Accueil'],['where','mic','Signaler'],['list','assignment','Mes OT',open.length],['notifs','notifications','Alertes',unread]], railOn, railOff),
+      navBottom: mk([['home','home','Accueil'],['where','mic','Signaler'],['list','assignment', gov ? 'Équipe' : 'Mes OT', open.length],['profile','person','Profil']], botOn, botOff),
+      goHome:() => this.go('home'), goProfile:() => this.go('profile'), goList:() => this.go('list'), openNotifs:() => this.go('notifs'),
+      startReport:() => this.newReport(), scanQR:() => { this.setF({ room:'214', space:null }); this.setState({ fromQR:true }); this.toast('QR scanné · Chambre 214', 'qr_code_2'); },
+
+      // accueil
+      isHome: scr === 'home', showCtaCard: !desk, ctaDir: mob ? 'column' : 'row', ctaAlign: mob ? 'stretch' : 'center', ctaPad: mob ? '20px' : '24px 28px', ctaTitle: mob ? '19px' : '22px',
+      kpiCols: mob ? 'repeat(2,minmax(0,1fr))' : 'repeat(4,minmax(0,1fr))', kpiPad: mob ? '16px' : '18px 20px', kpiDir: desk ? 'row' : 'column', kpiAlign: desk ? 'center' : 'flex-start',
+      kpis: kv.map((k,i) => ({ ...k, bl: (mob ? i % 2 : i) ? '1px solid #F0EBE2' : '0', bt: mob && i >= 2 ? '1px solid #F0EBE2' : '0' })),
+      homeGrid: desk ? 'minmax(0,1fr) 340px' : 'minmax(0,1fr)', cardCols: tab ? 'repeat(2,minmax(0,1fr))' : 'minmax(0,1fr)', tabsFlex: mob ? '1 1 100%' : 'none',
+      showTable: desk && homeOrders.length > 0, showCards: !desk, showActivity: wide,
+      ordersTitle: gov ? "Signalements de l'équipe" : 'Signalements',
+      tabs:[['mine','Les miens'],['urgent','Urgents'],['all', gov ? 'Équipe' : 'Tous']].map(([k,l]) => ({ l, on:() => this.setState({ tab:k }), bg: s.tab === k ? '#fff' : 'transparent', c: s.tab === k ? '#0E2136' : '#5C6472', sh: s.tab === k ? '0 1px 3px rgba(14,33,54,.12)' : 'none' })),
+      homeOrders, noOrders: homeOrders.length === 0,
+      agents: Object.entries(agentsMap).sort((a,b) => b[1]-a[1]).map(([name,n]) => { const p = PEOPLE[name]; return { name, n:String(n), ini:p[0], bg:p[1], fc:p[2], w: Math.min(100, n/6*100) + '%', c: n >= 5 ? '#B3261E' : n >= 3 ? '#B4740F' : '#1E7A55' }; }),
+      activity: s.activity.slice(0,5),
+
+      // parcours
+      inFlow, isWhere: scr === 'where' || (scr === 'spaces' && wide), isSpaces: scr === 'spaces' && mob, isWhat: scr === 'what', isVoice: scr === 'voice', isPhoto: scr === 'photo',
+      flowGrid: desk ? 'minmax(0,1fr) 320px' : 'minmax(0,1fr)', flowPad: mob ? '22px 20px 120px' : '32px 32px 40px', flowMax: desk ? '1180px' : tab ? '820px' : 'none',
+      titleAlign: wide && !desk ? 'center' : 'left', titleItems: wide && !desk ? 'center' : 'flex-start', stepTitle: mob ? '26px' : '32px',
+      cta, flowBack, backIcon: scr === 'where' ? 'close' : 'arrow_back', secondaryL: flowIdx === 0 ? 'Annuler' : 'Retour',
+      stepNum: inFlow ? String(flowIdx + 1) : '', stepName: ['Lieu','Type de problème','Message vocal','Photo et envoi'][flowIdx] || '',
+      steps: [['1','Lieu'],['2','Problème'],['3','Message vocal'],['4','Photo']].map(([n,l],i) => { const cur = i === flowIdx, done = i < flowIdx;
+        return { n: done ? '' : n, done: done ? 'check' : '', l, bar: i <= flowIdx ? '#B58435' : '#DCD5C8', flex: i === 3 ? 'none' : '1', line: i === 3 ? 'transparent' : (done ? '#B58435' : '#DCD5C8'),
+          w: cur ? 700 : 500, c: cur || done ? '#0E2136' : '#8B909A', nbg: cur ? '#0E2136' : done ? '#B58435' : '#fff', nc: cur ? '#E4C58F' : done ? '#fff' : '#8B909A', ring: cur ? '0 0 0 4px rgba(181,132,53,.2)' : done ? 'none' : 'inset 0 0 0 1.5px #DCD5C8' }; }),
+      whereSub: mob ? 'Tapez le numéro de la chambre.' : 'Tapez le numéro de chambre ou choisissez un espace commun.',
+      padMax: mob ? 'none' : '468px', keyH: mob ? '60px' : '72px', keyGap: mob ? '10px' : '12px',
+      placeKind: f.space ? 'Espace commun' : 'Chambre', placeIcon: f.space ? sp[1] : 'meeting_room',
+      placeTileBg: placeOk ? '#E3F1EA' : rc.tone === 'bad' ? '#FBE7E5' : '#F3EFE7', placeTileC: placeOk ? '#1E7A55' : rc.tone === 'bad' ? '#B3261E' : '#0E2136',
+      roomDisplay: f.space ? sp[2] : (f.room ? f.room.padEnd(3,'–') : '–––'), placeSize: f.space ? '28px' : '40px', placeLs: f.space ? '-.01em' : '.12em',
+      roomBorder: placeOk ? '#1E7A55' : rc.tone === 'bad' ? '#B3261E' : '#E8E2D6', roomGlow: placeOk ? '0 0 0 5px rgba(30,122,85,.08)' : 'none',
+      roomDigitC: f.room || f.space ? '#0E2136' : '#CFC8BA', roomMsgC: placeOk ? '#1E7A55' : rc.tone === 'bad' ? '#B3261E' : '#8B909A',
+      roomMsg: f.space ? 'Sélectionné' : (s.fromQR && rc.ok ? rc.msg + ' · QR' : rc.msg), roomIcon: f.space ? 'check_circle' : rc.icon,
+      keys: ['1','2','3','4','5','6','7','8','9','del','0','ok'].map(k => { const isOk = k === 'ok', isDel = k === 'del';
+        return { txt: isOk || isDel ? '' : k, icon: isOk ? 'check' : isDel ? 'backspace' : '',
+          bg: isOk ? (placeOk ? '#1E7A55' : '#EAE5DB') : isDel ? '#EAE5DB' : '#fff', c: isOk ? (placeOk ? '#fff' : '#A8A295') : '#0E2136', b: isOk ? (placeOk ? '#1E7A55' : '#EAE5DB') : isDel ? '#EAE5DB' : '#E8E2D6',
+          on: () => { if (isDel) this.setF({ room:f.room.slice(0,-1), space:null }); else if (isOk) { if (placeOk) this.go('what'); } else this.setF({ room: (f.space ? '' : f.room.length >= 3 ? '' : f.room) + k, space:null }); this.setState({ fromQR:false }); } }; }),
+      goSpaces:() => this.go('spaces'), goRoom:() => this.go('where'),
+      spaces: SPACES.map(([code,i,l]) => ({ i, l, ...tile(f.space === code, code === 'AUTRE'), on:() => this.setF({ space:code, room:'' }) })),
+      spacesWide: SPACES.slice(0,8).map(([code,i,l]) => ({ i, l, ...tile(f.space === code, false), on:() => this.setF({ space:code, room:'' }) })),
+      placeLong,
+      catCols: mob ? 'repeat(2,minmax(0,1fr))' : 'repeat(auto-fill,minmax(112px,1fr))',
+      cats: CATS.map(([k,i,l]) => ({ i, l, ...tile(f.cat === k, mob && k === 'autre'), on:() => this.setF({ cat:k }) })),
+      toggleUrgent:() => this.setF({ urgent:!f.urgent }),
+      urg: f.urgent ? { bg:'#FBE7E5', b:'#B3261E', tile:'#B3261E', ic:'#fff', track:'#B3261E', x:'20px' } : { bg:'#fff', b:'#E8E2D6', tile:'#FBE7E5', ic:'#B3261E', track:'#D9D2C5', x:'0px' },
+      catIcon: f.cat ? catOf(f.cat)[1] : '', catLabel: f.cat ? catOf(f.cat)[2] : '',
+      vReady: f.voice === 'ready', vRec: f.voice === 'rec', vDone: f.voice === 'done',
+      startRec:this.startRec, stopRec:this.stopRec, restartRec:() => { clearInterval(this.p); this.setState({ playing:false }); this.setF({ voice:'ready', sec:0 }); },
+      recTime:this.fmt(f.sec),
+      liveWave: [14,26,18,30,22,34,28,16,30,36,24,12,20,32,28,18,34,22,14,30,26,16,22,12].map((h,i) => (8 + ((h*7 + (s.tick+i)*13) % 34)) + 'px'),
+      doneWave: [14,26,18,30,22,34,28,16,30,36,24,12,20,32,28,18,34,22,14,30,26,16,22,12,18,28,14,22,30,16].map((h,i) => ({ h:h+'px', c: s.playing ? (i < s.tick ? '#0E2136' : '#D9D2C5') : '#9AA3B0' })),
+      togglePlay:this.togglePlay, playIcon: s.playing ? 'pause' : 'play_arrow',
+      photo:f.photo, noPhoto:!f.photo, takePhoto:() => this.setF({ photo:true }), removePhoto:() => this.setF({ photo:false }),
+      note:f.note, setNote:e => this.setF({ note:e.target.value }), photoCols: mob ? 'minmax(0,1fr)' : 'repeat(2,minmax(0,1fr))',
+      showRecapInline: !desk,
+      recap:[
+        { i:'location_on', k:'Lieu', v: (f.space || f.room) ? placeLong : '—', m: placeOk ? 'check_circle' : 'radio_button_unchecked', c: placeOk ? '#1E7A55' : '#CFC8BA' },
+        { i: f.cat ? catOf(f.cat)[1] : 'help', k:'Problème', v: f.cat ? catOf(f.cat)[2] + (f.urgent ? ' · Urgent' : '') : '—', m: f.cat ? 'check_circle' : 'radio_button_unchecked', c: f.cat ? '#1E7A55' : '#CFC8BA' },
+        { i:'mic', k:'Message vocal', v: f.voice === 'done' ? this.fmt(f.sec) : f.voice === 'rec' ? 'Enregistrement…' : 'Aucun', m: f.voice === 'done' ? 'check_circle' : f.voice === 'rec' ? 'radio_button_checked' : 'remove', c: f.voice === 'done' ? '#1E7A55' : f.voice === 'rec' ? '#B3261E' : '#B9B3A7' },
+        { i:'photo_camera', k:'Photo', v: f.photo ? '1 photo' : 'Aucune', m: f.photo ? 'check_circle' : 'remove', c: f.photo ? '#1E7A55' : '#B9B3A7' },
+      ],
+      footLoc: (f.space || rc.ok) ? placeLong : 'Aucun', footLocBg: placeOk ? '#0E2136' : '#EAE5DB', footLocC: placeOk ? '#E4C58F' : '#8B909A',
+
+      // confirmation
+      isSent: scr === 'sent', lastSent: s.lastSent || { lieu:'', code:'' },
+      openLast:() => s.lastSent && this.go('detail', { detailId:s.lastSent.id }),
+
+      // liste + fiche
+      isListArea, showListPane: split || scr === 'list', showDetailPane: !!d && (split || scr === 'detail'), detailBack: !split,
+      listAreaH: split ? '100%' : 'auto', paneScroll: split ? 'auto' : 'visible',
+      listPaneW: split ? (desk ? '400px' : '360px') : '100%', listPaneBg: split ? '#fff' : 'transparent', listPaneBr: split ? '1px solid #E8E2D6' : '0',
+      listMax: split ? 'none' : '760px', listPad: split ? '22px 18px 14px' : (mob ? '16px 20px 12px' : '28px 32px 14px'), rowsPad: split ? '0' : (mob ? '0 20px 28px' : '0 32px 32px'),
+      rowsBorder: split ? '0' : '1px solid #E8E2D6', rowsRadius: split ? '0' : '20px', listTitleSize: mob ? '24px' : '26px',
+      searchBg: split ? '#F4F1EB' : '#fff', searchB: split ? '#F4F1EB' : '#E8E2D6',
+      listTitle: otLabel, listCount: `${listSrc.length} / ${visible.length}`,
+      search:s.search, setSearch:e => this.setState({ search:e.target.value }),
+      statusFilters:[['all','Tous','#0E2136'],['r','En attente','#B3261E'],['o','En cours','#B4740F'],['g','Réparé','#1E7A55']].map(([k,l,dot]) => ({ l, dot: s.sf === k ? '#E4C58F' : dot, on:() => this.setState({ sf:k }), bg: s.sf === k ? '#0E2136' : '#fff', c: s.sf === k ? '#fff' : '#0E2136', b: s.sf === k ? '#0E2136' : '#E8E2D6' })),
+      listOrders: listSrc.map(o => { const x = dec(o), sel = split && o.id === selId; return { ...x, selBg: sel ? '#FBF6EC' : '#fff', selSh: sel ? 'inset 3px 0 0 #B58435' : 'none', tileBg: sel ? '#0E2136' : '#F3EFE7', tileC: sel ? '#E4C58F' : '#0E2136' }; }),
+      noList: listSrc.length === 0,
+      d: d || { history:[], infoRows:[] }, detailMax: split ? '980px' : '760px', detailPad: mob ? '16px 20px 32px' : '28px 32px 32px',
+      detailGrid: desk ? 'minmax(0,1.1fr) minmax(0,1fr)' : 'minmax(0,1fr)',
+      back:() => this.go(['notifs','home'].includes(s.prev) ? s.prev : 'list'),
+
+      // notifications
+      isNotifs: scr === 'notifs',
+      notifs: s.notifs.map((n,i) => ({ ...n, w: n.read ? 400 : 600, unread: !n.read, rowBg: n.read ? '#fff' : '#FDFBF6', open:() => this.setState(st => ({ notifs: st.notifs.map((x,j) => j === i ? { ...x, read:true } : x), prev:'notifs', screen:'detail', detailId:n.oid })) })),
+      readAll:() => this.setState(st => ({ notifs: st.notifs.map(x => ({ ...x, read:true })) })),
+
+      // profil + démo
+      isProfile: scr === 'profile',
+      simulateRepair:() => { const t = s.orders.find(o => o.by === meName && o.s === 'r') || s.orders.find(o => o.s === 'r'); if (!t) { this.toast('Aucun signalement en attente', 'info'); return; }
+        this.setState({ orders: s.orders.map(o => o.id === t.id ? { ...o, s:'o', tech:'Karim D.', eta:'11:30' } : o),
+          notifs:[{ icon:'engineering', c:'#9A5F0C', bg:'#FBEFD9', text:`${t.lieu} : Karim D. s'en occupe, passage prévu à 11:30.`, time:"À l'instant", read:false, oid:t.id }, ...s.notifs],
+          activity:[{ icon:'engineering', c:'#9A5F0C', bg:'#FBEFD9', text:`Karim D. a pris en charge · ${t.lieu}`, t:now() }, ...s.activity] });
+        this.toast(`${t.lieu} : technicien affecté`, 'notifications_active'); },
+      reset:() => { clearInterval(this.t); clearInterval(this.p); this.setState({ screen:'home', tab: gov ? 'all' : 'mine', orders:seed(), notifs:seedNotifs(), activity:seedActivity(), f:blank(), search:'', sf:'all', playing:false, nextId:105, detailId:null }); this.toast('Démo réinitialisée', 'restart_alt'); },
+
+      // toast
+      toastMsg: s.toast ? s.toast.msg : '', toastIcon: s.toast ? s.toast.icon : 'check_circle', toastOp: s.toast ? 1 : 0, toastY: s.toast ? '0' : '16px',
+      toastBottom: mob && !inFlow ? '96px' : inFlow ? '110px' : '28px',
+    };
+  }
+}
+</script>
+</body>
+</html>
