@@ -133,9 +133,10 @@ class Navigation
                     ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                     ['label' => 'Signaler un problème', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                     ['label' => self::housekeepingListLabel($user), 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
-                    // La gouvernante demande les blocages et remet les chambres en vente.
+                    // La gouvernante demande les blocages et remet les chambres en vente,
+                    // et a ses outils de supervision (Housekeeping::headTools).
                     ...($user->isDepartmentHead()
-                        ? [['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building']]
+                        ? [['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED), 'icon' => 'building'], ...Housekeeping::headTools()]
                         : []),
                 ],
                 'adminTitle' => '',

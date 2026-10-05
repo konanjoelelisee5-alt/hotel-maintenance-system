@@ -4,8 +4,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileDownloadController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\HousekeepingSupervisionController;
 use App\Http\Controllers\QuickReportController;
 use App\Http\Controllers\RoomBlockController;
+use App\Http\Controllers\RoomInspectionController;
 use App\Http\Controllers\TechnicianAvailabilityController;
 use App\Http\Controllers\TechnicianSkillController;
 use App\Http\Controllers\WorkOrderController;
@@ -61,6 +63,17 @@ Route::middleware(['auth', 'role:technicien'])->group(function () {
 
 Route::middleware(['auth', 'role:housekeeping'])->group(function () {
     Route::get('/housekeeping/dashboard', [DashboardController::class, 'housekeeping'])->name('housekeeping.dashboard');
+
+    // Outils de la gouvernante (droits vérifiés dans les contrôleurs : responsable du service).
+    Route::get('/housekeeping/plan', [HousekeepingSupervisionController::class, 'floorPlan'])->name('housekeeping.floor-plan');
+    Route::get('/housekeeping/bilan', [HousekeepingSupervisionController::class, 'monthlyReport'])->name('housekeeping.monthly-report');
+    Route::get('/inspections', [RoomInspectionController::class, 'index'])->name('inspections.index');
+    Route::post('/inspections', [RoomInspectionController::class, 'store'])->name('inspections.store');
+    Route::get('/inspections/{inspection}', [RoomInspectionController::class, 'show'])->name('inspections.show');
+    Route::delete('/inspections/{inspection}', [RoomInspectionController::class, 'destroy'])->name('inspections.destroy');
+    Route::patch('/inspections/{inspection}/points/{item}', [RoomInspectionController::class, 'updatePoint'])->name('inspections.points.update');
+    Route::post('/inspections/{inspection}/points/{item}/photo', [RoomInspectionController::class, 'storePhoto'])->name('inspections.points.photo');
+    Route::post('/inspections/{inspection}/terminer', [RoomInspectionController::class, 'complete'])->name('inspections.complete');
 });
 
 Route::middleware(['auth', 'role:reception'])->group(function () {

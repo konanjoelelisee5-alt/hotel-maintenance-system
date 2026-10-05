@@ -64,7 +64,7 @@
                         </p>
                     </div>
                 </div>
-                <x-hk.status :status="$workOrder->status" :urgent="$urgent" />
+                <x-hk.status :status="$workOrder->status" :urgent="$urgent" :late="$workOrder->slaSummary()['late']" />
             </div>
             <div class="flex items-center justify-between gap-3 flex-wrap pt-3 border-t border-line-soft">
                 <span class="text-[13.5px] font-semibold" style="color: {{ $accent }}">{{ $banner }}</span>

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\IssueCategory;
 use App\Enums\RoomOccupancy;
+use App\Enums\UserRole;
 use App\Models\User;
 use App\Models\WorkOrder;
 use Carbon\Carbon;
@@ -216,6 +217,26 @@ class Housekeeping
                 'last' => $group->first(),
             ])
             ->sortByDesc('count')->take($limit)->values();
+    }
+
+    /**
+     * Outils de la gouvernante : menu (sidebar), rail de la tablette et accueil sur téléphone.
+     *
+     * @return array<int, array{label: string, route: string, icon: string, hk: string, description: string}>
+     */
+    public static function headTools(): array
+    {
+        return [
+            ['label' => 'Plan des étages', 'route' => 'housekeeping.floor-plan', 'icon' => 'pin', 'hk' => 'building', 'description' => 'L\'état de chaque chambre d\'un coup d\'œil'],
+            ['label' => 'Inspections', 'route' => 'inspections.index', 'icon' => 'shield', 'hk' => 'check-circle', 'description' => 'Tournée d\'inspection des chambres'],
+            ['label' => 'Bilan du mois', 'route' => 'housekeeping.monthly-report', 'icon' => 'report', 'hk' => 'activity', 'description' => 'Pannes, délais de réparation, chambres touchées'],
+        ];
+    }
+
+    /** Gouvernantes actives (responsables du service Housekeeping). */
+    public static function heads(): Collection
+    {
+        return User::where('role', UserRole::Housekeeping)->where('is_department_head', true)->where('is_active', true)->get();
     }
 
     /** Titre de groupe de l'historique : « Aujourd'hui », « Hier », « Lundi 29 septembre ». */

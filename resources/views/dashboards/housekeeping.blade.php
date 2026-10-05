@@ -34,6 +34,18 @@
         <a href="{{ route('quick-reports.create') }}" class="btn btn-gold btn-lg w-full !h-[52px]"><x-nav-icon name="mic" /> Signaler un problème</a>
     </section>
 
+    {{-- Gouvernante sur téléphone : ses outils (sur tablette et ordinateur, ils sont dans le menu). --}}
+    @if ($isHead)
+        <nav class="tab:hidden grid grid-cols-3 gap-2" aria-label="Outils de la gouvernante">
+            @foreach ($hk::headTools() as $tool)
+                <a href="{{ route($tool['route']) }}" class="bg-white border border-line rounded-xl px-2 py-3 flex flex-col items-center gap-1.5 text-center hover:bg-paper">
+                    <span class="w-9 h-9 rounded-[9px] border border-line bg-paper text-gold flex items-center justify-center"><x-hk.icon :name="$tool['hk']" :size="18" /></span>
+                    <span class="text-[12px] font-semibold text-navy leading-tight">{{ $tool['label'] }}</span>
+                </a>
+            @endforeach
+        </nav>
+    @endif
+
     {{-- Réparations à confirmer par le service demandeur --}}
     @if ($toConfirm->isNotEmpty())
         <section class="bg-white border border-line rounded-xl overflow-hidden" x-data="{ all: false }">
@@ -134,7 +146,7 @@
                                             <div class="text-[12px] text-ink-grey mt-0.5">Signalé par {{ $w->reporter->name }}</div>
                                         @endif
                                     </td>
-                                    <td class="px-3 py-3.5 align-middle"><x-hk.status :status="$w->status" :urgent="$urgent" /></td>
+                                    <td class="px-3 py-3.5 align-middle"><x-hk.status :status="$w->status" :urgent="$urgent" :late="$w->slaSummary()['late']" /></td>
                                     <td class="px-3 py-3.5 align-middle">
                                         @if ($w->assignee)
                                             <span class="flex items-center gap-2 min-w-0">

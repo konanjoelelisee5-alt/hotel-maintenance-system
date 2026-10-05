@@ -6,8 +6,11 @@ use App\Models\InterventionReport;
 use App\Models\Room;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Notifications\HousekeepingReportNotification;
+use App\Support\OnCall;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -155,6 +158,78 @@ class HousekeepingFollowUpTest extends TestCase
 
         $this->actingAs($head)->get(route('housekeeping.dashboard'))->assertSee('Pannes récurrentes')->assertSee('2 fois');
         $this->actingAs($this->agent)->get(route('work-orders.show', $second))->assertSee('Panne récurrente');
+    }
+
+    // ===== Qui est prévenu =====
+
+    public function test_withdrawing_an_urgent_report_warns_on_call_and_reception(): void
+    {
+        $this->actingAs($this->agent)->postJson(route('quick-reports.store'), [
+            'room_number' => '214', 'room_occupancy' => 'client_present', 'category' => 'eau', 'urgent' => 1,
+        ])->assertCreated();
+        $workOrder = WorkOrder::where('reported_by', $this->agent->id)->firstOrFail();
+        $this->assertNotNull($workOrder->reception_alerted_at);
+        $manager = User::factory()->manager()->create(['receives_maintenance_alerts' => true, 'phone' => '+2250700000000']);
+        $reception = User::factory()->reception()->create();
+
+        Notification::fake();
+        $this->travelTo(now()->setTime(10, 0));
+        $workOrder->forceFill(['created_at' => now()])->save();
+        $this->actingAs($this->agent)->post(route('quick-reports.withdraw', $workOrder), ['reason' => 'regle']);
+
+        $withdrawn = fn ($n) => $n instanceof HousekeepingReportNotification && $n->toArray($this->agent)['step'] === HousekeepingReportNotification::WITHDRAWN;
+        Notification::assertSentTo($reception, HousekeepingReportNotification::class, $withdrawn);
+        $this->assertContains($manager->id, OnCall::recipients()->pluck('id')->all());
+        Notification::assertSentTo($manager, HousekeepingReportNotification::class, $withdrawn);
+    }
+
+    public function test_a_precision_warns_the_assigned_technician(): void
+    {
+        $workOrder = $this->report();
+        $technician = User::factory()->technicien()->create();
+        $workOrder->update(['assigned_to' => $technician->id, 'status' => 'en_cours']);
+
+        Notification::fake();
+        $this->actingAs($this->agent)->postJson(route('quick-reports.complement', $workOrder), ['note' => 'Ça goutte encore.'])->assertCreated();
+
+        Notification::assertSentTo($technician, HousekeepingReportNotification::class,
+            fn ($n) => str_contains($n->toArray($technician)['message'], 'Ça goutte encore.'));
+    }
+
+    public function test_the_governess_is_told_of_her_team_urgent_reports(): void
+    {
+        $head = User::factory()->housekeeping()->create(['is_department_head' => true]);
+
+        Notification::fake();
+        $this->actingAs($this->agent)->postJson(route('quick-reports.store'), [
+            'room_number' => '214', 'room_occupancy' => 'libre', 'category' => 'electricite', 'urgent' => 1,
+        ])->assertCreated();
+        $this->actingAs($this->agent)->postJson(route('quick-reports.store'), [
+            'room_number' => '214', 'room_occupancy' => 'libre', 'category' => 'tv',
+        ])->assertCreated();
+
+        Notification::assertSentToTimes($head, HousekeepingReportNotification::class, 1);
+    }
+
+    // ===== Finitions =====
+
+    public function test_late_reports_carry_a_badge(): void
+    {
+        $workOrder = $this->report();
+        $workOrder->forceFill(['sla_resolution_due_at' => now()->subHour()])->save();
+
+        $this->actingAs($this->agent)->get(route('work-orders.index'))->assertSee('En retard');
+    }
+
+    public function test_the_application_speaks_french(): void
+    {
+        $this->actingAs($this->agent)->get(route('profile.edit'))
+            ->assertOk()->assertSee('Changer le mot de passe')->assertDontSee('Update Password');
+
+        $this->actingAs($this->agent)->put(route('password.update'), [])
+            ->assertSessionHasErrorsIn('updatePassword', ['current_password' => 'Le champ mot de passe actuel est obligatoire.']);
+
+        $this->actingAs($this->agent)->get('/cette-page-n-existe-pas')->assertNotFound()->assertSee('Page introuvable');
     }
 
     public function test_requester_sees_what_the_technician_did(): void

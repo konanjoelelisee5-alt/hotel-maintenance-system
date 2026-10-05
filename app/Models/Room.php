@@ -61,6 +61,12 @@ class Room extends Model
         return $this->hasMany(RoomBlock::class);
     }
 
+    /** Inspections de la gouvernante (tournée d'inspection). */
+    public function inspections()
+    {
+        return $this->hasMany(RoomInspection::class);
+    }
+
     /** Demande de blocage en cours ou blocage effectif (au plus un à la fois). */
     public function activeBlock(): ?RoomBlock
     {

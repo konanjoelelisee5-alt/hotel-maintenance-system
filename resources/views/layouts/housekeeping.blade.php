@@ -36,7 +36,7 @@
     <div class="min-h-screen flex items-stretch">
 
         {{-- Ordinateur : la sidebar de l'admin (utilisateur, menu, profil et déconnexion). --}}
-        <aside class="hidden desk:flex flex-col w-[252px] flex-shrink-0 bg-navy text-white p-3.5 gap-5 sticky top-0 h-screen overflow-y-auto">
+        <aside class="hidden desk:flex print:hidden flex-col w-[252px] flex-shrink-0 bg-navy text-white p-3.5 gap-5 sticky top-0 h-screen overflow-y-auto">
             <div class="flex items-center gap-2.5 px-1.5 pt-1">
                 <span class="w-[34px] h-[34px] rounded-[9px] bg-gold flex items-center justify-center text-[13px] font-bold text-navy flex-shrink-0">{{ $user->initialsOrGenerated() }}</span>
                 <span class="flex flex-col gap-0.5 min-w-0">
@@ -50,7 +50,7 @@
 
         {{-- Tablette : rail de 96 px, mêmes entrées que la barre du bas. --}}
         @unless ($focus)
-            <nav class="hidden tab:flex desk:hidden flex-col items-center w-[96px] flex-shrink-0 bg-navy text-white sticky top-0 h-screen py-4 gap-1.5" aria-label="Navigation principale">
+            <nav class="hidden tab:flex desk:hidden print:hidden flex-col items-center w-[96px] flex-shrink-0 bg-navy text-white sticky top-0 h-screen overflow-y-auto py-4 gap-1.5" aria-label="Navigation principale">
                 <a href="{{ route('profile.edit') }}" class="mb-3 w-[38px] h-[38px] rounded-[10px] bg-gold flex items-center justify-center text-[13px] font-bold text-navy" title="{{ $user->name }}">
                     {{ $user->initialsOrGenerated() }}
                 </a>
@@ -67,6 +67,19 @@
                         @endif
                     </a>
                 @endforeach
+                {{-- Gouvernante : ses outils sous les entrées quotidiennes. --}}
+                @if ($user->isDepartmentHead())
+                    <span class="w-10 h-px bg-white/15 my-1.5" aria-hidden="true"></span>
+                    @foreach (\App\Support\Housekeeping::headTools() as $tool)
+                        @php $active = $isActive($tool); @endphp
+                        <a href="{{ route($tool['route']) }}" @if ($active) aria-current="page" @endif
+                           class="w-[80px] min-h-[60px] rounded-[10px] flex flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium text-center leading-tight
+                                  {{ $active ? 'bg-white/10 text-white' : 'text-[#B9C7D6] hover:bg-white/[.06] hover:text-white' }}">
+                            <x-nav-icon :name="$tool['icon']" class="w-5 h-5 {{ $active ? 'text-gold' : 'text-[#8FA3B8]' }}" />
+                            {{ $tool['label'] }}
+                        </a>
+                    @endforeach
+                @endif
                 <a href="{{ route('profile.edit') }}" @if (request()->routeIs('profile.*')) aria-current="page" @endif
                    class="mt-auto w-[80px] min-h-[60px] rounded-[10px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium {{ request()->routeIs('profile.*') ? 'bg-white/10 text-white' : 'text-[#B9C7D6] hover:bg-white/[.06]' }}">
                     <x-nav-icon name="user" class="w-5 h-5 {{ request()->routeIs('profile.*') ? 'text-gold' : 'text-[#8FA3B8]' }}" />
@@ -79,7 +92,7 @@
         <div class="flex-1 min-w-0 flex flex-col {{ $focus ? '' : 'pb-[calc(64px+env(safe-area-inset-bottom))] tab:pb-0' }}">
 
             {{-- Téléphone : barre marine de l'admin --}}
-            <div class="tab:hidden sticky top-0 z-40 bg-navy text-white px-4 py-3 flex items-center gap-3">
+            <div class="tab:hidden print:hidden sticky top-0 z-40 bg-navy text-white px-4 py-3 flex items-center gap-3">
                 @isset($backRoute)
                     <a href="{{ $backRoute }}" class="w-9 h-9 flex-shrink-0 rounded-lg border border-white/20 flex items-center justify-center" aria-label="{{ $focus ? 'Fermer' : 'Retour' }}">
                         <x-nav-icon :name="$focus ? 'close' : 'back'" class="w-4 h-4" />
@@ -100,7 +113,7 @@
             @endif
 
             {{-- Tablette et ordinateur : en-tête blanc de l'admin --}}
-            <header class="hidden tab:flex items-center gap-4 px-6 py-3.5 bg-white border-b border-line sticky top-0 z-30">
+            <header class="hidden tab:flex print:flex items-center gap-4 px-6 py-3.5 bg-white border-b border-line sticky top-0 z-30">
                 @isset($backRoute)
                     <a href="{{ $backRoute }}" class="w-[38px] h-[38px] flex-shrink-0 rounded-[9px] border border-line flex items-center justify-center text-navy hover:bg-paper" aria-label="{{ $focus ? 'Fermer' : 'Retour' }}">
                         <x-nav-icon :name="$focus ? 'close' : 'back'" class="w-4 h-4" />
@@ -208,7 +221,7 @@
 
     {{-- Téléphone : barre du bas de l'admin (64 px) --}}
     @unless ($focus)
-        <nav class="tab:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line pb-[env(safe-area-inset-bottom)]" aria-label="Navigation principale">
+        <nav class="tab:hidden print:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line pb-[env(safe-area-inset-bottom)]" aria-label="Navigation principale">
             <div class="h-16 flex gap-0.5 px-2.5 py-1.5">
                 @foreach ($bottomNav as $item)
                     @php $active = $isActive($item); @endphp

@@ -10,16 +10,20 @@ use App\Http\Requests\ComplementQuickReportRequest;
 use App\Http\Requests\StoreQuickReportRequest;
 use App\Models\ActivityLog;
 use App\Models\Room;
+use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
 use App\Models\WorkOrderType;
 use App\Notifications\GuestRoomAtRiskNotification;
+use App\Notifications\HousekeepingReportNotification;
 use App\Support\Housekeeping;
+use App\Support\OnCall;
 use App\Support\ReceptionDesk;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -98,6 +102,14 @@ class QuickReportController extends Controller
             ReceptionDesk::alertGuestAtRisk($workOrder, GuestRoomAtRiskNotification::GUEST_INSIDE);
         }
 
+        // Urgence d'un agent : sa gouvernante le sait tout de suite (pas seulement à l'affectation).
+        if ($urgent && $request->user()->role === UserRole::Housekeeping) {
+            Notification::send(
+                Housekeeping::heads()->reject(fn (User $u) => $u->id === $request->user()->id),
+                new HousekeepingReportNotification($workOrder->load('room', 'reporter'), HousekeepingReportNotification::TEAM_URGENT, $occupancy?->label()),
+            );
+        }
+
         $sent = route('quick-reports.sent', $workOrder);
         // Housekeeping : toast de confirmation sur la page suivante (sauf envoi différé
         // de la boîte d'envoi : la page en cours affiche déjà son propre toast).
@@ -141,6 +153,19 @@ class QuickReportController extends Controller
 
         ActivityLog::record('work_order.withdrawn', "Signalement {$workOrder->code()} retiré par son auteur : {$reason}", $workOrder);
 
+        // Ceux qui avaient été alertés ne doivent pas se déplacer pour rien : l'astreinte
+        // (appelée sur son téléphone pour un OT urgent), la réception (client concerné).
+        $workOrder->loadMissing('room', 'reporter', 'priority');
+        $actor = $request->user()->id;
+        if ($workOrder->priority?->triggersOnCallAlert()) {
+            Notification::send(OnCall::recipients()->reject(fn (User $u) => $u->id === $actor),
+                new HousekeepingReportNotification($workOrder, HousekeepingReportNotification::WITHDRAWN, Housekeeping::WITHDRAW_REASONS[$data['reason']], byPhone: true));
+        }
+        if ($workOrder->reception_alerted_at !== null) {
+            Notification::send(ReceptionDesk::staff(),
+                new HousekeepingReportNotification($workOrder, HousekeepingReportNotification::WITHDRAWN, Housekeeping::WITHDRAW_REASONS[$data['reason']]));
+        }
+
         return redirect()->route('work-orders.show', $workOrder)->with('success', 'Signalement retiré. Il reste visible dans votre historique.');
     }
 
@@ -170,6 +195,12 @@ class QuickReportController extends Controller
         if ($photo) {
             $this->attach($workOrder, $photo, "precision-photo-{$stamp}.".($photo->extension() ?: 'jpg'), $photo->getMimeType() ?? 'image/jpeg', $user->id);
         }
+
+        // Le technicien affecté la lit tout de suite ; sans technicien, l'équipe qui dispatche.
+        $recipients = $workOrder->assignee ? collect([$workOrder->assignee]) : OnCall::recipients();
+        Notification::send($recipients->reject(fn (User $u) => $u->id === $user->id),
+            new HousekeepingReportNotification($workOrder->loadMissing('room', 'reporter'), HousekeepingReportNotification::COMPLEMENTED,
+                $note !== '' ? Str::limit($note, 120) : collect([$audio ? 'message vocal' : null, $photo ? 'photo' : null])->filter()->join(' et ')));
 
         session()->flash('success', 'Précision ajoutée au signalement.');
         $back = route('work-orders.show', $workOrder);

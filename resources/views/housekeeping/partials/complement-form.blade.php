@@ -68,6 +68,21 @@
             // Enregistreur et fichiers gardés hors de l'état Alpine (un Proxy les casse).
             let recorder = null, stream = null, chunks = [], timer = null, audioBlob = null, photoBlob = null;
             const extensionFor = (type) => type.includes('mp4') ? 'm4a' : (type.includes('ogg') ? 'ogg' : 'webm');
+            // Photo réduite sur le téléphone (1600 px, JPEG), comme au signalement : envoi rapide en 3G.
+            const shrink = (file, max = 1600) => new Promise((resolve) => {
+                const url = URL.createObjectURL(file), img = new Image();
+                img.onload = () => {
+                    const scale = Math.min(1, max / Math.max(img.width, img.height));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    URL.revokeObjectURL(url);
+                    canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.8);
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+                img.src = url;
+            });
 
             return {
                 open: false,
@@ -115,12 +130,12 @@
                     if (this.audioUrl) URL.revokeObjectURL(this.audioUrl);
                     audioBlob = null; this.audioUrl = null; this.seconds = 0; this.rec = 'idle';
                 },
-                pickPhoto(e) {
+                async pickPhoto(e) {
                     const file = e.target.files[0];
                     e.target.value = '';
                     if (!file) return;
-                    photoBlob = file;
-                    this.photoUrl = URL.createObjectURL(file);
+                    photoBlob = await shrink(file);
+                    this.photoUrl = URL.createObjectURL(photoBlob);
                 },
                 resetPhoto() {
                     if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
@@ -139,7 +154,7 @@
                     data.append('_token', document.querySelector('meta[name=csrf-token]').content);
                     if (this.note.trim() !== '') data.append('note', this.note.trim());
                     if (audioBlob) data.append('audio', audioBlob, 'precision-vocale.' + extensionFor(audioBlob.type));
-                    if (photoBlob) data.append('photo', photoBlob, photoBlob.name || 'photo.jpg');
+                    if (photoBlob) data.append('photo', photoBlob, 'photo.jpg');
                     try {
                         const res = await fetch(config.action, {
                             method: 'POST', body: data, credentials: 'same-origin',

@@ -26,7 +26,7 @@
         <span class="font-mono text-[11.5px] text-[#26496B] whitespace-nowrap flex-shrink-0 mt-0.5">{{ $w->code() }}</span>
     </div>
 
-    <div class="mt-2.5"><x-hk.status :status="$w->status" :urgent="$urgent" /></div>
+    <div class="mt-2.5"><x-hk.status :status="$w->status" :urgent="$urgent" :late="$w->slaSummary()['late']" /></div>
 
     <div class="flex items-center justify-between gap-3 mt-2.5 pt-2.5 border-t border-line-soft text-[12.5px] text-[#6C6658]">
         @if ($w->status === 'annule')

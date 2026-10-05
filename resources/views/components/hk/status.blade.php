@@ -1,6 +1,7 @@
 {{-- Statut regroupé des écrans HK (App\Support\Housekeeping) : En attente, En cours, Réparé.
-     Même gabarit que les badges de l'admin (x-work-order-status-badge). --}}
-@props(['status', 'urgent' => false])
+     Même gabarit que les badges de l'admin (x-work-order-status-badge).
+     late : délai de réparation dépassé (WorkOrder::slaSummary), seulement tant que ce n'est pas terminé. --}}
+@props(['status', 'urgent' => false, 'late' => false])
 
 @php $s = \App\Support\Housekeeping::status($status); @endphp
 
@@ -11,6 +12,11 @@
     @if ($urgent)
         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-hk-pending-bg text-hk-pending ring-1 ring-inset ring-hk-pending/25">
             <x-hk.icon name="alert-triangle" :size="13" /> Urgent
+        </span>
+    @endif
+    @if ($late)
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-red text-white">
+            <x-hk.icon name="clock" :size="13" /> En retard
         </span>
     @endif
 </span>
