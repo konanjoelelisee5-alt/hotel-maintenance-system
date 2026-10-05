@@ -16,7 +16,8 @@ class NotificationController extends Controller
     {
         $notifications = $request->user()->notifications()->paginate(20);
 
-        return view('notifications.index', compact('notifications'));
+        // Housekeeping : liste lu / non lu au style de ses écrans.
+        return view($request->user()->role === UserRole::Housekeeping ? 'housekeeping.notifications' : 'notifications.index', compact('notifications'));
     }
 
     /**

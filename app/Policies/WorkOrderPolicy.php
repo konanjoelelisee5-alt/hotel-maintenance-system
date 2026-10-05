@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderAttachment;
+use App\Support\Housekeeping;
 
 class WorkOrderPolicy
 {
@@ -174,5 +175,30 @@ class WorkOrderPolicy
             && in_array($workOrder->status, ['resolu', 'ferme'], true)
             && $workOrder->requester_confirmed_at === null
             && $workOrder->completed_at?->greaterThanOrEqualTo(now()->subDays(WorkOrder::CONFIRMATION_WINDOW_DAYS));
+    }
+
+    /**
+     * Housekeeping : l'agent retire son propre signalement fait par erreur (mauvaise
+     * chambre, doublon), tant que personne ne s'en occupe et peu après l'envoi.
+     * L'OT n'est pas supprimé : il passe « annulé », avec le motif dans l'historique.
+     */
+    public function withdraw(User $user, WorkOrder $workOrder): bool
+    {
+        return $user->role?->value === 'housekeeping'
+            && $workOrder->reported_by === $user->id
+            && $workOrder->status === 'ouvert'
+            && $workOrder->assigned_to === null
+            && $workOrder->created_at?->greaterThanOrEqualTo(now()->subMinutes(Housekeeping::WITHDRAW_WINDOW_MINUTES));
+    }
+
+    /**
+     * Housekeeping : ajouter une précision (texte, message vocal, photo) à un signalement
+     * pas encore réparé. On ajoute à la suite, on ne modifie rien de ce qui existe.
+     */
+    public function complement(User $user, WorkOrder $workOrder): bool
+    {
+        return $user->role?->value === 'housekeeping'
+            && $this->view($user, $workOrder)
+            && in_array($workOrder->status, ['ouvert', 'en_cours', 'en_attente', 'rejete'], true);
     }
 }

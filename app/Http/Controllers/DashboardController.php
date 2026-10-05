@@ -13,6 +13,7 @@ use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
+use App\Support\Housekeeping;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -64,7 +65,8 @@ class DashboardController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $filter = $request->string('filter')->toString() ?: 'urgent';
+        // Housekeeping : l'agent arrive sur ses propres signalements (« Les miens »).
+        $filter = $request->string('filter')->toString() ?: ($user->role === UserRole::Housekeeping ? 'mine' : 'urgent');
         $period = in_array($request->string('period')->toString(), array_keys(self::PERIODS), true)
             ? $request->string('period')->toString()
             : '7d';
@@ -84,6 +86,10 @@ class DashboardController extends Controller
             // Service demandeur : réparations à confirmer ou à rouvrir.
             'toConfirm' => in_array($user->role, [UserRole::Housekeeping, UserRole::Reception], true)
                 ? WorkOrder::visibleTo($user)->awaitingRequesterConfirmation()->with(['room', 'assignee'])->latest('completed_at')->get()
+                : collect(),
+            // Gouvernante : chambres où la même panne revient (Housekeeping::REPEAT_DAYS jours).
+            'repeats' => $user->role === UserRole::Housekeeping && $user->isDepartmentHead()
+                ? Housekeeping::repeats($user)
                 : collect(),
         ]);
     }
@@ -164,6 +170,15 @@ class DashboardController extends Controller
 
     private function queue(User $user, string $filter): Collection
     {
+        // Housekeeping suit ses signalements : le plus récent en tête (un nouvel OT apparaît en premier).
+        if ($user->role === UserRole::Housekeeping) {
+            return $this->filteredQueue($user, $filter)
+                ->with(['room', 'assignee', 'priority', 'reporter'])
+                ->latest()->latest('id')
+                ->limit(8)
+                ->get();
+        }
+
         return $this->filteredQueue($user, $filter)
             ->with(['room', 'equipment', 'assignee', 'priority'])
             ->orderByRaw('CASE WHEN sla_breached THEN 0 ELSE 1 END')
@@ -283,6 +298,9 @@ class DashboardController extends Controller
                         // Le responsable a besoin de savoir quel agent a signalé.
                         'meta' => $w->code().' · '.($user->isDepartmentHead() ? ($w->reporter?->name ?? '—').' · ' : '').($w->assignee?->name ?? $w->status_label),
                         'color' => $w->slaColorClass(),
+                        // Activité récente (écran HK) : heure et fiche liée.
+                        'time' => $w->created_at->format('H:i'),
+                        'id' => $w->id,
                     ]),
             ],
             UserRole::Admin => [

@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Enums\UserRole;
 use App\Support\Navigation;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -20,6 +21,8 @@ class AppLayout extends Component
         public string $pageTitle = '',
         public string $crumb = '',
         public ?string $backRoute = null,
+        // Parcours sans distraction (signalement) : navigation masquée sur téléphone et tablette.
+        public bool $focus = false,
     ) {}
 
     public function render(): View
@@ -27,7 +30,8 @@ class AppLayout extends Component
         $user = auth()->user();
         $notifications = $user->notifications()->latest('created_at')->limit(6)->get();
 
-        return view('layouts.app', [
+        // Housekeeping : sa propre coquille (barre basse, rail, sidebar), mêmes menus.
+        return view($user->role === UserRole::Housekeeping ? 'layouts.housekeeping' : 'layouts.app', [
             'nav' => Navigation::forSidebar($user),
             'bottomNav' => Navigation::forBottomNav($user),
             'notifications' => $notifications,

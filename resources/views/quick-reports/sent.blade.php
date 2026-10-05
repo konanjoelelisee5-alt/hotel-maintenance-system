@@ -1,25 +1,55 @@
-<x-app-layout crumb="Signalement rapide" page-title="Signalement envoyé">
-    <div class="max-w-xl w-full mx-auto flex flex-col items-center gap-5 text-center py-6">
-        <div class="w-32 h-32 rounded-full bg-green text-white flex items-center justify-center text-7xl shadow-lg">✓</div>
+{{-- Confirmation du signalement : coche verte, lieu et référence de l'OT, puis
+     « Suivre ce signalement », « Nouveau signalement » et « Accueil ». --}}
+@php
+    $hk = \App\Support\Housekeeping::class;
+    $category = $hk::category($workOrder);
+    $urgent = $workOrder->priority?->code === 'urgente';
+@endphp
 
-        <div class="flex flex-col gap-1.5">
-            <h2 class="text-[22px] font-semibold">Merci ! C'est envoyé.</h2>
-            <p class="text-[15px] text-[#4A463E]">La maintenance est prévenue.</p>
-        </div>
-
-        <div class="w-full bg-white border border-line rounded-xl p-4 flex items-center gap-3 text-left">
-            <span class="text-3xl">{{ $workOrder->priority?->code === 'urgente' ? '🚨' : '📋' }}</span>
-            <div class="min-w-0">
-                <div class="text-[15px] font-semibold truncate">{{ $workOrder->room?->label ?? 'Parties communes' }}</div>
-                <div class="text-[12.5px] text-ink-grey">{{ $workOrder->code() }} · {{ $workOrder->priority?->code === 'urgente' ? 'URGENT' : 'reçu' }}</div>
+<x-app-layout crumb="Signalement" page-title="Signalement envoyé">
+    <div class="w-full max-w-[560px] mx-auto tab:mt-6">
+        <section class="bg-white border border-line rounded-xl overflow-hidden">
+            <div class="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-3 border-b border-line-soft">
+                <span class="w-16 h-16 rounded-full bg-[#E6F3EC] text-green flex items-center justify-center ring-8 ring-[#E6F3EC]/50">
+                    <x-hk.icon name="check" :size="30" />
+                </span>
+                <h2 class="m-0 mt-2 text-[20px] font-semibold text-navy tracking-tight">Signalement envoyé</h2>
+                <p class="m-0 text-[13.5px] text-[#6C6658] max-w-[380px] leading-relaxed">La maintenance est prévenue. Vous recevrez une notification à chaque étape de la réparation.</p>
             </div>
-        </div>
 
-        <a href="{{ route('quick-reports.create') }}" class="w-full h-16 rounded-xl bg-gold text-navy flex items-center justify-center gap-3 text-[17px] font-bold">
-            <span class="text-2xl">🎤</span> Nouveau signalement
-        </a>
-        <a href="{{ route('work-orders.index') }}" class="w-full h-14 rounded-xl border-2 border-line flex items-center justify-center gap-3 text-[15px] font-semibold text-navy">
-            <span class="text-2xl">📋</span> Mes signalements
-        </a>
+            <dl class="m-0 px-6 py-2 text-[13.5px]">
+                <div class="flex items-center justify-between gap-4 py-3 border-b border-line-soft">
+                    <dt class="text-ink-grey">Référence</dt>
+                    <dd class="m-0 font-mono text-[13px] text-navy font-medium">{{ $workOrder->code() }}</dd>
+                </div>
+                <div class="flex items-center justify-between gap-4 py-3 border-b border-line-soft">
+                    <dt class="text-ink-grey">Lieu</dt>
+                    <dd class="m-0 font-medium text-navy text-right">{{ $workOrder->room?->label ?? 'Parties communes' }}</dd>
+                </div>
+                <div class="flex items-center justify-between gap-4 py-3 border-b border-line-soft">
+                    <dt class="text-ink-grey">Problème</dt>
+                    <dd class="m-0 font-medium text-navy flex items-center gap-1.5">
+                        <x-hk.icon :name="$hk::categoryIcon($category)" :size="15" class="text-gold" />
+                        {{ $category ? $hk::categoryLabel($category) : $workOrder->title }}
+                    </dd>
+                </div>
+                <div class="flex items-center justify-between gap-4 py-3 border-b border-line-soft">
+                    <dt class="text-ink-grey">Statut</dt>
+                    <dd class="m-0"><x-hk.status :status="$workOrder->status" :urgent="$urgent" /></dd>
+                </div>
+                <div class="flex items-center justify-between gap-4 py-3">
+                    <dt class="text-ink-grey">Envoyé</dt>
+                    <dd class="m-0 font-mono text-[13px] text-navy">{{ $workOrder->created_at->format('d/m/Y à H\hi') }}</dd>
+                </div>
+            </dl>
+
+            <div class="px-6 py-5 bg-paper/60 border-t border-line flex flex-col gap-2.5">
+                <a href="{{ route('work-orders.show', $workOrder) }}" class="btn btn-primary btn-lg w-full"><x-hk.icon name="activity" :size="16" /> Suivre ce signalement</a>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <a href="{{ route('quick-reports.create') }}" class="btn btn-secondary btn-lg"><x-hk.icon name="plus" :size="16" /> Nouveau</a>
+                    <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="btn btn-secondary btn-lg"><x-hk.icon name="home" :size="16" /> Accueil</a>
+                </div>
+            </div>
+        </section>
     </div>
 </x-app-layout>

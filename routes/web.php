@@ -100,6 +100,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/signaler', [QuickReportController::class, 'create'])->name('quick-reports.create');
     Route::post('/signaler', [QuickReportController::class, 'store'])->name('quick-reports.store');
     Route::get('/signaler/{workOrder}/envoye', [QuickReportController::class, 'sent'])->name('quick-reports.sent');
+    // Housekeeping : retirer un signalement fait par erreur, ou lui ajouter une précision
+    // (droits : WorkOrderPolicy::withdraw / complement).
+    Route::post('/signaler/{workOrder}/retirer', [QuickReportController::class, 'withdraw'])->name('quick-reports.withdraw');
+    Route::post('/signaler/{workOrder}/completer', [QuickReportController::class, 'complement'])->name('quick-reports.complement');
 
     // Blocage d'une chambre à la vente : demande (gouvernante / maintenance), décision
     // (réception), remise en vente (gouvernante). Droits dans RoomBlockPolicy.

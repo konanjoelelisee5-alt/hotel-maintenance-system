@@ -20,7 +20,7 @@ class StoreQuickReportRequest extends FormRequest
      * Android, Firefox), mp4/aac (Safari, iPhone). Un webm ou mp4 sans image est
      * souvent détecté comme "video/*" côté serveur, d'où leur présence ici.
      */
-    private const AUDIO_MIMETYPES = [
+    public const AUDIO_MIMETYPES = [
         'audio/webm', 'video/webm', 'audio/ogg', 'audio/mp4', 'video/mp4',
         'audio/x-m4a', 'audio/aac', 'audio/mpeg', 'audio/wav', 'audio/x-wav',
     ];

@@ -5,18 +5,23 @@ namespace App\Http\Controllers;
 use App\Actions\ReportWorkOrder;
 use App\Enums\IssueCategory;
 use App\Enums\RoomOccupancy;
+use App\Enums\UserRole;
+use App\Http\Requests\ComplementQuickReportRequest;
 use App\Http\Requests\StoreQuickReportRequest;
+use App\Models\ActivityLog;
 use App\Models\Room;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
 use App\Models\WorkOrderType;
 use App\Notifications\GuestRoomAtRiskNotification;
+use App\Support\Housekeeping;
 use App\Support\ReceptionDesk;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -28,10 +33,12 @@ class QuickReportController extends Controller
 {
     public function create(Request $request): View
     {
-        return view('quick-reports.create', [
+        return view($this->screen($request, 'create'), [
             // number => étage : le contrôle du numéro se fait sur le téléphone, sans aller-retour.
             // Seules les chambres en service : on ne signale pas dans une chambre retirée.
             'rooms' => Room::rooms()->inService()->orderBy('number')->pluck('floor', 'number'),
+            // Affichage seulement : dire « hors service » plutôt que « inexistante » (l'envoi reste refusé).
+            'outOfServiceRooms' => Room::rooms()->where('status', 'hors_service')->pluck('number'),
             'commonAreas' => Room::commonAreas()->inService()->get()
                 ->map(fn (Room $r) => ['id' => $r->id, 'label' => $r->label])->sortBy('label')->values(),
             'categories' => IssueCategory::cases(),
@@ -39,6 +46,10 @@ class QuickReportController extends Controller
             // Pré-rempli par ?chambre=214 (QR code collé dans la chambre).
             'prefillRoom' => $request->string('chambre')->toString(),
             'maxSeconds' => StoreQuickReportRequest::MAX_AUDIO_SECONDS,
+            // Housekeeping : signalements déjà ouverts, pour avertir d'un doublon pendant la saisie.
+            'openReports' => $request->user()->role === UserRole::Housekeeping
+                ? Housekeeping::openReportsByPlace($request->user())
+                : [],
         ]);
     }
 
@@ -88,23 +99,98 @@ class QuickReportController extends Controller
         }
 
         $sent = route('quick-reports.sent', $workOrder);
+        // Housekeeping : toast de confirmation sur la page suivante (sauf envoi différé
+        // de la boîte d'envoi : la page en cours affiche déjà son propre toast).
+        if ($request->user()->role === UserRole::Housekeeping && ! $request->hasHeader('X-HK-Outbox')) {
+            session()->flash('success', 'Signalement envoyé à la maintenance.');
+        }
 
         return $request->expectsJson()
             ? response()->json(['redirect' => $sent], 201)
             : redirect($sent);
     }
 
-    public function sent(WorkOrder $workOrder): View
+    public function sent(Request $request, WorkOrder $workOrder): View
     {
         $this->authorize('view', $workOrder);
 
-        return view('quick-reports.sent', ['workOrder' => $workOrder->load('room', 'priority')]);
+        return view($this->screen($request, 'sent'), ['workOrder' => $workOrder->load('room', 'priority')]);
     }
 
-    private function attach(WorkOrder $workOrder, UploadedFile $file, string $name, string $mime): void
+    /**
+     * Housekeeping : l'agent retire un signalement fait par erreur (WorkOrderPolicy::withdraw).
+     * Rien n'est supprimé : l'OT passe « annulé » et l'historique garde qui, quand et pourquoi.
+     */
+    public function withdraw(Request $request, WorkOrder $workOrder): RedirectResponse
+    {
+        $this->authorize('withdraw', $workOrder);
+        $data = $request->validate([
+            'reason' => ['required', Rule::in(array_keys(Housekeeping::WITHDRAW_REASONS))],
+            'detail' => ['nullable', 'string', 'max:300'],
+        ], ['reason.required' => 'Choisissez pourquoi vous retirez ce signalement.']);
+
+        $reason = Housekeeping::WITHDRAW_REASONS[$data['reason']].(filled($data['detail'] ?? null) ? ' — '.trim($data['detail']) : '');
+
+        $workOrder->statusHistories()->create([
+            'changed_by' => $request->user()->id,
+            'old_status' => $workOrder->status,
+            'new_status' => 'annule',
+            'note' => "Retiré par le demandeur : {$reason}",
+        ]);
+        $workOrder->update(['status' => 'annule']);
+
+        ActivityLog::record('work_order.withdrawn', "Signalement {$workOrder->code()} retiré par son auteur : {$reason}", $workOrder);
+
+        return redirect()->route('work-orders.show', $workOrder)->with('success', 'Signalement retiré. Il reste visible dans votre historique.');
+    }
+
+    /**
+     * Housekeeping : précision ajoutée à un signalement en cours (WorkOrderPolicy::complement).
+     * Le texte devient un commentaire, le vocal et la photo des pièces jointes : la
+     * maintenance les voit dans l'onglet « Échanges » de sa fiche.
+     */
+    public function complement(ComplementQuickReportRequest $request, WorkOrder $workOrder): JsonResponse|RedirectResponse
+    {
+        $this->authorize('complement', $workOrder);
+        $user = $request->user();
+        $note = trim((string) $request->validated('note'));
+        $audio = $request->file('audio');
+        $photo = $request->file('photo');
+
+        $workOrder->comments()->create([
+            'user_id' => $user->id,
+            'content' => 'Précision du demandeur : '.($note !== '' ? $note : collect([$audio ? 'message vocal' : null, $photo ? 'photo' : null])->filter()->join(' et ').' ajouté(s).'),
+        ]);
+
+        $stamp = now()->format('His');
+        if ($audio) {
+            $mime = 'audio/'.Str::after(Str::before($audio->getMimeType() ?? 'audio/webm', ';'), '/');
+            $this->attach($workOrder, $audio, "precision-vocale-{$stamp}.".($audio->extension() ?: 'webm'), $mime, $user->id);
+        }
+        if ($photo) {
+            $this->attach($workOrder, $photo, "precision-photo-{$stamp}.".($photo->extension() ?: 'jpg'), $photo->getMimeType() ?? 'image/jpeg', $user->id);
+        }
+
+        session()->flash('success', 'Précision ajoutée au signalement.');
+        $back = route('work-orders.show', $workOrder);
+
+        return $request->expectsJson()
+            ? response()->json(['redirect' => $back], 201)
+            : redirect($back);
+    }
+
+    /** Housekeeping : parcours en 4 étapes ; les autres services gardent l'écran d'une page. */
+    private function screen(Request $request, string $name): string
+    {
+        return $request->user()->role === UserRole::Housekeeping
+            ? "quick-reports.{$name}"
+            : "quick-reports.classic-{$name}";
+    }
+
+    private function attach(WorkOrder $workOrder, UploadedFile $file, string $name, string $mime, ?int $uploader = null): void
     {
         $workOrder->attachments()->create([
-            'uploaded_by' => $workOrder->reported_by,
+            'uploaded_by' => $uploader ?? $workOrder->reported_by,
             'file_path' => $file->store('work-orders/'.$workOrder->id, FileDownloadController::DISK),
             'original_name' => $name,
             'mime_type' => $mime,
