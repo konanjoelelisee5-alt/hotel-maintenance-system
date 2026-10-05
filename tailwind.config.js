@@ -60,6 +60,29 @@ export default {
                 line: '#E2DCD0',
                 'line-soft': '#F3EFE6',
                 success: '#123A2C',
+                // Housekeeping (maquette « Président Housekeeping ») : fond crème, cartes
+                // bordées de sable, trois niveaux de texte et les 3 statuts regroupés.
+                'gold-light': '#E4C58F',
+                cream: '#F4F1EB',
+                sand: '#E8E2D6',
+                ink: { DEFAULT: '#0E2136', soft: '#5C6472', label: '#8B909A' },
+                hk: {
+                    pending: '#B3261E', 'pending-bg': '#FBE7E5',
+                    progress: '#9A5F0C', 'progress-bg': '#FBEFD9',
+                    done: '#1E7A55', 'done-bg': '#E3F1EA',
+                },
+            },
+            borderRadius: {
+                card: '20px',
+                cta: '16px',
+            },
+            // Écrans Housekeeping : téléphone < 700, tablette (rail) ≥ 700, liste + fiche
+            // côte à côte ≥ 1000, ordinateur (sidebar) ≥ 1200. Utilisés seulement par les
+            // vues HK : ils s'ajoutent après lg/xl sans changer les autres écrans.
+            screens: {
+                tab: '700px',
+                split: '1000px',
+                desk: '1200px',
             },
         },
     },
