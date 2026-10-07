@@ -53,6 +53,24 @@ class PurchasingScreensTest extends TestCase
         $this->assertSame('receptionnee', $order->fresh()->status);
     }
 
+    public function test_numbering_skips_numbers_already_taken(): void
+    {
+        // Bons créés sans le compteur (démonstration, import) : le compteur est resté en
+        // arrière. La création suivante prenait un numéro déjà utilisé et échouait.
+        $year = now()->year;
+        foreach ([1, 2, 3, 11] as $n) {
+            PurchaseOrder::factory()->create(['number' => sprintf('BC-%d-%04d', $year, $n)]);
+        }
+        \Illuminate\Support\Facades\DB::table('number_sequences')->updateOrInsert(['sequence_key' => "purchase_order_{$year}"], ['value' => 2]);
+
+        $this->actingAs($this->manager)->post(route('purchase-orders.store'), [
+            'supplier_id' => $this->supplier->id, 'order_date' => now()->toDateString(),
+            'items' => [['description' => 'Joint', 'quantity' => 1, 'unit_price' => 500]],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('purchase_orders', ['number' => sprintf('BC-%d-0012', $year)]);
+    }
+
     public function test_reception_ignores_lines_of_another_order(): void
     {
         $this->actingAs($this->manager)->post(route('purchase-orders.store'), [

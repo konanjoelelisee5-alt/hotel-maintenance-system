@@ -82,6 +82,18 @@ class PurchaseOrder extends Model
         $year = now()->year;
         $key = "purchase_order_{$year}";
 
+        // Le compteur ne repart jamais sous un numéro déjà pris : des bons créés sans lui (import,
+        // données de démonstration, restauration de sauvegarde) donnaient sinon un doublon refusé
+        // par la base à la création (« Duplicate entry BC-2026-0011 »).
+        $prefix = "BC-{$year}-";
+        $highest = (int) static::where('number', 'like', $prefix.'%')->pluck('number')
+            ->map(fn (string $number) => (int) substr($number, strlen($prefix)))->max();
+        if ($highest > 0) {
+            DB::table('number_sequences')->insertOrIgnore(['sequence_key' => $key, 'value' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('number_sequences')->where('sequence_key', $key)->where('value', '<', $highest)
+                ->update(['value' => $highest, 'updated_at' => now()]);
+        }
+
         // INSERT ... ON DUPLICATE KEY UPDATE est une opération ATOMIQUE en MySQL :
         // aucune autre requête ne peut s'intercaler entre la lecture et l'écriture
         // de cette valeur, contrairement à un simple "SELECT puis UPDATE" séparés.
