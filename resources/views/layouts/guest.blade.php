@@ -65,7 +65,7 @@
                         </h1>
                     </div>
 
-                    <div class="bg-[#FAF8F4] rounded-2xl shadow-sm border border-line p-6 sm:p-8">
+                    <div class="bg-paper rounded-2xl shadow-sm border border-line p-6 sm:p-8">
                         {{ $slot }}
                     </div>
 

@@ -25,20 +25,20 @@
             <div class="grid grid-cols-3 gap-4">
                 @foreach ([['OT ouverts', $stats['open']], ['OT sur 90 jours', $stats['last90']], ['OT au total', $stats['total']]] as [$label, $value])
                     <div class="bg-white p-4 shadow-sm rounded-lg">
-                        <div class="text-xs text-gray-500 uppercase">{{ $label }}</div>
-                        <div class="text-2xl font-semibold text-gray-900 mt-1">{{ $value }}</div>
+                        <div class="text-xs text-ink-muted uppercase">{{ $label }}</div>
+                        <div class="text-2xl font-semibold text-navy mt-1">{{ $value }}</div>
                     </div>
                 @endforeach
             </div>
 
             @if ($equipment->maintenancePlans->isNotEmpty())
                 <div class="bg-white p-6 shadow-sm rounded-lg">
-                    <h3 class="font-semibold text-gray-800 mb-3">Maintenance préventive</h3>
-                    <ul class="divide-y divide-gray-100 text-sm">
+                    <h3 class="font-semibold text-ink-deep mb-3">Maintenance préventive</h3>
+                    <ul class="divide-y divide-line-soft text-sm">
                         @foreach ($equipment->maintenancePlans as $plan)
                             <li class="py-2 flex justify-between gap-3">
-                                <a href="{{ route('maintenance-plans.show', $plan) }}" class="text-gray-900 hover:underline">{{ $plan->name }}</a>
-                                <span class="text-gray-500">
+                                <a href="{{ route('maintenance-plans.show', $plan) }}" class="text-navy hover:underline">{{ $plan->name }}</a>
+                                <span class="text-ink-muted">
                                     {{ $plan->is_active ? 'Prochaine échéance : '.($plan->next_due_at?->format('d/m/Y') ?? '—') : 'Plan inactif' }}
                                 </span>
                             </li>

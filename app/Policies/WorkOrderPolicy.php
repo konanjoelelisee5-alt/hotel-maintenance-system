@@ -24,7 +24,8 @@ class WorkOrderPolicy
     {
         return match ($user->role?->value) {
             'admin', 'manager' => true,
-            'technicien' => $workOrder->assigned_to === $user->id,
+            // Ses OT, et les pannes qu'il a lui-même signalées en passant.
+            'technicien' => $workOrder->assigned_to === $user->id || $workOrder->reported_by === $user->id,
             'housekeeping', 'reception' => $workOrder->reported_by === $user->id
                 || ($user->isDepartmentHead() && $workOrder->reporter?->role === $user->role),
             default => false,
@@ -142,6 +143,19 @@ class WorkOrderPolicy
             && $workOrder->status !== 'ferme';
     }
 
+    /** Le technicien affecté dit « J'ai vu, je m'en occupe » (une fois par affectation). */
+    public function acknowledge(User $user, WorkOrder $workOrder): bool
+    {
+        return $this->perform($user, $workOrder) && $workOrder->awaitsAcknowledgement();
+    }
+
+    /** Demander au manager une pièce absente du magasin : l'intervenant, OT pas encore réparé. */
+    public function requestPart(User $user, WorkOrder $workOrder): bool
+    {
+        return $this->perform($user, $workOrder)
+            && in_array($workOrder->status, ['ouvert', 'en_cours', 'en_attente', 'rejete'], true);
+    }
+
     /**
      * Un admin ou un manager (ex. le chef de maintenance, un soir sans technicien)
      * prend l'OT pour le réparer lui-même : son nom apparaîtra honnêtement partout.
@@ -178,13 +192,14 @@ class WorkOrderPolicy
     }
 
     /**
-     * Housekeeping : l'agent retire son propre signalement fait par erreur (mauvaise
-     * chambre, doublon), tant que personne ne s'en occupe et peu après l'envoi.
-     * L'OT n'est pas supprimé : il passe « annulé », avec le motif dans l'historique.
+     * Services demandeurs (housekeeping, réception) : l'auteur retire son propre
+     * signalement fait par erreur (mauvaise chambre, doublon), tant que personne ne
+     * s'en occupe et peu après l'envoi. L'OT n'est pas supprimé : il passe « annulé »,
+     * avec le motif dans l'historique.
      */
     public function withdraw(User $user, WorkOrder $workOrder): bool
     {
-        return $user->role?->value === 'housekeeping'
+        return in_array($user->role?->value, ['housekeeping', 'reception'], true)
             && $workOrder->reported_by === $user->id
             && $workOrder->status === 'ouvert'
             && $workOrder->assigned_to === null
@@ -192,12 +207,13 @@ class WorkOrderPolicy
     }
 
     /**
-     * Housekeeping : ajouter une précision (texte, message vocal, photo) à un signalement
-     * pas encore réparé. On ajoute à la suite, on ne modifie rien de ce qui existe.
+     * Services demandeurs (housekeeping, réception) : ajouter une précision (texte,
+     * message vocal, photo) à un signalement pas encore réparé — le client rappelle,
+     * la fuite a empiré. On ajoute à la suite, on ne modifie rien de ce qui existe.
      */
     public function complement(User $user, WorkOrder $workOrder): bool
     {
-        return $user->role?->value === 'housekeeping'
+        return in_array($user->role?->value, ['housekeeping', 'reception'], true)
             && $this->view($user, $workOrder)
             && in_array($workOrder->status, ['ouvert', 'en_cours', 'en_attente', 'rejete'], true);
     }

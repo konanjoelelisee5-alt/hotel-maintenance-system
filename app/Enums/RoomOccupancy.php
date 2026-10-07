@@ -31,16 +31,6 @@ enum RoomOccupancy: string
         };
     }
 
-    public function emoji(): string
-    {
-        return match ($this) {
-            self::Libre => '🟢',
-            self::ClientAbsent => '🧳',
-            self::ClientPresent => '🛏️',
-            self::Depart => '🚪',
-        };
-    }
-
     /** Une chambre vendue ce soir : on ne la bloque pas, on répare ou la réception déloge. */
     public function isOccupied(): bool
     {

@@ -29,48 +29,67 @@
 @endphp
 
 <section class="bg-white border border-line rounded-xl overflow-hidden">
-    <div class="px-5 lg:px-6 pt-5 pb-4 flex flex-col gap-3">
+    <div class="px-5 tab:px-6 pt-5 pb-4 flex flex-col gap-3">
         <div class="flex items-center gap-2 flex-wrap">
-            <span class="font-mono text-[12px] text-[#4A4639] px-2 py-0.5 rounded-md bg-paper border border-line">{{ $workOrder->code() }}</span>
+            <span class="font-mono text-[12px] text-ink-body px-2 py-0.5 rounded-md bg-paper border border-line">{{ $workOrder->code() }}</span>
             <x-work-order-status-badge :status="$status" />
             <x-work-order-priority-badge :priority="$workOrder->priority" />
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-line-soft text-[#6C6658]">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-line-soft text-ink-muted">
                 <x-nav-icon name="tag" class="w-3.5 h-3.5" /> {{ $workOrder->type->label }}
             </span>
             @if ($workOrder->maintenance_plan_id)
                 @if ($showPlanLink)
                     <a href="{{ route('maintenance-plans.show', $workOrder->maintenance_plan_id) }}"
-                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#EAF0F6] text-blue hover:underline">
+                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-info-bg text-blue hover:underline">
                         <x-nav-icon name="status" class="w-3.5 h-3.5" /> Maintenance préventive
                     </a>
                 @else
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#EAF0F6] text-blue">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-info-bg text-blue">
                         <x-nav-icon name="status" class="w-3.5 h-3.5" /> Maintenance préventive
                     </span>
                 @endif
             @endif
             <span class="w-full sm:w-auto sm:ml-auto text-[12px] text-ink-grey">
-                Signalé par <span class="font-semibold text-[#4A4639]">{{ $workOrder->reporter?->name ?? '—' }}</span>
+                Signalé par <span class="font-semibold text-ink-body">{{ $workOrder->reporter?->name ?? '—' }}</span>
                 le {{ $workOrder->created_at->format('d/m/Y à H\hi') }}
             </span>
         </div>
 
         @if ($workOrder->description)
-            <p class="m-0 text-[14.5px] leading-relaxed text-[#3d3a33] whitespace-pre-line">{{ $workOrder->description }}</p>
+            <p class="m-0 text-[14.5px] leading-relaxed text-ink-strong whitespace-pre-line">{{ $workOrder->description }}</p>
         @else
             <p class="m-0 text-[13.5px] italic text-ink-grey">Aucune description fournie.</p>
+        @endif
+
+        {{-- Situation du client, à lire avant d'entrer dans la chambre (agent au
+             signalement, puis réception). Couleur + icône + texte, pas la couleur seule. --}}
+        @if ($guest = $workOrder->guestNotice())
+            <div id="guest-notice" class="flex gap-3 px-3.5 py-3 rounded-[10px] {{ \App\Support\Swatch::soft($guest['tone']) }}">
+                <x-nav-icon :name="$guest['tone'] === 'green' ? 'check' : ($guest['tone'] === 'amber' ? 'alert' : 'user')"
+                            class="w-5 h-5 flex-shrink-0 mt-0.5 {{ \App\Support\Swatch::text($guest['tone']) }}" />
+                <div class="min-w-0">
+                    <p class="m-0 text-[14.5px] font-semibold text-ink-deep">{{ $guest['title'] }}</p>
+                    <p class="m-0 text-[13.5px] text-ink-strong">{{ $guest['detail'] }}</p>
+                    @if ($guest['note'])
+                        <p class="m-0 mt-1 text-[12.5px] text-ink-muted">
+                            {{ $guest['note']->content }}
+                            <span class="whitespace-nowrap">· {{ $guest['note']->created_at->format('d/m H\hi') }}</span>
+                        </p>
+                    @endif
+                </div>
+            </div>
         @endif
     </div>
 
     {{-- Repères clés --}}
-    <dl class="m-0 grid grid-cols-2 lg:grid-cols-4 gap-px bg-line-soft border-t border-line-soft">
+    <dl class="m-0 grid grid-cols-2 tab:grid-cols-4 gap-px bg-line-soft border-t border-line-soft">
         <div class="bg-white px-5 py-3.5 flex gap-3 min-w-0">
             <x-nav-icon name="pin" class="w-[18px] h-[18px] text-gold mt-0.5 flex-shrink-0" />
             <div class="min-w-0">
                 <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-grey">Lieu</dt>
                 <dd class="m-0 text-[14px] font-semibold text-navy truncate">{{ $workOrder->room?->label ?? '—' }}</dd>
                 @if ($workOrder->equipment)
-                    <dd class="m-0 text-[12px] text-[#6C6658] truncate">{{ $workOrder->equipment->name }}</dd>
+                    <dd class="m-0 text-[12px] text-ink-muted truncate">{{ $workOrder->equipment->name }}</dd>
                 @endif
             </div>
         </div>
@@ -85,7 +104,13 @@
                         <span class="text-[14px] font-semibold text-navy truncate">{{ $assignee->name }}</span>
                     </dd>
                     @if ($workOrder->scheduled_at)
-                        <dd class="m-0 text-[12px] text-[#6C6658]">Prévu le {{ $workOrder->scheduled_at->format('d/m à H\hi') }}</dd>
+                        <dd class="m-0 text-[12px] text-ink-muted">Prévu le {{ $workOrder->scheduled_at->format('d/m à H\hi') }}</dd>
+                    @endif
+                    {{-- L'intervenant a son bandeau « Nouvel ordre pour vous » juste dessous. --}}
+                    @if ($workOrder->awaitsAcknowledgement() && $assignee->id !== auth()->id())
+                        <dd class="m-0 text-[12px] font-semibold text-amber">Pas encore vu</dd>
+                    @elseif ($workOrder->acknowledged_at && ! $finished)
+                        <dd class="m-0 text-[12px] text-ink-muted">Vu le {{ $workOrder->acknowledged_at->format('d/m à H\hi') }}</dd>
                     @endif
                 @else
                     <dd class="m-0 text-[14px] font-semibold text-amber">Non affecté</dd>
@@ -99,7 +124,7 @@
                 <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-grey">Échéance</dt>
                 <dd class="m-0 text-[14px] font-semibold {{ $late ? 'text-red' : 'text-navy' }}">{{ $workOrder->due_date?->format('d/m/Y à H\hi') ?? 'Non fixée' }}</dd>
                 @if ($workOrder->due_date && ! $finished)
-                    <dd class="m-0 text-[12px] {{ $late ? 'text-red font-medium' : 'text-[#6C6658]' }}">
+                    <dd class="m-0 text-[12px] {{ $late ? 'text-red font-medium' : 'text-ink-muted' }}">
                         {{ $late ? 'En retard de ' : 'Dans ' }}{{ $workOrder->due_date->locale('fr')->diffForHumans(null, true) }}
                     </dd>
                 @endif
@@ -125,9 +150,9 @@
     </dl>
 
     {{-- Frise d'avancement --}}
-    <div class="border-t border-line-soft bg-paper/50 px-5 lg:px-6 py-4">
+    <div class="border-t border-line-soft bg-paper/50 px-5 tab:px-6 py-4">
         @if ($status === 'annule')
-            <div class="flex items-center gap-2.5 text-[13px] text-[#6C6658]">
+            <div class="flex items-center gap-2.5 text-[13px] text-ink-muted">
                 <x-nav-icon name="x" class="w-[18px] h-[18px] text-ink-grey" />
                 <span><strong class="text-navy">OT annulé.</strong> Il reste consultable ; le motif figure dans l'historique.</span>
             </div>

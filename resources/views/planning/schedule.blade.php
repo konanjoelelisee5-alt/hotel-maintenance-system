@@ -9,7 +9,7 @@
 
                     <div>
                         <x-input-label for="assigned_to" value="Technicien" />
-                        <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                        <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-line rounded-md shadow-sm" required>
                             <option value="">-- Sélectionner --</option>
                             @foreach ($technicians as $technician)
                                 <option value="{{ $technician->id }}" @selected(old('assigned_to', $workOrder->assigned_to) == $technician->id)>
@@ -38,10 +38,10 @@
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('work-orders.show', $workOrder) }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">
+                        <a href="{{ route('work-orders.show', $workOrder) }}" class="btn btn-ghost">
                             Annuler
                         </a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
+                        <button type="submit" class="btn btn-primary">
                             Planifier
                         </button>
                     </div>

@@ -35,9 +35,9 @@ class GuestRoomAtRiskNotification extends Notification
         $place = $this->workOrder->room?->label ?? 'Chambre';
 
         $message = match ($this->reason) {
-            self::DEADLINE => "⚠️ {$place} : client attendu vers ".$this->workOrder->due_date?->format('H\hi')
+            self::DEADLINE => "{$place} : client attendu vers ".$this->workOrder->due_date?->format('H\hi')
                 ." et la réparation n'est pas terminée ({$this->workOrder->title}). Prévoir un délogement ?",
-            self::GUEST_INSIDE => "⚠️ {$place} : panne urgente avec le client dans la chambre ({$this->workOrder->title}).",
+            self::GUEST_INSIDE => "{$place} : panne urgente avec le client dans la chambre ({$this->workOrder->title}).",
         };
 
         return [

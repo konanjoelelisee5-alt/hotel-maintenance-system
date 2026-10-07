@@ -13,7 +13,7 @@
                             <label class="flex items-center gap-2 text-sm">
                                 <input type="checkbox" name="skills[]" value="{{ $skill->id }}"
                                     @checked($technician->skills->contains($skill->id))
-                                    class="rounded border-gray-300">
+                                    class="rounded border-line">
                                 {{ $skill->name }}
                             </label>
                         @endforeach
@@ -22,10 +22,10 @@
                     <x-input-error :messages="$errors->get('skills')" class="mt-2" />
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('planning.technician', $technician) }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">
+                        <a href="{{ route('planning.technician', $technician) }}" class="btn btn-ghost">
                             Annuler
                         </a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
+                        <button type="submit" class="btn btn-primary">
                             Enregistrer
                         </button>
                     </div>

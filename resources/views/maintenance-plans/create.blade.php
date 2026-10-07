@@ -7,8 +7,8 @@
                     @include('maintenance-plans._fields')
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('maintenance-plans.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Créer le plan</button>
+                        <a href="{{ route('maintenance-plans.index') }}" class="btn btn-ghost">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Créer le plan</button>
                     </div>
                 </form>
             </div>

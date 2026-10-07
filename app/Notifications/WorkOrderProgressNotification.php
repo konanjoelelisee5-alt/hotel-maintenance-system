@@ -36,10 +36,12 @@ class WorkOrderProgressNotification extends Notification
         $technician = $this->workOrder->assignee?->name ?? 'un technicien';
 
         $message = match ($this->step) {
-            self::ASSIGNED => "🔧 {$place} : {$technician} va s'en occuper"
+            self::ASSIGNED => "{$place} : {$technician} va s'en occuper"
                 .($this->workOrder->scheduled_at ? ', passage prévu le '.$this->workOrder->scheduled_at->format('d/m à H\hi') : '')
                 .'.',
-            self::RESOLVED => "✅ {$place} : réparé par {$technician}. Vous pouvez vérifier.",
+            // Réclamation d'un client (type « Demande client ») : la réception doit le rappeler.
+            self::RESOLVED => "{$place} : réparé par {$technician}. "
+                .($this->workOrder->loadMissing('type')->type?->code === 'demande_client' ? 'Prévenez le client, puis confirmez.' : 'Vous pouvez vérifier.'),
             self::CANCELLED => $this->cancelledMessage($place),
         };
 
@@ -57,7 +59,7 @@ class WorkOrderProgressNotification extends Notification
         $history = $this->workOrder->statusHistories()->where('new_status', 'annule')->with('changedBy')->latest('id')->first();
         $reason = $history?->note ? trim(preg_replace('/^Annulé\s*:\s*/u', '', $history->note)) : null;
 
-        return "❌ {$place} : signalement annulé"
+        return "{$place} : signalement annulé"
             .($history?->changedBy ? " par {$history->changedBy->name}" : '')
             .($reason ? ". Motif : {$reason}" : '.');
     }

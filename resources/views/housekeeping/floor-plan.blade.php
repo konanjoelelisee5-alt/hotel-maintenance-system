@@ -4,8 +4,8 @@
      Données : HousekeepingSupervisionController::floorPlan(). --}}
 @php
     $states = [
-        'alert' => ['label' => 'Panne urgente ou en retard', 'tile' => 'bg-[#FDECEA] border-red/40 text-red', 'dot' => 'bg-red'],
-        'issue' => ['label' => 'Panne en cours', 'tile' => 'bg-[#FBF1DF] border-amber/40 text-[#7A5A16]', 'dot' => 'bg-amber'],
+        'alert' => ['label' => 'Panne urgente ou en retard', 'tile' => 'bg-danger-bg border-red/40 text-red', 'dot' => 'bg-red'],
+        'issue' => ['label' => 'Panne en cours', 'tile' => 'bg-warn-bg border-amber/40 text-warn-ink', 'dot' => 'bg-amber'],
         'blocked' => ['label' => 'Bloquée à la vente', 'tile' => 'bg-navy border-navy text-white', 'dot' => 'bg-navy'],
         'out' => ['label' => 'Hors service', 'tile' => 'bg-[#E4DFD4] border-[#D6D0C4] text-[#8A8578]', 'dot' => 'bg-[#B9B3A6]'],
         'ok' => ['label' => 'Rien à signaler', 'tile' => 'bg-white border-line text-navy', 'dot' => 'bg-white border border-line'],
@@ -41,7 +41,7 @@
                         </button>
                     @endforeach
                 </div>
-                <ul class="m-0 p-0 list-none flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-[#6C6658]">
+                <ul class="m-0 p-0 list-none flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-ink-muted">
                     @foreach ($states as $s)
                         <li class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-[4px] {{ $s['dot'] }}"></span>{{ $s['label'] }}</li>
                     @endforeach
@@ -56,7 +56,7 @@
                         <h2 class="m-0 text-[15px] font-semibold text-navy">{{ $floor }}</h2>
                         <span class="text-[12px] text-ink-grey">
                             {{ $tiles->count() }} chambre(s)
-                            @if ($n = $tiles->whereIn('state', ['alert', 'issue'])->count()) · <span class="text-[#7A5A16] font-semibold">{{ $n }} avec panne</span>@endif
+                            @if ($n = $tiles->whereIn('state', ['alert', 'issue'])->count()) · <span class="text-warn-ink font-semibold">{{ $n }} avec panne</span>@endif
                         </span>
                     </header>
                     <div class="grid grid-cols-4 min-[420px]:grid-cols-5 tab:grid-cols-7 split:grid-cols-6 desk:grid-cols-8 gap-2 p-3">
@@ -96,7 +96,7 @@
                     <header class="flex items-center gap-3 px-5 py-4 border-b border-line-soft">
                         <div class="flex-1 min-w-0">
                             <h2 class="m-0 text-[17px] font-semibold text-navy">Chambre <span class="font-mono" x-text="room.number"></span></h2>
-                            <p class="m-0 text-[12.5px] text-[#6C6658]" x-text="room.floor + ' · ' + room.statusLabel + (room.block ? ' · ' + room.block : '')"></p>
+                            <p class="m-0 text-[12.5px] text-ink-muted" x-text="room.floor + ' · ' + room.statusLabel + (room.block ? ' · ' + room.block : '')"></p>
                         </div>
                         <button type="button" @click="room = null" class="w-9 h-9 rounded-lg flex items-center justify-center text-ink-grey hover:bg-paper" aria-label="Fermer"><x-hk.icon name="x" :size="16" /></button>
                     </header>
@@ -107,17 +107,17 @@
                             <a :href="o.url" class="flex items-center gap-2 px-3 py-2.5 rounded-[10px] border border-line hover:bg-paper">
                                 <span class="flex-1 min-w-0">
                                     <span class="block text-[13.5px] font-semibold text-navy truncate" x-text="o.label"></span>
-                                    <span class="block text-[12px] text-[#6C6658]"><span class="font-mono" x-text="o.code"></span> · <span x-text="o.status"></span></span>
+                                    <span class="block text-[12px] text-ink-muted"><span class="font-mono" x-text="o.code"></span> · <span x-text="o.status"></span></span>
                                 </span>
                                 <span x-show="o.urgent" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-hk-pending-bg text-hk-pending">Urgent</span>
                                 <span x-show="o.late" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red text-white">En retard</span>
                             </a>
                         </template>
                         <p x-show="! room.orders.length && ! room.others" class="m-0 text-[13px] text-ink-grey">Aucun signalement en cours.</p>
-                        <p x-show="room.others" class="m-0 text-[12.5px] text-[#6C6658]" x-text="room.others + ' OT en cours ouvert(s) par un autre service (maintenance, réception).'"></p>
+                        <p x-show="room.others" class="m-0 text-[12.5px] text-ink-muted" x-text="room.others + ' OT en cours ouvert(s) par un autre service (maintenance, réception).'"></p>
 
                         <h3 class="m-0 mt-1 text-[11.5px] font-semibold uppercase tracking-wide text-ink-grey">Inspection</h3>
-                        <p class="m-0 text-[13px]" :class="room.inspectionDue ? 'text-[#7A5A16] font-medium' : 'text-[#4A4639]'"
+                        <p class="m-0 text-[13px]" :class="room.inspectionDue ? 'text-warn-ink font-medium' : 'text-ink-body'"
                            x-text="room.lastInspection ? 'Dernière inspection ' + room.lastInspection + (room.inspectionDue ? ' : à refaire' : '') : 'Jamais inspectée'"></p>
                     </div>
 

@@ -35,11 +35,11 @@ class RoomBlockNotification extends Notification
         $place = $block->room->label;
 
         $message = match ($this->step) {
-            self::REQUESTED => "🚫 Blocage demandé : {$place} — {$block->reason} (par {$block->requester->name}). À valider.",
-            self::APPROVED => "🚫 {$place} bloquée par {$block->decider?->name} : retirée de la vente jusqu'à la réparation.",
-            self::REFUSED => "↩️ Blocage de {$place} refusé par {$block->decider?->name}"
+            self::REQUESTED => "Blocage demandé : {$place} — {$block->reason} (par {$block->requester->name}). À valider.",
+            self::APPROVED => "{$place} bloquée par {$block->decider?->name} : retirée de la vente jusqu'à la réparation.",
+            self::REFUSED => "Blocage de {$place} refusé par {$block->decider?->name}"
                 .($block->decision_note ? " : {$block->decision_note}" : '.'),
-            self::RELEASED => "🟢 {$place} remise en vente par {$block->releaser?->name}. Pensez à la remettre en service dans Opera.",
+            self::RELEASED => "{$place} remise en vente par {$block->releaser?->name}. Pensez à la remettre en service dans Opera.",
         };
 
         return [

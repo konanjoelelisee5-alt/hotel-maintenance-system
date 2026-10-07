@@ -1,24 +1,41 @@
-<x-app-layout crumb="Exploitation" page-title="Tableau de bord">
-    @php
-        $here = fn (array $params) => route('manager.dashboard', array_merge(['filter' => $filter], $params));
-    @endphp
+{{-- Tableau de bord du manager (répartit le travail le jour), dans layouts.sheet : même
+     structure que l'admin ; à droite, la charge des techniciens et les achats, le stock, le
+     préventif et les pièces demandées à traiter (pas d'outils d'administration). --}}
+@php
+    $here = fn (?string $f) => route('manager.dashboard', ['filter' => $f]);
+    $icons = ['urgent' => 'alert', 'unassigned' => 'user', 'late' => 'clock', 'to_review' => 'shield', 'waiting' => 'pause'];
+    $kpis = collect($pulse)->map(fn (array $p) => [
+        'label' => $p['label'], 'value' => $p['value'], 'icon' => $icons[$p['filter']] ?? 'part',
+        'trend' => $p['sub'], 'tone' => 'muted',
+        'href' => $p['url'] ?? $here($p['filter']), 'active' => $p['filter'] !== null && $filter === $p['filter'],
+    ])->all();
+    $unassigned = collect($pulse)->firstWhere('filter', 'unassigned')['value'] ?? 0;
+    $toReview = collect($pulse)->firstWhere('filter', 'to_review')['value'] ?? 0;
+@endphp
 
-    <x-slot:primaryAction>
-        <x-dashboard-actions />
-    </x-slot:primaryAction>
+<x-app-layout page-title="Tableau de bord">
+    <x-slot:greeting>
+        @include('dashboards.partials.sheet-greeting', ['summary' => $unassigned || $toReview
+            ? trim(($unassigned ? $unassigned.' ordre'.($unassigned > 1 ? 's' : '').' à répartir' : '').($unassigned && $toReview ? ', ' : '').($toReview ? $toReview.' à contrôler' : '')).'.'
+            : 'Tout le travail est réparti.'])
+    </x-slot:greeting>
 
-    @include('dashboards.partials._kpi-band')
+    @include('dashboards.partials.sheet-pilot-search')
 
-    {{-- Même structure que le tableau de bord admin ; la colonne latérale garde
-         les panneaux propres au manager (charge des techniciens, achats et stock). --}}
-    <div class="grid gap-5 items-start min-[1100px]:grid-cols-[minmax(0,1fr)_320px] min-[1500px]:grid-cols-[minmax(0,1fr)_380px]">
-        @include('dashboards.partials._queue-table')
+    @include('dashboards.partials.sheet-kpis')
 
-        <div class="flex flex-col gap-5 min-w-0">
-            @include('dashboards.partials._bars-card', ['panel' => $sideA])
-            @include('dashboards.partials._list-card', ['panel' => $sideB, 'link' => ['Achats →', route('purchase-orders.index', ['tab' => 'open'])]])
-        </div>
-    </div>
+    @include('dashboards.partials.sheet-chart', ['chartTitle' => 'Ordres de travail créés', 'chartUnit' => ['ordre', 'ordres']])
 
-    @include('dashboards.partials._timeline')
+    @include('dashboards.partials.sheet-queue', [
+        'queueTitle' => match ($filter) { 'urgent' => 'Ordres urgents', 'unassigned' => 'Ordres à répartir', 'late' => 'Ordres en retard SLA', 'to_review' => 'Ordres à contrôler', 'waiting' => 'Ordres en attente', default => 'Tous les ordres' },
+    ])
+
+    @include('dashboards.partials.sheet-timeline')
+
+    <x-slot:aside>
+        @include('dashboards.partials.sheet-oncall')
+        @include('dashboards.partials.sheet-panel', ['panel' => $sideA, 'link' => ['Planning', route('planning.index')]])
+        @include('dashboards.partials.sheet-panel', ['panel' => $sideB, 'link' => ['Achats', route('purchase-orders.index', ['tab' => 'open'])]])
+        @include('dashboards.partials.sheet-activity')
+    </x-slot:aside>
 </x-app-layout>

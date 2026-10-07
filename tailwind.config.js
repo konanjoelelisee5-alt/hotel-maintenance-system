@@ -1,6 +1,10 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 
+// Couleurs portées par des variables CSS (resources/css/app.css, :root) : mêmes valeurs
+// partout, sauf sous .theme-reception où l'habillage de la réception les redéfinit.
+const v = (name) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
@@ -24,9 +28,9 @@ export default {
                 // portées, + les clés DEFAULT/dark/light de la nouvelle maquette : Tailwind
                 // fusionne les deux (bg-navy, bg-navy-800 coexistent).
                 navy: {
-                    DEFAULT: '#0E2136',
-                    dark: '#0B1B2C',
-                    light: '#16344F',
+                    DEFAULT: v('navy'),
+                    dark: v('navy-dark'),
+                    light: v('navy-light'),
                     50: '#eef3f8',
                     100: '#d6e2ee',
                     200: '#adc5dd',
@@ -39,26 +43,41 @@ export default {
                     900: '#0a1c2e',
                 },
                 gold: {
-                    DEFAULT: '#B58435',
+                    DEFAULT: v('gold'),
                     50: '#faf7ef',
                     100: '#f2ead2',
                     200: '#e4d3a3',
                     300: '#d6bb74',
-                    400: '#c9a961',
+                    400: v('gold-400'),
                     500: '#b8934a',
                     600: '#96753a',
                     700: '#75592d',
                 },
                 // Nouveaux tokens de la refonte (palette "editorial" navy/gold/canvas).
-                blue: '#26496B',
-                red: '#B3261E',
-                amber: '#B4740F',
-                green: '#1E7A55',
-                'ink-grey': '#8A8578',
-                canvas: '#EDEAE3',
-                paper: '#FAF8F4',
-                line: '#E2DCD0',
-                'line-soft': '#F3EFE6',
+                blue: v('blue'),
+                red: v('red'),
+                amber: v('amber'),
+                green: v('green'),
+                'ink-grey': v('ink-grey'),
+                // Couleurs de la refonte autrefois recopiées en dur dans les vues : un nom par rôle.
+                'ink-deep': v('ink-deep'),     // texte principal
+                'ink-strong': v('ink-strong'),   // texte des boutons secondaires
+                'ink-body': v('ink-body'),     // texte courant secondaire
+                'ink-muted': v('ink-muted'),    // texte d'appoint
+                'ink-faint': v('ink-faint'),    // texte effacé (vide, désactivé)
+                'warn-ink': v('warn-ink'),     // avertissement : texte
+                'warn-bg': v('warn-bg'),      // avertissement : fond
+                'danger-ink': v('danger-ink'),   // erreur : texte
+                'danger-bg': v('danger-bg'),    // erreur : fond
+                'danger-soft': v('danger-soft'),  // erreur : fond d'icône, survol
+                'ok-bg': v('ok-bg'),        // réussite : fond
+                'info-bg': v('info-bg'),      // information : fond
+                'side-muted': v('side-muted'),   // menu marine : texte secondaire
+                'side-soft': v('side-soft'),    // menu marine : texte des entrées
+                canvas: v('canvas'),
+                paper: v('paper'),
+                line: v('line'),
+                'line-soft': v('line-soft'),
                 success: '#123A2C',
                 // Housekeeping (maquette « Président Housekeeping ») : fond crème, cartes
                 // bordées de sable, trois niveaux de texte et les 3 statuts regroupés.

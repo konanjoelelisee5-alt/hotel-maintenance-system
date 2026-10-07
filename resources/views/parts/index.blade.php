@@ -24,7 +24,7 @@
         <div class="flex items-end gap-4 flex-wrap px-4 sm:px-6 pt-5 border-b border-line">
             <div class="flex flex-col gap-0.5 pb-3.5">
                 <h2 class="m-0 text-[17px] font-semibold text-navy">{{ ['all' => 'Pièces au catalogue', 'low' => 'Pièces à commander', 'inactive' => 'Pièces retirées'][$tab] }}</h2>
-                <div class="text-[12.5px] text-[#6C6658]">{{ $parts->total() }} pièce(s) · par nom</div>
+                <div class="text-[12.5px] text-ink-muted">{{ $parts->total() }} pièce(s) · par nom</div>
             </div>
             <x-tabs :items="$tabItems" :active="$tab" label="Filtres" class="sm:ml-auto max-w-full" />
         </div>
@@ -37,7 +37,7 @@
                 <input type="search" name="search" value="{{ $search }}" placeholder="Nom ou référence (SKU)…" class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[13.5px] placeholder:text-ink-grey focus:ring-0">
             </label>
             @if (filled($search))
-                <a href="{{ route('parts.index', array_filter(['tab' => $tab === 'all' ? null : $tab], 'filled')) }}" class="text-[12.5px] font-semibold text-[#6C6658] hover:text-navy">Effacer la recherche</a>
+                <a href="{{ route('parts.index', array_filter(['tab' => $tab === 'all' ? null : $tab], 'filled')) }}" class="text-[12.5px] font-semibold text-ink-muted hover:text-navy">Effacer la recherche</a>
             @endif
         </form>
 
@@ -45,10 +45,10 @@
             <div class="px-5 py-12 flex flex-col items-center gap-2 text-center">
                 <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-grey"><x-nav-icon name="part" class="w-5 h-5" /></div>
                 <div class="text-[14px] font-semibold">{{ $tab === 'low' ? 'Aucune pièce sous le seuil' : 'Aucune pièce ne correspond' }}</div>
-                <div class="text-[12.5px] text-[#6C6658]">{{ $tab === 'low' ? 'Le stock couvre les besoins pour l’instant.' : 'Changez d’onglet ou effacez la recherche.' }}</div>
+                <div class="text-[12.5px] text-ink-muted">{{ $tab === 'low' ? 'Le stock couvre les besoins pour l’instant.' : 'Changez d’onglet ou effacez la recherche.' }}</div>
             </div>
         @else
-            <div class="hidden md:grid grid-cols-[minmax(0,1fr)_220px_120px_90px] gap-4 px-6 py-3 bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-[#6C6658]">
+            <div class="hidden split:grid grid-cols-[minmax(0,1fr)_220px_120px_90px] gap-4 px-6 py-3 bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-ink-muted">
                 <span>Pièce</span><span>Disponible / en stock</span><span class="text-right">Coût unitaire</span><span></span>
             </div>
             <ul class="m-0 p-0 list-none divide-y divide-line-soft">
@@ -57,29 +57,29 @@
                         $low = $part->is_active && $part->is_below_threshold;
                         $fill = $part->quantity_on_hand > 0 ? min(100, round($part->quantity_available / max($part->quantity_on_hand, 1) * 100)) : 0;
                     @endphp
-                    <li class="relative grid gap-2.5 md:grid-cols-[minmax(0,1fr)_220px_120px_90px] md:gap-4 md:items-center px-4 sm:px-6 py-3.5 hover:bg-paper/60 {{ $low ? 'shadow-[inset_3px_0_0_theme(colors.red)]' : '' }}">
+                    <li class="relative grid gap-2.5 split:grid-cols-[minmax(0,1fr)_220px_120px_90px] split:gap-4 split:items-center px-4 sm:px-6 py-3.5 hover:bg-paper/60 {{ $low ? 'bg-danger-bg/30' : '' }}">
                         <div class="min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <a href="{{ route('parts.show', $part) }}" class="text-[14.5px] font-semibold text-navy hover:underline after:absolute after:inset-0 md:after:hidden">{{ $part->name }}</a>
+                                <a href="{{ route('parts.show', $part) }}" class="text-[14.5px] font-semibold text-navy hover:underline after:absolute after:inset-0 split:after:hidden">{{ $part->name }}</a>
                                 @if ($low)
                                     <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ \App\Support\Swatch::pill('red') }}">Sous le seuil ({{ $part->reorder_threshold }})</span>
                                 @endif
                             </div>
-                            <div class="font-mono text-[12px] text-[#6C6658] mt-0.5">{{ $part->sku }}</div>
+                            <div class="font-mono text-[12px] text-ink-muted mt-0.5">{{ $part->sku }}</div>
                         </div>
                         <div>
                             <div class="flex items-baseline justify-between gap-2 text-[13px]">
-                                <span><strong class="text-navy">{{ $part->quantity_available }}</strong> <span class="text-[#6C6658]">/ {{ $part->quantity_on_hand }} {{ $part->unit }}</span></span>
+                                <span><strong class="text-navy">{{ $part->quantity_available }}</strong> <span class="text-ink-muted">/ {{ $part->quantity_on_hand }} {{ $part->unit }}</span></span>
                                 @if ($part->quantity_reserved)
-                                    <span class="text-[11.5px] text-[#6C6658]">{{ $part->quantity_reserved }} réservée(s)</span>
+                                    <span class="text-[11.5px] text-ink-muted">{{ $part->quantity_reserved }} réservée(s)</span>
                                 @endif
                             </div>
                             <div class="mt-1.5 h-[5px] rounded-full bg-line-soft overflow-hidden">
                                 <div class="h-full {{ $low ? 'bg-red' : 'bg-green' }}" style="width: {{ $fill }}%"></div>
                             </div>
                         </div>
-                        <div class="text-[13px] text-[#4A4639] md:text-right font-mono">{{ \App\Support\Money::format($part->unit_cost) }}</div>
-                        <div class="hidden md:block text-right">
+                        <div class="text-[13px] text-ink-body split:text-right font-mono">{{ \App\Support\Money::format($part->unit_cost) }}</div>
+                        <div class="hidden split:block text-right">
                             <a href="{{ route('parts.show', $part) }}" class="btn btn-sm btn-secondary">Ouvrir</a>
                         </div>
                     </li>

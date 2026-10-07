@@ -17,14 +17,14 @@
         <div>
             <x-input-label for="description" value="Description" />
             <textarea id="description" name="description" rows="3"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('description', $workOrder->description) }}</textarea>
+                class="mt-1 block w-full border-line rounded-md shadow-sm">{{ old('description', $workOrder->description) }}</textarea>
             <x-input-error :messages="$errors->get('description')" class="mt-2" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <x-input-label for="type_id" value="Type" />
-                <select id="type_id" name="type_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                <select id="type_id" name="type_id" class="mt-1 block w-full border-line rounded-md shadow-sm" required>
                     @foreach ($types as $type)
                         <option value="{{ $type->id }}" @selected(old('type_id', $workOrder->type_id) == $type->id)>{{ $type->label }}</option>
                     @endforeach
@@ -34,7 +34,7 @@
 
             <div>
                 <x-input-label for="priority_id" value="Priorité" />
-                <select id="priority_id" name="priority_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                <select id="priority_id" name="priority_id" class="mt-1 block w-full border-line rounded-md shadow-sm" required>
                     @foreach ($priorities as $priority)
                         <option value="{{ $priority->id }}" @selected(old('priority_id', $workOrder->priority_id) == $priority->id)>{{ $priority->label }}</option>
                     @endforeach
@@ -45,7 +45,7 @@
 
         {{-- Ce que change une nouvelle priorité / un nouveau type : le délai SLA. --}}
         @unless (in_array($workOrder->status, \App\Models\WorkOrder::FINISHED_STATUSES, true))
-            <div class="flex gap-2.5 px-3.5 py-3 rounded-[10px] bg-[#EAF0F6] text-[12.5px] leading-snug text-navy">
+            <div class="flex gap-2.5 px-3.5 py-3 rounded-[10px] bg-info-bg text-[12.5px] leading-snug text-navy">
                 <x-nav-icon name="shield" class="w-4 h-4 flex-shrink-0 mt-px" />
                 <span>
                     Changer la <strong>priorité</strong> ou le <strong>type</strong> recalcule le délai SLA depuis la création de l'OT.
@@ -68,7 +68,7 @@
 
             <div>
                 <x-input-label for="equipment_id" value="Équipement" />
-                <select id="equipment_id" name="equipment_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                <select id="equipment_id" name="equipment_id" class="mt-1 block w-full border-line rounded-md shadow-sm">
                     <option value="">-- Aucun --</option>
                     @foreach ($equipments as $equipment)
                         <option value="{{ $equipment->id }}" @selected(old('equipment_id', $workOrder->equipment_id) == $equipment->id)>{{ $equipment->label }}</option>
@@ -81,7 +81,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <x-input-label for="assigned_to" value="Technicien" />
-                <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-line rounded-md shadow-sm">
                     <option value="">-- Non affecté --</option>
                     @foreach ($technicians as $technician)
                         <option value="{{ $technician->id }}" @selected(old('assigned_to', $workOrder->assigned_to) == $technician->id)>
@@ -103,8 +103,8 @@
         {{-- Plus de suppression : un OT inutile s'annule depuis le panneau
              « Pilotage » de sa fiche, avec un motif (l'historique est conservé). --}}
         <div class="flex justify-end items-center gap-3">
-            <a href="{{ route('work-orders.show', $workOrder) }}" data-modal-close class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-            <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Enregistrer</button>
+            <a href="{{ route('work-orders.show', $workOrder) }}" data-modal-close class="btn btn-ghost">Annuler</a>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
         </div>
     </form>
 </x-form-page>

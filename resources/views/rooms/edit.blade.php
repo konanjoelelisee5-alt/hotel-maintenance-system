@@ -8,8 +8,8 @@
                     @include('rooms._form')
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('rooms.show', $room) }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Enregistrer</button>
+                        <a href="{{ route('rooms.show', $room) }}" class="btn btn-ghost">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
                     </div>
                 </form>
             </div>

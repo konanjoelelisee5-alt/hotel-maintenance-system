@@ -10,17 +10,17 @@
         @csrf
 
         <div>
-            <label for="email" class="block text-[14px] font-medium text-[#26496B] mb-1.5">Adresse e-mail</label>
+            <label for="email" class="block text-[14px] font-medium text-blue mb-1.5">Adresse e-mail</label>
             <input id="email" type="email" name="email" placeholder="prenom.nom@hotel-president.fr"
-                class="block w-full h-[48px] px-4 rounded-lg border border-line bg-white text-[14px] placeholder:text-[#A09A8C] focus:border-navy focus:ring-navy"
+                class="block w-full h-[48px] px-4 rounded-lg border border-line bg-white text-[14px] placeholder:text-ink-faint focus:border-navy focus:ring-navy"
                 value="{{ old('email') }}" required autofocus autocomplete="username">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <div>
-            <label for="password" class="block text-[14px] font-medium text-[#26496B] mb-1.5">Mot de passe</label>
+            <label for="password" class="block text-[14px] font-medium text-blue mb-1.5">Mot de passe</label>
             <input id="password" type="password" name="password" placeholder="••••••••"
-                class="block w-full h-[48px] px-4 rounded-lg border border-line bg-white text-[14px] placeholder:text-[#A09A8C] focus:border-navy focus:ring-navy"
+                class="block w-full h-[48px] px-4 rounded-lg border border-line bg-white text-[14px] placeholder:text-ink-faint focus:border-navy focus:ring-navy"
                 required autocomplete="current-password">
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -29,7 +29,7 @@
             <label for="remember_me" class="inline-flex items-center min-h-[44px]">
                 <input id="remember_me" type="checkbox" name="remember"
                     class="rounded border-line text-navy focus:ring-navy">
-                <span class="ms-2 text-sm text-[#26496B]">Rester connecté sur cet appareil</span>
+                <span class="ms-2 text-sm text-blue">Rester connecté sur cet appareil</span>
             </label>
         </div>
 
@@ -40,7 +40,7 @@
 
         @if (Route::has('password.request'))
             <p class="text-center">
-                <a class="text-[13px] text-[#26496B] hover:underline" href="{{ route('password.request') }}">
+                <a class="text-[13px] text-blue hover:underline" href="{{ route('password.request') }}">
                     Mot de passe oublié ?
                 </a>
             </p>

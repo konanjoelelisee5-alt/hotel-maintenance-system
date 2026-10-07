@@ -50,10 +50,8 @@ class QuickReportController extends Controller
             // Pré-rempli par ?chambre=214 (QR code collé dans la chambre).
             'prefillRoom' => $request->string('chambre')->toString(),
             'maxSeconds' => StoreQuickReportRequest::MAX_AUDIO_SECONDS,
-            // Housekeeping : signalements déjà ouverts, pour avertir d'un doublon pendant la saisie.
-            'openReports' => $request->user()->role === UserRole::Housekeeping
-                ? Housekeeping::openReportsByPlace($request->user())
-                : [],
+            // Signalements déjà ouverts, pour avertir d'un doublon pendant la saisie.
+            'openReports' => Housekeeping::openReportsByPlace($request->user()),
         ]);
     }
 
@@ -82,7 +80,8 @@ class QuickReportController extends Controller
             'room_occupancy' => $occupancy,
             // Client sorti : la réparation doit être faite avant son retour.
             'due_date' => $occupancy?->repairDeadline(now()),
-            'type_id' => WorkOrderType::where('code', 'maintenance')->value('id'),
+            // Réclamation d'un client : type « Demande client », pour que la réception sache qu'il attend une réponse.
+            'type_id' => WorkOrderType::where('code', $request->boolean('guest_complaint') ? 'demande_client' : 'maintenance')->value('id'),
             'priority_id' => WorkOrderPriority::where('code', $urgent ? 'urgente' : 'moyenne')->value('id'),
         ]);
 
@@ -162,7 +161,7 @@ class QuickReportController extends Controller
                 new HousekeepingReportNotification($workOrder, HousekeepingReportNotification::WITHDRAWN, Housekeeping::WITHDRAW_REASONS[$data['reason']], byPhone: true));
         }
         if ($workOrder->reception_alerted_at !== null) {
-            Notification::send(ReceptionDesk::staff(),
+            Notification::send(ReceptionDesk::staff()->reject(fn (User $u) => $u->id === $actor),
                 new HousekeepingReportNotification($workOrder, HousekeepingReportNotification::WITHDRAWN, Housekeeping::WITHDRAW_REASONS[$data['reason']]));
         }
 
@@ -210,12 +209,15 @@ class QuickReportController extends Controller
             : redirect($back);
     }
 
-    /** Housekeeping : parcours en 4 étapes ; les autres services gardent l'écran d'une page. */
+    /**
+     * Saisie : parcours en 4 étapes pour le Housekeeping (téléphone), écran d'une page
+     * pensé pour l'ordinateur pour les autres (réception au comptoir). Confirmation commune.
+     */
     private function screen(Request $request, string $name): string
     {
-        return $request->user()->role === UserRole::Housekeeping
-            ? "quick-reports.{$name}"
-            : "quick-reports.classic-{$name}";
+        return $name === 'create' && $request->user()->role !== UserRole::Housekeeping
+            ? 'quick-reports.desk-create'
+            : "quick-reports.{$name}";
     }
 
     private function attach(WorkOrder $workOrder, UploadedFile $file, string $name, string $mime, ?int $uploader = null): void

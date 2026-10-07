@@ -24,7 +24,7 @@
 
     @if ($notifications->isEmpty())
         <div class="bg-white border border-line rounded-xl px-5 py-14 flex flex-col items-center gap-2 text-center">
-            <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-[#A09A8C]"><x-nav-icon name="bell" class="w-5 h-5" /></div>
+            <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-faint"><x-nav-icon name="bell" class="w-5 h-5" /></div>
             <div class="text-[14px] font-semibold">Aucune notification</div>
             <div class="text-[12.5px] text-ink-grey">Tu seras prévenu ici des évènements qui te concernent.</div>
         </div>

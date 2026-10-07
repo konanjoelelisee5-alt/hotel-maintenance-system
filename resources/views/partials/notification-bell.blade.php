@@ -1,4 +1,4 @@
-@props(['dark' => false])
+@props(['dark' => false, 'round' => false])
 
 @php
     // Pas de modèle de "niveau" de notification chez nous : une couleur de repli
@@ -14,7 +14,8 @@
 
 <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
     <button @click="open = !open" type="button"
-        class="relative w-[38px] h-[38px] rounded-[9px] border {{ $dark ? 'border-white/20 text-white' : 'border-line bg-white text-navy' }} flex items-center justify-center">
+        aria-label="Notifications{{ $unreadCount > 0 ? ' ('.$unreadCount.' non lues)' : '' }}"
+        class="relative flex items-center justify-center {{ $round ? 'w-11 h-11 rounded-full bg-paper text-ink-deep hover:bg-line transition-colors' : 'w-[38px] h-[38px] rounded-[9px] border '.($dark ? 'border-white/20 text-white' : 'border-line bg-white text-navy') }}">
         <x-nav-icon name="bell" class="w-[18px] h-[18px]" />
         @if ($unreadCount > 0)
             <span class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-white text-[10.5px] font-semibold flex items-center justify-center">{{ $unreadCount }}</span>
@@ -22,7 +23,7 @@
     </button>
 
     <div x-show="open" @click.outside="open = false" x-transition
-        class="absolute right-0 mt-2 w-[320px] max-w-[90vw] bg-white border border-line rounded-xl shadow-lg z-50 p-3 flex flex-col gap-2.5 text-[#14202B]"
+        class="absolute right-0 mt-2 w-[320px] {{ $round ? '!rounded-2xl shadow-[0_24px_48px_-20px_rgba(23,25,31,.35)] border-line-soft' : '' }} max-w-[90vw] bg-white border border-line rounded-xl shadow-lg z-50 p-3 flex flex-col gap-2.5 text-ink-deep"
         style="display: none;">
         <div class="flex items-center justify-between px-1">
             <span class="text-[13.5px] font-semibold">Notifications</span>

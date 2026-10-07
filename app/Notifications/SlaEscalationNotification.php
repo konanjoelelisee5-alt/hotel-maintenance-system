@@ -36,7 +36,7 @@ class SlaEscalationNotification extends Notification
             'work_order_id' => $this->workOrder->id,
             'title' => $this->workOrder->title,
             'rule' => $this->rule->trigger_type_label,
-            'message' => "⚠ SLA — {$this->rule->trigger_type_label} pour l'OT « {$this->workOrder->title} ».",
+            'message' => "Délai SLA : {$this->rule->trigger_type_label} pour l'OT « {$this->workOrder->title} ».",
         ];
     }
 

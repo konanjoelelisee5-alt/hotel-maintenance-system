@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
+    <div class="mb-4 text-sm text-ink-muted">
         Vous allez modifier des comptes ou des accès. Par sécurité, confirmez votre mot de passe
         (il ne vous sera plus demandé pendant 15 minutes).
     </div>
@@ -20,7 +20,7 @@
         </div>
 
         <div class="flex justify-between items-center mt-4">
-            <a href="{{ route('users.index') }}" class="text-sm text-gray-600 hover:underline">Annuler</a>
+            <a href="{{ route('users.index') }}" class="text-sm text-ink-muted hover:underline">Annuler</a>
             <x-primary-button>
                 Confirmer
             </x-primary-button>

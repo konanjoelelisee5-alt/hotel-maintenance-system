@@ -3,6 +3,8 @@
 import Alpine from 'alpinejs';
 import './modal';
 import './confirm';
+// Après modal.js et confirm.js : leurs envois interceptés gardent leur propre affichage.
+import './ui';
 import agenda from './agenda';
 import hkOutbox from './hk-outbox';
 

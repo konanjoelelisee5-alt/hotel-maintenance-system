@@ -22,14 +22,14 @@
 
     {{-- Coordonnées : appeler ou écrire d'un geste depuis le téléphone --}}
     <section class="bg-white border border-line rounded-xl overflow-hidden">
-        <div class="flex items-center gap-3.5 px-5 lg:px-6 py-5">
+        <div class="flex items-center gap-3.5 px-5 tab:px-6 py-5">
             <span class="w-12 h-12 rounded-[12px] bg-paper border border-line flex items-center justify-center text-gold flex-shrink-0"><x-nav-icon name="truck" class="w-6 h-6" /></span>
             <div class="min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                     <h2 class="m-0 text-[18px] font-semibold text-navy">{{ $supplier->name }}</h2>
                     <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ \App\Support\Swatch::pill($supplier->is_active ? 'green' : 'muted') }}">{{ $supplier->is_active ? 'Actif' : 'Désactivé' }}</span>
                 </div>
-                <p class="m-0 mt-0.5 text-[13px] text-[#6C6658]">Contact : {{ $supplier->contact_person ?? 'non renseigné' }}</p>
+                <p class="m-0 mt-0.5 text-[13px] text-ink-muted">Contact : {{ $supplier->contact_person ?? 'non renseigné' }}</p>
             </div>
         </div>
         <dl class="m-0 grid sm:grid-cols-3 border-t border-line-soft divide-y sm:divide-y-0 sm:divide-x divide-line-soft">
@@ -38,11 +38,11 @@
                 ['send', 'E-mail', $supplier->email, $supplier->email ? 'mailto:'.$supplier->email : null],
                 ['pin', 'Adresse', $supplier->address, null],
             ] as [$icon, $label, $value, $url])
-                <div class="flex gap-3 px-5 lg:px-6 py-4 min-w-0">
+                <div class="flex gap-3 px-5 tab:px-6 py-4 min-w-0">
                     <x-nav-icon :name="$icon" class="w-[18px] h-[18px] text-gold flex-shrink-0 mt-0.5" />
                     <div class="min-w-0">
-                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-[#6C6658]">{{ $label }}</dt>
-                        <dd class="m-0 mt-0.5 text-[14px] text-navy {{ $value ? 'font-semibold' : 'text-[#6C6658]' }} break-words">
+                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">{{ $label }}</dt>
+                        <dd class="m-0 mt-0.5 text-[14px] text-navy {{ $value ? 'font-semibold' : 'text-ink-muted' }} break-words">
                             @if ($url)<a href="{{ $url }}" class="hover:underline">{{ $value }}</a>@else{{ $value ?? 'Non renseigné' }}@endif
                         </dd>
                     </div>
@@ -50,7 +50,7 @@
             @endforeach
         </dl>
         @if ($supplier->notes)
-            <p class="m-0 px-5 lg:px-6 py-4 border-t border-line-soft text-[13.5px] text-[#3d3a33] leading-relaxed whitespace-pre-line">{{ $supplier->notes }}</p>
+            <p class="m-0 px-5 tab:px-6 py-4 border-t border-line-soft text-[13.5px] text-ink-strong leading-relaxed whitespace-pre-line">{{ $supplier->notes }}</p>
         @endif
     </section>
 
@@ -66,7 +66,7 @@
             <a href="{{ route('purchase-orders.show', $po) }}" class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 px-5 py-3.5 border-b border-line-soft last:border-b-0 hover:bg-paper/60">
                 <span class="flex-1 min-w-0">
                     <span class="font-mono text-[13px] font-semibold text-navy">{{ $po->number }}</span>
-                    <span class="block text-[12.5px] text-[#6C6658] truncate">du {{ $po->order_date->format('d/m/Y') }}{{ $po->workOrder ? ' · pour '.$po->workOrder->code() : '' }}</span>
+                    <span class="block text-[12.5px] text-ink-muted truncate">du {{ $po->order_date->format('d/m/Y') }}{{ $po->workOrder ? ' · pour '.$po->workOrder->code() : '' }}</span>
                 </span>
                 <span class="flex items-center justify-between sm:justify-end gap-4">
                     <x-purchase-order-status-badge :status="$po->status" />

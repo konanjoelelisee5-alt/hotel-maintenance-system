@@ -21,7 +21,7 @@
 
         <div>
             <x-input-label for="status" value="État" />
-            <select id="status" name="status" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <select id="status" name="status" class="mt-1 block w-full border-line rounded-md shadow-sm">
                 @foreach (\App\Models\Equipment::STATUS_LABELS as $value => $label)
                     <option value="{{ $value }}" @selected(old('status', $equipment->status) === $value)>{{ $label }}</option>
                 @endforeach

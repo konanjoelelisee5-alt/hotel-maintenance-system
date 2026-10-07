@@ -133,7 +133,7 @@ class MobileNavigationTest extends TestCase
             [User::factory()->housekeeping()->create(), 'housekeeping.dashboard', 'Accueil', 'Accueil', 'Accueil'],
             [User::factory()->housekeeping()->create(), 'work-orders.index', 'Mes signalements', 'Signalements', 'Mes signalements'],
             [User::factory()->housekeeping()->create(['is_department_head' => true]), 'work-orders.index', "Signalements de l'équipe", 'Signalements', "Signalements de l'équipe"],
-            [User::factory()->reception()->create(), 'reception.dashboard', 'Recherche chambre', 'Recherche', 'Recherche chambre'],
+            [User::factory()->reception()->create(), 'reception.dashboard', 'Accueil', 'Accueil', 'Accueil'],
             [User::factory()->reception()->create(), 'work-orders.index', 'Demandes', 'Demandes', 'Demandes'],
             [User::factory()->reception()->create(), 'room-blocks.index', 'Chambres bloquées', 'Blocages', 'Chambres bloquées'],
         ];
@@ -143,8 +143,10 @@ class MobileNavigationTest extends TestCase
             $this->assertSame($menu, $menuItems->firstWhere('route', $route)['label'], "menu {$route}");
             $this->assertSame($bottom, collect(\App\Support\Navigation::forBottomNav($user))->firstWhere('route', $route)['label'], "barre {$route}");
 
+            // Le titre de la page (onglet, barre du haut du téléphone) : chaque coquille met en
+            // forme son en-tête à sa façon (la réception accueille par « Bonjour, … »).
             $this->actingAs($user)->get(route($route))
-                ->assertSee('<h1 class="m-0 text-[19px] font-semibold tracking-tight">'.e($title).'</h1>', false);
+                ->assertSee('<title>'.e($title).' · ', false);
         }
     }
 

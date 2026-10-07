@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Models\WorkOrder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -31,7 +32,15 @@ class NotificationController extends Controller
         // Blocages et clients concernés : la réception ne voit pas les OT des autres
         // services, elle est donc renvoyée vers la page des blocages.
         if (($notification->data['target'] ?? null) === 'room-blocks') {
-            return redirect()->route('room-blocks.index');
+            // Client concerné par une panne (alerte « client dans la chambre » ou « client qui
+            // revient ») : la réception arrive directement sur la chambre, pour agir.
+            $room = isset($notification->data['reason']) && $request->user()->role === UserRole::Reception
+                ? WorkOrder::with('room')->find($notification->data['work_order_id'] ?? 0)?->room
+                : null;
+
+            return $room
+                ? redirect()->route('reception.dashboard', ['chambre' => $room->number])
+                : redirect()->route('room-blocks.index');
         }
 
         if (isset($notification->data['work_order_id'])) {

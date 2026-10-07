@@ -45,13 +45,13 @@ class Navigation
                     ['label' => 'Rapports', 'route' => 'reports.index', 'icon' => 'list'],
                 ]),
                 self::section('Stock & achats', [
-                    ['label' => 'Pièces & stock', 'route' => 'parts.index', 'badge' => self::lowStockCount()],
-                    ['label' => 'Bons de commande', 'route' => 'purchase-orders.index'],
-                    ['label' => 'Fournisseurs', 'route' => 'suppliers.index'],
+                    ['label' => 'Pièces & stock', 'route' => 'parts.index', 'badge' => self::lowStockCount(), 'icon' => 'part'],
+                    ['label' => 'Bons de commande', 'route' => 'purchase-orders.index', 'icon' => 'tag'],
+                    ['label' => 'Fournisseurs', 'route' => 'suppliers.index', 'icon' => 'truck'],
                 ], secondary: true),
                 self::section('Patrimoine', [
-                    ['label' => 'Lieux', 'route' => 'rooms.index'],
-                    ['label' => 'Équipements', 'route' => 'equipment.index'],
+                    ['label' => 'Lieux', 'route' => 'rooms.index', 'icon' => 'pin'],
+                    ['label' => 'Équipements', 'route' => 'equipment.index', 'icon' => 'wrench'],
                 ], secondary: true),
                 $isAdmin ? self::section('Administration', [
                     ['label' => 'Paramètres', 'route' => 'settings.index', 'icon' => 'settings', 'match' => self::settingsRoutePatterns()],
@@ -122,6 +122,8 @@ class Navigation
                 'ops' => [
                     ['label' => 'Ma journée', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                     ['label' => 'Mes ordres', 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
+                    // Une autre panne trouvée en intervention : la signaler sur place.
+                    ['label' => 'Signaler une panne', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                     ['label' => 'Mon planning', 'route' => 'planning.technician', 'params' => ['technician' => $user->id], 'icon' => 'calendar'],
                 ],
                 'adminTitle' => '',
@@ -130,7 +132,8 @@ class Navigation
             UserRole::Housekeeping => [
                 'ops' => [
                     // Un nom par page, le même partout (menu, barre du bas, titre).
-                    ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                    // 'match' exact : les outils de la gouvernante sont aussi en « housekeeping.* ».
+                    ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'match' => [$user->dashboardRoute()], 'icon' => 'home'],
                     ['label' => 'Signaler un problème', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                     ['label' => self::housekeepingListLabel($user), 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
                     // La gouvernante demande les blocages et remet les chambres en vente,
@@ -144,10 +147,16 @@ class Navigation
             ],
             UserRole::Reception => [
                 'ops' => [
-                    ['label' => 'Recherche chambre', 'route' => $user->dashboardRoute(), 'icon' => 'search'],
+                    // 'match' exact : les autres pages de la réception sont aussi en « reception.* ».
+                    // Accueil : recherche de chambre, clients concernés, astreinte, activité.
+                    ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'match' => [$user->dashboardRoute()], 'icon' => 'home'],
                     ['label' => 'Demandes', 'route' => 'work-orders.index', 'badge' => $openCount(), 'icon' => 'clipboard'],
                     // Badge = demandes de blocage à valider.
                     ['label' => 'Chambres bloquées', 'route' => 'room-blocks.index', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED), 'icon' => 'building'],
+                    // Responsable de réception : le bilan du mois de son équipe.
+                    ...($user->isDepartmentHead()
+                        ? [['label' => 'Bilan du mois', 'route' => 'reception.monthly-report', 'match' => ['reception.monthly-report'], 'icon' => 'report']]
+                        : []),
                 ],
                 'adminTitle' => '',
                 'admin' => [],
@@ -169,11 +178,12 @@ class Navigation
             UserRole::Technicien => [
                 ['label' => 'Ma journée', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Mes ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
+                ['label' => 'Signaler', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                 ['label' => 'Planning', 'route' => 'planning.technician', 'params' => ['technician' => $user->id], 'icon' => 'calendar'],
                 $profile,
             ],
             UserRole::Housekeeping => [
-                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
+                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'match' => [$user->dashboardRoute()], 'icon' => 'home'],
                 ['label' => 'Signaler', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                 // « Signalements » : version courte de « Mes signalements », la barre est étroite.
                 ['label' => 'Signalements', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
@@ -184,7 +194,7 @@ class Navigation
                 $profile,
             ],
             UserRole::Reception => [
-                ['label' => 'Recherche', 'route' => $user->dashboardRoute(), 'icon' => 'search'],
+                ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'match' => [$user->dashboardRoute()], 'icon' => 'home'],
                 ['label' => 'Demandes', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 // Accepter ou refuser un blocage est la décision clé de la réception.
                 ['label' => 'Blocages', 'route' => 'room-blocks.index', 'icon' => 'building', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED)],
@@ -205,6 +215,23 @@ class Navigation
                 $profile,
             ],
         };
+    }
+
+    /**
+     * Motifs de routes qui allument une entrée (menu, barre du bas, rail) : 'match' si
+     * l'entrée le précise, sinon toutes les pages de sa ressource (users.index → users.*).
+     *
+     * @return array<int, string>
+     */
+    public static function activePatterns(array $item): array
+    {
+        return $item['match'] ?? [Str::beforeLast($item['route'], '.').'.*'];
+    }
+
+    /** L'entrée correspond-elle à la page affichée ? Règle unique pour toutes les navigations. */
+    public static function isActive(array $item): bool
+    {
+        return request()->routeIs(...self::activePatterns($item));
     }
 
     /** Liste des OT côté housekeeping : ceux de l'agent, ou de toute l'équipe pour la gouvernante. */

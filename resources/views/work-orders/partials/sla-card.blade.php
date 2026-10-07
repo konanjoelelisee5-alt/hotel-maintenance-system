@@ -8,7 +8,7 @@
 <x-panel title="Délai SLA" icon="shield">
     <x-slot:badge>
         @if ($slaLate)
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11.5px] font-semibold bg-[#FBE4E1] text-red">Dépassé</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11.5px] font-semibold bg-danger-soft text-red">Dépassé</span>
         @elseif (! $slaClosed && $workOrder->sla_resolution_due_at)
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11.5px] font-semibold {{ \App\Support\Swatch::soft($slaColor) }} {{ \App\Support\Swatch::text($slaColor) }}">{{ $workOrder->slaProgressPercent() }} % consommé</span>
         @endif

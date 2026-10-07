@@ -2,14 +2,14 @@
     {{-- Accueil de l'espace « Paramètres » : ce que l'on configure une fois puis qu'on
          ajuste rarement. Chaque carte ouvre l'écran correspondant. Liste des écrans :
          App\Support\Navigation::settings(). --}}
-    <p class="m-0 -mt-1 text-[13.5px] text-[#6C6658] max-w-2xl leading-relaxed">
+    <p class="m-0 -mt-1 text-[13.5px] text-ink-muted max-w-2xl leading-relaxed">
         Comptes, règles et données de référence de l'application. Ces réglages s'appliquent
         à tout le service ; les changements sensibles sont inscrits au journal d'activité.
     </p>
 
     @foreach ($groups as $group => $items)
         <section class="flex flex-col gap-3" aria-labelledby="settings-{{ \Illuminate\Support\Str::slug($group) }}">
-            <h2 id="settings-{{ \Illuminate\Support\Str::slug($group) }}" class="m-0 text-[12px] font-semibold uppercase tracking-wide text-[#6C6658]">{{ $group }}</h2>
+            <h2 id="settings-{{ \Illuminate\Support\Str::slug($group) }}" class="m-0 text-[12px] font-semibold uppercase tracking-wide text-ink-muted">{{ $group }}</h2>
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach ($items as $item)
                     <a href="{{ route($item['route']) }}"
@@ -19,7 +19,7 @@
                         </span>
                         <span class="flex flex-col gap-1 min-w-0">
                             <span class="text-[14.5px] font-semibold text-navy group-hover:underline">{{ $item['label'] }}</span>
-                            <span class="text-[12.5px] text-[#6C6658] leading-snug">{{ $item['description'] }}</span>
+                            <span class="text-[12.5px] text-ink-muted leading-snug">{{ $item['description'] }}</span>
                         </span>
                     </a>
                 @endforeach

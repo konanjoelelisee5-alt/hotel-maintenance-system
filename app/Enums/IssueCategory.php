@@ -30,17 +30,4 @@ enum IssueCategory: string
             self::Autre => 'Autre',
         };
     }
-
-    public function emoji(): string
-    {
-        return match ($this) {
-            self::Eau => '💧',
-            self::Electricite => '⚡',
-            self::Clim => '❄️',
-            self::Tv => '📺',
-            self::Mobilier => '🛏️',
-            self::Porte => '🔑',
-            self::Autre => '❓',
-        };
-    }
 }

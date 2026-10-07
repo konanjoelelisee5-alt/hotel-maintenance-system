@@ -1,7 +1,8 @@
-{{-- Bilan du mois (gouvernante) : signalements de l'équipe, délais de réparation,
+{{-- Bilan du mois d'un service demandeur (gouvernante, responsable de réception) : signalements de l'équipe, délais de réparation,
      catégories, chambres et agents, inspections. Comparaison avec le mois précédent ;
      imprimable pour la réunion avec le chef de maintenance.
-     Données : HousekeepingSupervisionController::monthlyReport(). --}}
+     Données : App\Support\MonthlyReport, via HousekeepingSupervisionController::monthlyReport()
+     et ReceptionController::monthlyReport() ; $inspections est null pour la réception. --}}
 @php
     $label = ucfirst($month->locale('fr')->translatedFormat('F Y'));
     $delta = function ($now, $before, bool $lowerIsBetter = false) {
@@ -12,7 +13,7 @@
         return ['text' => ($diff > 0 ? '+' : '').$diff.' % vs mois précédent', 'class' => $good ? 'text-green' : 'text-red'];
     };
     $kpis = [
-        ['Signalements', $stats['total'], $stats['urgent'].' urgent(s)', null],
+        ['Signalements', $stats['total'], $inspections === null ? $stats['complaints'].' réclamation(s) client · '.$stats['urgent'].' urgent(s)' : $stats['urgent'].' urgent(s)', null],
         ['Réparés', $stats['repaired'], $stats['open'].' encore en cours', null],
         ['Délai moyen de réparation', $stats['avgHours'] !== null ? str_replace('.', ',', $stats['avgHours']).' h' : '—', 'du signalement à la réparation', $delta($stats['avgHours'], $previous['avgHours'], true)],
         ['Réparés dans le délai', $stats['onTime'] !== null ? $stats['onTime'].' %' : '—', 'délai garanti (SLA)', $delta($stats['onTime'], $previous['onTime'])],
@@ -20,19 +21,19 @@
     $bars = fn ($items) => $items->map(fn ($n, $name) => ['name' => $name, 'n' => $n, 'pct' => (int) round($n / max(1, $items->max()) * 100)])->values();
 @endphp
 
-<x-app-layout crumb="Outils de la gouvernante" :page-title="'Bilan · '.$label">
+<x-app-layout :crumb="$crumb" :page-title="'Bilan · '.$label">
     <x-slot:primaryAction>
         <button type="button" onclick="window.print()" class="btn btn-secondary"><x-hk.icon name="note" :size="16" /> Imprimer</button>
     </x-slot:primaryAction>
 
     {{-- Choix du mois --}}
     <div class="flex items-center justify-between gap-3 print:hidden">
-        <a href="{{ route('housekeeping.monthly-report', ['mois' => $month->copy()->subMonth()->format('Y-m')]) }}" class="btn btn-secondary" aria-label="Mois précédent">
+        <a href="{{ route($reportRoute, ['mois' => $month->copy()->subMonth()->format('Y-m')]) }}" class="btn btn-secondary" aria-label="Mois précédent">
             <x-hk.icon name="arrow-left" :size="16" /> <span class="hidden min-[420px]:inline">{{ ucfirst($month->copy()->subMonth()->locale('fr')->translatedFormat('F')) }}</span>
         </a>
         <span class="text-[15px] font-semibold text-navy">{{ $label }}</span>
         @if ($canGoNext)
-            <a href="{{ route('housekeeping.monthly-report', ['mois' => $month->copy()->addMonth()->format('Y-m')]) }}" class="btn btn-secondary" aria-label="Mois suivant">
+            <a href="{{ route($reportRoute, ['mois' => $month->copy()->addMonth()->format('Y-m')]) }}" class="btn btn-secondary" aria-label="Mois suivant">
                 <span class="hidden min-[420px]:inline">{{ ucfirst($month->copy()->addMonth()->locale('fr')->translatedFormat('F')) }}</span> <x-hk.icon name="arrow-right" :size="16" />
             </a>
         @else
@@ -44,9 +45,9 @@
     <section class="grid grid-cols-2 split:grid-cols-4 gap-3" aria-label="Chiffres clés">
         @foreach ($kpis as [$title, $value, $sub, $trend])
             <div class="bg-white border border-line rounded-xl px-4 py-4 flex flex-col gap-1">
-                <span class="text-[12.5px] text-[#4A4639]">{{ $title }}</span>
+                <span class="text-[12.5px] text-ink-body">{{ $title }}</span>
                 <span class="text-[26px] font-semibold text-navy tracking-tight leading-tight">{{ $value }}</span>
-                <span class="text-[12px] text-[#6C6658]">{{ $sub }}</span>
+                <span class="text-[12px] text-ink-muted">{{ $sub }}</span>
                 @if ($trend)<span class="text-[11.5px] font-semibold {{ $trend['class'] }}">{{ $trend['text'] }}</span>@endif
             </div>
         @endforeach
@@ -64,7 +65,7 @@
                             <div class="flex flex-col gap-1.5">
                                 <div class="flex items-center justify-between gap-2 text-[13px]">
                                     <span class="truncate">{{ $row['name'] }}</span>
-                                    <span class="font-mono text-[12px] text-[#4A4639]">{{ $row['n'] }}</span>
+                                    <span class="font-mono text-[12px] text-ink-body">{{ $row['n'] }}</span>
                                 </div>
                                 <div class="h-[5px] rounded-full bg-line-soft overflow-hidden"><div class="h-full bg-navy" style="width: {{ max(4, $row['pct']) }}%"></div></div>
                             </div>
@@ -75,7 +76,8 @@
         </div>
     @endif
 
-    {{-- Inspections --}}
+    {{-- Inspections (gouvernante seulement) --}}
+    @if ($inspections !== null)
     <section class="bg-white border border-line rounded-xl px-5 py-4 flex flex-col gap-4 break-inside-avoid">
         <div class="flex items-baseline justify-between gap-3">
             <h2 class="m-0 text-[15px] font-semibold text-navy">Inspections</h2>
@@ -85,9 +87,9 @@
             <p class="m-0 text-[13px] text-ink-grey">Aucune inspection terminée ce mois-ci.</p>
         @else
             <div class="grid grid-cols-3 gap-3 text-center">
-                <div><div class="text-[22px] font-semibold text-navy">{{ $inspections['count'] }}</div><div class="text-[12px] text-[#6C6658]">inspection(s)</div></div>
-                <div><div class="text-[22px] font-semibold text-navy">{{ $inspections['rooms'] }}</div><div class="text-[12px] text-[#6C6658]">chambre(s)</div></div>
-                <div><div class="text-[22px] font-semibold text-navy">{{ $inspections['conformity'] !== null ? $inspections['conformity'].' %' : '—' }}</div><div class="text-[12px] text-[#6C6658]">conformité moyenne</div></div>
+                <div><div class="text-[22px] font-semibold text-navy">{{ $inspections['count'] }}</div><div class="text-[12px] text-ink-muted">inspection(s)</div></div>
+                <div><div class="text-[22px] font-semibold text-navy">{{ $inspections['rooms'] }}</div><div class="text-[12px] text-ink-muted">chambre(s)</div></div>
+                <div><div class="text-[22px] font-semibold text-navy">{{ $inspections['conformity'] !== null ? $inspections['conformity'].' %' : '—' }}</div><div class="text-[12px] text-ink-muted">conformité moyenne</div></div>
             </div>
             @if ($inspections['nokPoints']->isNotEmpty())
                 <div>
@@ -101,6 +103,7 @@
             @endif
         @endif
     </section>
+    @endif
 
-    <p class="m-0 text-[11.5px] text-ink-grey">Signalements de l'équipe Housekeeping créés en {{ mb_strtolower($label) }}. Délai moyen calculé sur les signalements réparés ; « dans le délai » : réparés avant l'échéance garantie.</p>
+    <p class="m-0 text-[11.5px] text-ink-grey">Signalements de l'équipe {{ $service }} créés en {{ mb_strtolower($label) }}. Délai moyen calculé sur les signalements réparés ; « dans le délai » : réparés avant l'échéance garantie.</p>
 </x-app-layout>

@@ -22,28 +22,28 @@
             <div class="grid grid-cols-3 gap-4">
                 @foreach ([['OT ouverts', $stats['open']], ['OT sur 90 jours', $stats['last90']], ['OT au total', $stats['total']]] as [$label, $value])
                     <div class="bg-white p-4 shadow-sm rounded-lg">
-                        <div class="text-xs text-gray-500 uppercase">{{ $label }}</div>
-                        <div class="text-2xl font-semibold text-gray-900 mt-1">{{ $value }}</div>
+                        <div class="text-xs text-ink-muted uppercase">{{ $label }}</div>
+                        <div class="text-2xl font-semibold text-navy mt-1">{{ $value }}</div>
                     </div>
                 @endforeach
             </div>
 
             <div class="bg-white p-6 shadow-sm rounded-lg">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-semibold text-gray-800">Équipements ({{ $room->equipment->count() }})</h3>
-                    <a href="{{ route('equipment.create', ['room_id' => $room->id]) }}" class="text-sm text-indigo-600 hover:underline">+ Ajouter un équipement</a>
+                    <h3 class="font-semibold text-ink-deep">Équipements ({{ $room->equipment->count() }})</h3>
+                    <a href="{{ route('equipment.create', ['room_id' => $room->id]) }}" class="text-sm text-blue hover:underline">+ Ajouter un équipement</a>
                 </div>
-                <ul class="divide-y divide-gray-100">
+                <ul class="divide-y divide-line-soft">
                     @forelse ($room->equipment as $item)
                         <li class="py-2 flex justify-between items-center gap-3 text-sm">
-                            <a href="{{ route('equipment.show', $item) }}" class="text-gray-900 hover:underline">{{ $item->name }}</a>
+                            <a href="{{ route('equipment.show', $item) }}" class="text-navy hover:underline">{{ $item->name }}</a>
                             <span class="flex items-center gap-3">
-                                <span class="text-gray-500">{{ $item->type }}</span>
+                                <span class="text-ink-muted">{{ $item->type }}</span>
                                 @include('rooms.partials.status-badge', ['status' => $item->status, 'label' => $item->status_label])
                             </span>
                         </li>
                     @empty
-                        <li class="py-2 text-sm text-gray-500">Aucun équipement enregistré dans ce lieu.</li>
+                        <li class="py-2 text-sm text-ink-muted">Aucun équipement enregistré dans ce lieu.</li>
                     @endforelse
                 </ul>
             </div>

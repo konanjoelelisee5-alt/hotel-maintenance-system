@@ -31,6 +31,11 @@ class InterventionSessionController extends Controller
             'started_at' => now(),
         ]);
 
+        // Démarrer le chrono vaut prise en charge (« J'ai vu, je m'en occupe »).
+        if (! $workOrder->acknowledged_at) {
+            $workOrder->update(['acknowledged_at' => now()]);
+        }
+
         // Si c'est la toute première session, on passe automatiquement l'OT en "en_cours"
         if ($workOrder->status === 'ouvert') {
             $workOrder->update(['status' => 'en_cours']);

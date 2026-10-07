@@ -14,14 +14,14 @@ namespace App\Support;
 class Swatch
 {
     private const MAP = [
-        'red' => ['bg-red', 'text-red', 'bg-[#FDECEA]', 'bg-[#FDECEA] text-[#8A1F16]', '#B3261E'],
-        'amber' => ['bg-amber', 'text-amber', 'bg-[#FBF1DF]', 'bg-[#FBF1DF] text-[#7A5A16]', '#B4740F'],
-        'gold' => ['bg-gold', 'text-gold', 'bg-[#FBF1DF]', 'bg-gold-100 text-gold-700', '#B58435'],
-        'green' => ['bg-green', 'text-green', 'bg-[#E6F3EC]', 'bg-[#E6F3EC] text-[#155C40]', '#1E7A55'],
-        'blue' => ['bg-blue', 'text-blue', 'bg-[#EAF0F6]', 'bg-[#EAF0F6] text-blue', '#26496B'],
-        'navy' => ['bg-navy', 'text-navy', 'bg-[#EAF0F6]', 'bg-[#EAF0F6] text-navy', '#0E2136'],
-        'grey' => ['bg-[#8A8578]', 'text-[#6C6658]', 'bg-line-soft', 'bg-line-soft text-[#4A4639]', '#8A8578'],
-        'muted' => ['bg-[#CFC8B8]', 'text-[#6C6658]', 'bg-paper', 'bg-paper text-[#6C6658] ring-1 ring-inset ring-line', '#CFC8B8'],
+        'red' => ['bg-red', 'text-red', 'bg-danger-bg', 'bg-danger-bg text-danger-ink', '#B3261E'],
+        'amber' => ['bg-amber', 'text-amber', 'bg-warn-bg', 'bg-warn-bg text-warn-ink', '#B4740F'],
+        'gold' => ['bg-gold', 'text-gold', 'bg-warn-bg', 'bg-gold-100 text-gold-700', '#B58435'],
+        'green' => ['bg-green', 'text-green', 'bg-ok-bg', 'bg-ok-bg text-[#155C40]', '#1E7A55'],
+        'blue' => ['bg-blue', 'text-blue', 'bg-info-bg', 'bg-info-bg text-blue', '#26496B'],
+        'navy' => ['bg-navy', 'text-navy', 'bg-info-bg', 'bg-info-bg text-navy', '#0E2136'],
+        'grey' => ['bg-ink-grey', 'text-ink-muted', 'bg-line-soft', 'bg-line-soft text-ink-body', '#8A8578'],
+        'muted' => ['bg-[#CFC8B8]', 'text-ink-muted', 'bg-paper', 'bg-paper text-ink-muted ring-1 ring-inset ring-line', '#CFC8B8'],
     ];
 
     public static function bg(?string $key): string

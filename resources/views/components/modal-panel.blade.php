@@ -22,7 +22,7 @@
                 @endif
                 <h2 class="m-0 text-[19px] leading-tight font-semibold tracking-tight text-navy" id="remote-modal-title">{{ $title }}</h2>
                 @if ($subtitle)
-                    <p class="text-[13px] text-[#6C6658] leading-snug mt-0.5">{{ $subtitle }}</p>
+                    <p class="text-[13px] text-ink-muted leading-snug mt-0.5">{{ $subtitle }}</p>
                 @endif
             </div>
             <button type="button" data-modal-close class="w-9 h-9 -mr-1.5 flex-shrink-0 rounded-[9px] flex items-center justify-center text-ink-grey hover:text-navy hover:bg-line-soft transition">

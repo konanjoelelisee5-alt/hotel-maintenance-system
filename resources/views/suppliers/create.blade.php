@@ -28,17 +28,17 @@
 
         <div>
             <x-input-label for="address" value="Adresse" />
-            <textarea id="address" name="address" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('address') }}</textarea>
+            <textarea id="address" name="address" rows="2" class="mt-1 block w-full border-line rounded-md shadow-sm">{{ old('address') }}</textarea>
         </div>
 
         <div>
             <x-input-label for="notes" value="Notes" />
-            <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('notes') }}</textarea>
+            <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-line rounded-md shadow-sm">{{ old('notes') }}</textarea>
         </div>
 
         <div class="flex justify-end gap-3">
-            <a href="{{ route('suppliers.index') }}" data-modal-close class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-            <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Créer</button>
+            <a href="{{ route('suppliers.index') }}" data-modal-close class="btn btn-ghost">Annuler</a>
+            <button type="submit" class="btn btn-primary">Créer</button>
         </div>
     </form>
 </x-form-page>

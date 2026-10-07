@@ -6,15 +6,14 @@
     Structure : titre+référence / lieu+assigné / badges statut+priorité / [échéance] / barre SLA.
 --}}
 <a href="{{ route('work-orders.show', $w) }}"
-   class="block border-l-[3px] rounded-2xl border border-line bg-white px-4 py-4 hover:bg-paper transition"
-   style="border-left-color: {{ $w->priority->color }}">
+   class="block rounded-2xl border border-line bg-white px-4 py-4 hover:bg-paper transition">
 
     <div class="flex items-start justify-between gap-2">
         <span class="text-[15px] font-semibold text-navy leading-snug">{{ $w->title }}</span>
-        <span class="font-mono text-[11.5px] text-[#26496B] whitespace-nowrap flex-shrink-0 mt-0.5">{{ $w->code() }}</span>
+        <span class="font-mono text-[11.5px] text-blue whitespace-nowrap flex-shrink-0 mt-0.5">{{ $w->code() }}</span>
     </div>
 
-    <div class="flex items-center justify-between gap-2 mt-1.5 text-[13px] text-[#6C6658]">
+    <div class="flex items-center justify-between gap-2 mt-1.5 text-[13px] text-ink-muted">
         <span class="truncate">{{ $w->room?->label ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</span>
         @if ($w->assignee)
             <span class="flex items-center gap-1.5 flex-shrink-0">
@@ -22,13 +21,14 @@
                 <span>{{ $w->assignee->name }}</span>
             </span>
         @else
-            <span class="text-[#A09A8C] flex-shrink-0">— à affecter</span>
+            <span class="text-ink-faint flex-shrink-0">— à affecter</span>
         @endif
     </div>
 
     <div class="flex items-center gap-1.5 mt-2.5">
         <x-work-order-status-badge :status="$w->status" />
         <x-work-order-priority-badge :priority="$w->priority" />
+        <x-ack-badge :work-order="$w" />
     </div>
 
     @if ($showDueDate && $w->sla_resolution_due_at)

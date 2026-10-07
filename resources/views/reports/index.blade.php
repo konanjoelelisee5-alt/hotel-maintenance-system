@@ -39,16 +39,16 @@
 
         {{-- ===== Filtres ===== --}}
         <section class="bg-white border border-line rounded-xl">
-            <div class="flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-3.5 border-b border-line-soft">
-                <div class="flex gap-1.5 overflow-x-auto -mx-5 px-5 lg:mx-0 lg:px-0 pb-0.5" role="group" aria-label="Période rapide">
+            <div class="flex flex-col tab:flex-row tab:items-center gap-3 px-5 py-3.5 border-b border-line-soft">
+                <div class="flex gap-1.5 overflow-x-auto -mx-5 px-5 tab:mx-0 tab:px-0 pb-0.5" role="group" aria-label="Période rapide">
                     @foreach ($presets as $label => [$start, $end])
                         @php $active = $from === $start->toDateString() && $to === $end->toDateString(); @endphp
                         <a href="{{ route('reports.index', [...$keep, 'date_from' => $start->toDateString(), 'date_to' => $end->toDateString()]) }}"
                            @class(['flex-shrink-0 h-[32px] px-3.5 inline-flex items-center rounded-full border text-[12.5px] font-semibold transition',
-                                   'bg-navy text-white border-navy' => $active, 'bg-white text-[#4A4639] border-line hover:bg-paper' => ! $active])>{{ $label }}</a>
+                                   'bg-navy text-white border-navy' => $active, 'bg-white text-ink-body border-line hover:bg-paper' => ! $active])>{{ $label }}</a>
                     @endforeach
                 </div>
-                <p class="m-0 lg:ml-auto flex items-center gap-1.5 text-[12.5px] text-[#6C6658]">
+                <p class="m-0 tab:ml-auto flex items-center gap-1.5 text-[12.5px] text-ink-muted">
                     <x-nav-icon name="calendar" class="w-4 h-4 text-gold" />
                     <span>
                         Analyse <strong class="text-navy">{{ $period }}</strong>
@@ -58,7 +58,7 @@
                 </p>
             </div>
 
-            <form method="GET" action="{{ route('reports.index') }}" class="grid grid-cols-2 lg:grid-cols-[1fr_1fr_1.3fr_1.3fr_auto] gap-3 items-end px-5 py-4">
+            <form method="GET" action="{{ route('reports.index') }}" class="grid grid-cols-2 split:grid-cols-[1fr_1fr_1.3fr_1.3fr_auto] gap-3 items-end px-5 py-4">
                 <div>
                     <label for="date_from">Du</label>
                     <input type="date" id="date_from" name="date_from" value="{{ $from }}">
@@ -85,8 +85,8 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-span-2 lg:col-span-1 flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-1 lg:flex-none h-[44px]"><x-nav-icon name="search" /> Filtrer</button>
+                <div class="col-span-2 split:col-span-1 flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-1 split:flex-none h-[44px]"><x-nav-icon name="search" /> Filtrer</button>
                     @if (request()->hasAny(['date_from', 'date_to', 'technician_id', 'type_id']))
                         <a href="{{ route('reports.index') }}" class="btn btn-ghost h-[44px]">Réinitialiser</a>
                     @endif
@@ -96,19 +96,19 @@
 
         {{-- ===== Indicateurs ===== --}}
         <section class="bg-white border border-line rounded-xl overflow-hidden">
-            <dl class="m-0 grid grid-cols-2 lg:grid-cols-5 gap-px bg-line-soft">
+            <dl class="m-0 grid grid-cols-2 tab:grid-cols-3 split:grid-cols-5 gap-px bg-line-soft">
                 <div class="bg-white px-5 py-4 flex flex-col gap-1">
-                    <dt class="flex items-center gap-2 text-[12.5px] text-[#4A4639]"><span class="w-[7px] h-[7px] rounded-full bg-navy"></span> Ordres de travail</dt>
+                    <dt class="flex items-center gap-2 text-[12.5px] text-ink-body"><span class="w-[7px] h-[7px] rounded-full bg-navy"></span> Ordres de travail</dt>
                     <dd class="m-0 text-[28px] leading-tight font-semibold tracking-tight text-navy">{{ $totalCount }}</dd>
                     <dd class="m-0 text-[12px] text-ink-grey">{{ $openCount }} ouvert(s) · {{ $resolvedCount }} terminé(s)</dd>
                 </div>
                 <div class="bg-white px-5 py-4 flex flex-col gap-1">
-                    <dt class="flex items-center gap-2 text-[12.5px] text-[#4A4639]"><span class="w-[7px] h-[7px] rounded-full bg-blue"></span> Temps moyen de résolution</dt>
+                    <dt class="flex items-center gap-2 text-[12.5px] text-ink-body"><span class="w-[7px] h-[7px] rounded-full bg-blue"></span> Temps moyen de résolution</dt>
                     <dd class="m-0 text-[28px] leading-tight font-semibold tracking-tight text-navy">{{ $avgResolutionMinutes !== null ? \App\Support\Duration::human($avgResolutionMinutes) : '—' }}</dd>
                     <dd class="m-0 text-[12px] text-ink-grey">de la création à la réparation</dd>
                 </div>
                 <div class="bg-white px-5 py-4 flex flex-col gap-1">
-                    <dt class="flex items-center gap-2 text-[12.5px] text-[#4A4639]"><span class="w-[7px] h-[7px] rounded-full {{ \App\Support\Swatch::bg($slaColor) }}"></span> Respect du SLA</dt>
+                    <dt class="flex items-center gap-2 text-[12.5px] text-ink-body"><span class="w-[7px] h-[7px] rounded-full {{ \App\Support\Swatch::bg($slaColor) }}"></span> Respect du SLA</dt>
                     <dd class="m-0 text-[28px] leading-tight font-semibold tracking-tight {{ $slaRate === null ? 'text-navy' : \App\Support\Swatch::text($slaColor) }}">{{ $slaRate !== null ? $slaRate.' %' : '—' }}</dd>
                     @if ($slaRate !== null)
                         <dd class="m-0 h-[5px] rounded-full bg-line-soft overflow-hidden"><span class="block h-full {{ \App\Support\Swatch::bg($slaColor) }}" style="width: {{ $slaRate }}%"></span></dd>
@@ -116,12 +116,12 @@
                     <dd class="m-0 text-[12px] text-ink-grey">sur {{ $slaEligibleCount }} OT soumis à un délai</dd>
                 </div>
                 <div class="bg-white px-5 py-4 flex flex-col gap-1">
-                    <dt class="flex items-center gap-2 text-[12.5px] text-[#4A4639]"><span class="w-[7px] h-[7px] rounded-full bg-gold"></span> Rejets au contrôle qualité</dt>
+                    <dt class="flex items-center gap-2 text-[12.5px] text-ink-body"><span class="w-[7px] h-[7px] rounded-full bg-gold"></span> Rejets au contrôle qualité</dt>
                     <dd class="m-0 text-[28px] leading-tight font-semibold tracking-tight {{ $qualityRejectionRate !== null && $qualityRejectionRate > 20 ? 'text-red' : 'text-navy' }}">{{ $qualityRejectionRate !== null ? $qualityRejectionRate.' %' : '—' }}</dd>
                     <dd class="m-0 text-[12px] text-ink-grey">{{ $qualityRejectionRate !== null ? 'des contrôles réalisés' : 'aucun contrôle sur la période' }}</dd>
                 </div>
-                <div class="bg-white px-5 py-4 flex flex-col gap-1 col-span-2 lg:col-span-1">
-                    <dt class="flex items-center gap-2 text-[12.5px] text-[#4A4639]"><span class="w-[7px] h-[7px] rounded-full bg-green"></span> Coût des achats</dt>
+                <div class="bg-white px-5 py-4 flex flex-col gap-1 col-span-2 tab:col-span-1">
+                    <dt class="flex items-center gap-2 text-[12.5px] text-ink-body"><span class="w-[7px] h-[7px] rounded-full bg-green"></span> Coût des achats</dt>
                     <dd class="m-0 text-[24px] leading-tight font-semibold tracking-tight text-navy whitespace-nowrap">{{ \App\Support\Money::format($totalPurchaseCost) }}</dd>
                     <dd class="m-0 text-[12px] text-ink-grey">bons de commande de la période</dd>
                 </div>
@@ -129,7 +129,7 @@
         </section>
 
         {{-- ===== Graphiques ===== --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+        <div class="grid grid-cols-1 split:grid-cols-2 gap-5 items-start">
             <x-panel title="Répartition par statut" icon="status">
                 @if ($byStatus->isEmpty())
                     @include('reports.partials.empty')
@@ -146,7 +146,7 @@
                             @foreach ($byStatus as $label => $count)
                                 <li class="flex items-center gap-3 py-2 text-[13px]">
                                     <span class="w-2.5 h-2.5 rounded-[3px] flex-shrink-0" style="background-color: {{ $statusColors[$label] ?? '#8A8578' }}"></span>
-                                    <span class="flex-1 text-[#3d3a33]">{{ $label }}</span>
+                                    <span class="flex-1 text-ink-strong">{{ $label }}</span>
                                     <span class="font-semibold text-navy">{{ $count }}</span>
                                     <span class="w-12 text-right font-mono text-[12px] text-ink-grey">{{ round($count / max($totalCount, 1) * 100) }} %</span>
                                 </li>

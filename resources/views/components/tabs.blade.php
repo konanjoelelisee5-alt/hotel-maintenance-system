@@ -16,9 +16,9 @@
         ? 'flex-shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-full border text-[14px] whitespace-nowrap transition'
         : 'flex items-center gap-1.5 px-3.5 pb-3 pt-1 border-b-2 text-[13.5px] whitespace-nowrap transition';
     $on = $pills ? 'bg-navy border-navy text-white font-semibold' : 'border-navy text-navy font-semibold';
-    $off = $pills ? 'bg-white border-line text-navy font-medium' : 'border-transparent text-[#6C6658] font-medium hover:text-navy';
+    $off = $pills ? 'bg-white border-line text-navy font-medium' : 'border-transparent text-ink-muted font-medium hover:text-navy';
     $countOn = $pills ? 'bg-white/15 text-white' : 'text-ink-grey';
-    $countOff = $pills ? 'bg-line-soft text-[#4A4639]' : 'text-ink-grey';
+    $countOff = $pills ? 'bg-line-soft text-ink-body' : 'text-ink-grey';
     $countBase = $pills ? 'min-w-[22px] h-[22px] px-1.5 rounded-full text-[11.5px] font-mono flex items-center justify-center' : 'font-mono text-[11.5px]';
 @endphp
 

@@ -23,7 +23,8 @@ const VIEW_PARAM = { day: 'jour', week: 'semaine', month: 'mois' };
 const initialView = () => {
     const fromUrl = new URLSearchParams(window.location.search).get('vue');
     const view = Object.keys(VIEW_PARAM).find((key) => VIEW_PARAM[key] === fromUrl);
-    return view ?? (window.matchMedia('(min-width: 1024px)').matches ? 'week' : 'day');
+    // Tablette et ordinateur (≥ 700 px, écran « tab ») : la semaine ; téléphone : le jour.
+    return view ?? (window.matchMedia('(min-width: 700px)').matches ? 'week' : 'day');
 };
 
 export default (config) => ({
@@ -187,7 +188,7 @@ export default (config) => ({
     isPast(e) { return e.endAt < this.now; },
 
     /** Fond teinté et filet de la couleur de la priorité. */
-    cardStyle(e) { return `border-left-color: ${e.color}; background-color: ${e.color}14;`; },
+    cardStyle(e) { return `border-color: ${e.color}55; background-color: ${e.color}14;`; },
 
     /** Heures affichées dans la grille : 7 h – 20 h, élargies aux interventions de la semaine. */
     get hours() {

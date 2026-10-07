@@ -40,11 +40,11 @@
         </x-slot:primaryAction>
     @endcan
 
-    {{-- Téléphone / tablette, disposition à la Chrome : barre de recherche arrondie en
+    {{-- Téléphone, disposition à la Chrome : barre de recherche arrondie en
          tête, onglets en pastilles juste dessous, réglages repliés derrière un bouton,
-         indicateurs en tuiles 2 × 2. Le bureau garde la bande et le tableau ci-après. --}}
+         indicateurs en tuiles 2 × 2. Tablette et bureau : panneau avec onglets et barre d'outils. --}}
     @php $refineCount = (int) request()->filled('status') + (int) request()->filled('priority_id') + (int) ($sort !== 'due'); @endphp
-    <div class="lg:hidden flex flex-col gap-3" x-data="{ more: {{ $refineCount ? 'true' : 'false' }} }">
+    <div class="tab:hidden flex flex-col gap-3" x-data="{ more: {{ $refineCount ? 'true' : 'false' }} }">
         <form action="{{ route('work-orders.index') }}" method="GET" class="flex flex-col gap-3">
             <input type="hidden" name="filter" value="{{ $filter }}">
             <div class="flex items-center gap-2">
@@ -54,7 +54,7 @@
                     <input type="search" name="q" value="{{ $q }}" placeholder="Rechercher un ordre, une chambre" enterkeyhint="search"
                            class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[15px] placeholder:text-ink-grey focus:ring-0">
                     @if (filled($q))
-                        <a href="{{ $here(['q' => null, 'page' => null]) }}" class="w-8 h-8 rounded-full flex items-center justify-center text-ink-grey hover:bg-line-soft" aria-label="Effacer la recherche">✕</a>
+                        <a href="{{ $here(['q' => null, 'page' => null]) }}" class="w-8 h-8 rounded-full flex items-center justify-center text-ink-grey hover:bg-line-soft" aria-label="Effacer la recherche"><x-nav-icon name="x" class="w-4 h-4" /></a>
                     @endif
                 </label>
                 <button type="button" @click="more = ! more" :aria-expanded="more.toString()" aria-controls="wo-refine"
@@ -94,7 +94,7 @@
                     </select>
                 </label>
                 @if ($refined)
-                    <a href="{{ route('work-orders.index', ['filter' => $filter]) }}" class="col-span-2 h-11 rounded-xl border border-line flex items-center justify-center text-[14px] font-semibold text-[#6C6658]">Réinitialiser les critères</a>
+                    <a href="{{ route('work-orders.index', ['filter' => $filter]) }}" class="col-span-2 h-11 rounded-xl border border-line flex items-center justify-center text-[14px] font-semibold text-ink-muted">Réinitialiser les critères</a>
                 @endif
             </div>
         </form>
@@ -106,14 +106,14 @@
          chacun ouvre la liste filtrée. --}}
     <x-kpi-band :items="$kpiItems" tiles />
 
-    <div class="lg:hidden -mb-2 flex items-baseline justify-between gap-3 px-1">
+    <div class="tab:hidden -mb-2 flex items-baseline justify-between gap-3 px-1">
         <h2 class="text-[17px] font-semibold text-navy">{{ $listTitle }}</h2>
         <span class="text-[12.5px] text-ink-grey whitespace-nowrap">{{ $workOrders->total() }} ordre(s)</span>
     </div>
 
-    <section class="min-w-0 lg:bg-white lg:border lg:border-line lg:rounded-xl lg:overflow-hidden">
+    <section class="min-w-0 tab:bg-white tab:border tab:border-line tab:rounded-xl tab:overflow-hidden">
         {{-- Titre + onglets soulignés avec compteur --}}
-        <div class="hidden lg:flex items-end gap-4 flex-wrap px-6 pt-5 border-b border-line">
+        <div class="hidden tab:flex items-end gap-4 flex-wrap px-6 pt-5 border-b border-line">
             <div class="flex flex-col gap-0.5 pb-3.5">
                 <h2 class="text-[17px] font-semibold text-navy">{{ $listTitle }}</h2>
                 <div class="text-[12.5px] text-ink-grey">{{ $workOrders->total() }} ordre(s) · triés par {{ ['due' => 'échéance SLA', 'priority' => 'priorité', 'created' => 'date de création'][$sort] }}</div>
@@ -123,7 +123,7 @@
         </div>
 
         {{-- Barre d'outils : recherche, affinage, tri (envoi automatique au changement) --}}
-        <form action="{{ route('work-orders.index') }}" method="GET" class="hidden lg:flex items-center gap-2.5 flex-wrap px-6 py-3.5 bg-paper/60 border-b border-line-soft">
+        <form action="{{ route('work-orders.index') }}" method="GET" class="hidden tab:flex items-center gap-2.5 flex-wrap px-6 py-3.5 bg-paper/60 border-b border-line-soft">
             <input type="hidden" name="filter" value="{{ $filter }}">
             <label class="flex items-center gap-2 h-[38px] w-full sm:w-[280px] px-3 rounded-[9px] border border-line bg-white text-[13px] focus-within:border-navy">
                 <svg class="w-4 h-4 text-ink-grey flex-shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4" stroke-linecap="round"/></svg>
@@ -131,7 +131,7 @@
                 <input type="search" name="q" value="{{ $q }}" placeholder="Titre, n° de chambre…" class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[13px] placeholder:text-ink-grey focus:ring-0">
             </label>
 
-            @php $select = 'h-[38px] rounded-[9px] border border-line bg-white text-[13px] text-[#26496B] font-medium pl-3 pr-8 py-0 focus:border-navy focus:ring-0'; @endphp
+            @php $select = 'h-[38px] rounded-[9px] border border-line bg-white text-[13px] text-blue font-medium pl-3 pr-8 py-0 focus:border-navy focus:ring-0'; @endphp
             <label class="sr-only" for="wo-status">Statut</label>
             <select id="wo-status" name="status" onchange="this.form.submit()" class="{{ $select }} flex-1 sm:flex-none">
                 <option value="">Tous les statuts</option>
@@ -148,7 +148,7 @@
             </select>
 
             @if ($refined)
-                <a href="{{ route('work-orders.index', ['filter' => $filter, 'sort' => $sort]) }}" class="text-[12.5px] font-semibold text-[#6C6658] hover:text-navy whitespace-nowrap">Réinitialiser</a>
+                <a href="{{ route('work-orders.index', ['filter' => $filter, 'sort' => $sort]) }}" class="text-[12.5px] font-semibold text-ink-muted hover:text-navy whitespace-nowrap">Réinitialiser</a>
             @endif
 
             <label class="flex items-center gap-1.5 sm:ml-auto text-[12.5px] text-ink-grey whitespace-nowrap">
@@ -163,7 +163,7 @@
         </form>
 
         @if ($workOrders->isEmpty())
-            <div class="px-5 py-14 flex flex-col items-center gap-2 text-center bg-white border border-line rounded-2xl lg:border-0 lg:rounded-none">
+            <div class="px-5 py-14 flex flex-col items-center gap-2 text-center bg-white border border-line rounded-2xl tab:border-0 tab:rounded-none">
                 <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-grey">
                     <x-nav-icon name="clipboard" class="w-5 h-5" />
                 </div>
@@ -173,15 +173,15 @@
                 </div>
             </div>
         @else
-            {{-- Mobile / tablette : cartes empilées (un tableau serait illisible en dessous de 1024px) --}}
-            <div class="lg:hidden flex flex-col gap-3">
+            {{-- Téléphone : cartes empilées ; tablette : cartes sur deux colonnes (un tableau serait illisible sous 1200 px). --}}
+            <div class="desk:hidden flex flex-col gap-3 tab:grid tab:grid-cols-2 tab:p-4">
                 @foreach ($workOrders as $w)
                     @include('work-orders.partials._ot-card', ['w' => $w, 'showDueDate' => true])
                 @endforeach
             </div>
 
-            {{-- Desktop : même tableau que la file de la Supervision, liseré rouge si en retard --}}
-            <div class="hidden lg:block overflow-x-auto">
+            {{-- Ordinateur : même tableau que la file de la Supervision, liseré rouge si en retard --}}
+            <div class="hidden desk:block overflow-x-auto">
                 <table class="w-full min-w-[860px] text-left border-collapse">
                     <thead>
                         <tr class="bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-ink-grey">
@@ -196,8 +196,8 @@
                     <tbody>
                         @foreach ($workOrders as $w)
                             @php $sla = $w->slaSummary(); @endphp
-                            <tr class="border-b border-line-soft last:border-b-0 hover:bg-paper/60 {{ $sla['late'] ? 'shadow-[inset_3px_0_0_theme(colors.red)]' : '' }}">
-                                <td class="pl-6 pr-3 py-4 align-middle font-mono text-[12.5px] text-[#4A4639] whitespace-nowrap">
+                            <tr class="border-b border-line-soft last:border-b-0 hover:bg-paper/60 {{ $sla['late'] ? 'bg-danger-bg/30' : '' }}">
+                                <td class="pl-6 pr-3 py-4 align-middle font-mono text-[12.5px] text-ink-body whitespace-nowrap">
                                     <a href="{{ route('work-orders.show', $w) }}" class="hover:text-navy">{{ $w->code() }}</a>
                                 </td>
                                 <td class="px-3 py-4 align-middle">
@@ -205,10 +205,11 @@
                                         <a href="{{ route('work-orders.show', $w) }}" class="text-[14.5px] font-semibold text-navy hover:underline">{{ $w->title }}</a>
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-semibold whitespace-nowrap" style="background-color: {{ $w->priority->color }}18; color: {{ $w->priority->color }};">{{ $w->priority->label }}</span>
                                     </div>
-                                    <div class="text-[13px] text-[#6C6658] mt-0.5">{{ $w->room?->label ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</div>
+                                    <div class="text-[13px] text-ink-muted mt-0.5">{{ $w->room?->label ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</div>
                                 </td>
                                 <td class="px-3 py-4 align-middle whitespace-nowrap">
                                     <x-work-order-status-badge :status="$w->status" />
+                                    <x-ack-badge :work-order="$w" class="mt-1 !flex w-fit" />
                                 </td>
                                 <td class="px-3 py-4 align-middle">
                                     @if ($w->assignee)
@@ -217,11 +218,11 @@
                                             <span class="text-[13.5px] truncate max-w-[130px]" title="{{ $w->assignee->name }}">{{ $w->assignee->name }}</span>
                                         </span>
                                     @else
-                                        <span class="text-[13px] text-[#A09A8C]">— à affecter</span>
+                                        <span class="text-[13px] text-ink-faint">— à affecter</span>
                                     @endif
                                 </td>
                                 <td class="px-3 py-4 align-middle whitespace-nowrap">
-                                    <div class="font-mono text-[12.5px] text-[#4A4639]">{{ $w->created_at->format('d/m/Y') }}</div>
+                                    <div class="font-mono text-[12.5px] text-ink-body">{{ $w->created_at->format('d/m/Y') }}</div>
                                     <div class="text-[11.5px] text-ink-grey mt-0.5">{{ $w->reporter?->name ?? '—' }}</div>
                                 </td>
                                 <td class="pl-3 pr-6 py-4 align-middle">
@@ -239,7 +240,7 @@
             </div>
 
             @if ($workOrders->hasPages())
-                <div class="mt-4 lg:mt-0 lg:px-6 lg:py-3.5 lg:border-t lg:border-line lg:bg-paper/60">
+                <div class="mt-4 tab:mt-0 tab:px-6 tab:py-3.5 tab:border-t tab:border-line tab:bg-paper/60">
                     {{ $workOrders->links() }}
                 </div>
             @endif

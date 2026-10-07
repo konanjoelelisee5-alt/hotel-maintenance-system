@@ -14,7 +14,7 @@
                     <span class="w-8 h-8 rounded-[8px] border border-line bg-paper text-gold flex items-center justify-center flex-shrink-0"><x-hk.icon name="check-circle" :size="16" /></span>
                     <div class="min-w-0">
                         <h2 class="m-0 text-[14.5px] font-semibold text-navy">Nouvelle inspection</h2>
-                        <p class="m-0 text-[12.5px] text-[#6C6658]">{{ count(\App\Support\RoomInspectionChecklist::POINTS) }} points à vérifier : entrée, chambre, salle de bain.</p>
+                        <p class="m-0 text-[12.5px] text-ink-muted">{{ count(\App\Support\RoomInspectionChecklist::POINTS) }} points à vérifier : entrée, chambre, salle de bain.</p>
                     </div>
                 </header>
                 <form method="POST" action="{{ route('inspections.store') }}" class="ui-form flex flex-col min-[420px]:flex-row gap-2.5 px-5 py-4">
@@ -36,15 +36,15 @@
             {{-- En cours --}}
             @if ($inProgress->isNotEmpty())
                 <section class="bg-white border border-amber/40 rounded-xl overflow-hidden">
-                    <header class="px-5 py-3 border-b border-line-soft bg-[#FBF1DF] text-[13px] font-semibold text-[#7A5A16]">Inspections en cours · {{ $inProgress->count() }}</header>
+                    <header class="px-5 py-3 border-b border-line-soft bg-warn-bg text-[13px] font-semibold text-warn-ink">Inspections en cours · {{ $inProgress->count() }}</header>
                     @foreach ($inProgress as $inspection)
                         @php $p = $inspection->progress(); @endphp
                         <a href="{{ route('inspections.show', $inspection) }}" class="flex items-center gap-3 px-5 py-3 border-b border-line-soft last:border-b-0 hover:bg-paper">
                             <span class="flex-1 min-w-0">
                                 <span class="block text-[14px] font-semibold text-navy">{{ $inspection->room->label }}</span>
-                                <span class="block text-[12px] text-[#6C6658]">{{ $inspection->inspector->name }} · commencée {{ $inspection->created_at->locale('fr')->diffForHumans() }}</span>
+                                <span class="block text-[12px] text-ink-muted">{{ $inspection->inspector->name }} · commencée {{ $inspection->created_at->locale('fr')->diffForHumans() }}</span>
                             </span>
-                            <span class="font-mono text-[12px] text-[#4A4639]">{{ $p['answered'] }}/{{ $p['total'] }}</span>
+                            <span class="font-mono text-[12px] text-ink-body">{{ $p['answered'] }}/{{ $p['total'] }}</span>
                             <span class="btn btn-sm btn-secondary">Reprendre</span>
                         </a>
                     @endforeach
@@ -60,12 +60,12 @@
                     @php $score = $inspection->conformity(); $nok = $inspection->items->where('result', 'nok')->count(); @endphp
                     <a href="{{ route('inspections.show', $inspection) }}" class="flex items-center gap-3 px-5 py-3 border-b border-line-soft last:border-b-0 hover:bg-paper">
                         <span class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 font-mono text-[12px] font-semibold
-                                     {{ $score === null ? 'bg-line-soft text-ink-grey' : ($score === 100 ? 'bg-[#E6F3EC] text-green' : ($score >= 80 ? 'bg-[#FBF1DF] text-[#7A5A16]' : 'bg-[#FDECEA] text-red')) }}">
+                                     {{ $score === null ? 'bg-line-soft text-ink-grey' : ($score === 100 ? 'bg-ok-bg text-green' : ($score >= 80 ? 'bg-warn-bg text-warn-ink' : 'bg-danger-bg text-red')) }}">
                             {{ $score !== null ? $score.'%' : '—' }}
                         </span>
                         <span class="flex-1 min-w-0">
                             <span class="block text-[14px] font-semibold text-navy">{{ $inspection->room->label }}</span>
-                            <span class="block text-[12px] text-[#6C6658] truncate">{{ $inspection->completed_at->locale('fr')->translatedFormat('j F à H\hi') }} · {{ $inspection->inspector->name }}</span>
+                            <span class="block text-[12px] text-ink-muted truncate">{{ $inspection->completed_at->locale('fr')->translatedFormat('j F à H\hi') }} · {{ $inspection->inspector->name }}</span>
                         </span>
                         <span class="text-[12px] whitespace-nowrap {{ $nok ? 'text-red font-semibold' : 'text-green' }}">{{ $nok ? $nok.' non conforme(s)' : 'Tout conforme' }}</span>
                     </a>
@@ -86,7 +86,7 @@
                         <input type="hidden" name="room_number" value="{{ $d['room']->number }}">
                         <button type="submit" class="w-full flex items-center gap-3 py-2.5 text-left group">
                             <span class="font-mono text-[14px] font-semibold text-navy w-14">{{ $d['room']->number }}</span>
-                            <span class="flex-1 text-[12.5px] {{ $d['last'] ? 'text-[#6C6658]' : 'text-[#7A5A16]' }}">{{ $d['last'] ? 'Inspectée '.$d['last']->locale('fr')->diffForHumans() : 'Jamais inspectée' }}</span>
+                            <span class="flex-1 text-[12.5px] {{ $d['last'] ? 'text-ink-muted' : 'text-warn-ink' }}">{{ $d['last'] ? 'Inspectée '.$d['last']->locale('fr')->diffForHumans() : 'Jamais inspectée' }}</span>
                             <span class="text-[12.5px] font-semibold text-navy group-hover:underline">Inspecter</span>
                         </button>
                     </form>

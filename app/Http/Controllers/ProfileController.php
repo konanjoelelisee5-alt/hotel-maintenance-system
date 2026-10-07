@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserRole;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\ActivityLog;
 use Illuminate\Http\RedirectResponse;
@@ -17,8 +16,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        // Housekeeping : avatar, rôle, langue, déconnexion (mot de passe toujours modifiable).
-        return view($request->user()->role === UserRole::Housekeeping ? 'housekeeping.profile' : 'profile.edit', [
+        return view('profile.edit', [
             'user' => $request->user(),
         ]);
     }

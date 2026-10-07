@@ -14,8 +14,8 @@
 
                     <div>
                         <x-input-label value="Code technique" />
-                        <p class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm text-gray-600 font-mono">{{ $workOrderType->code }}</p>
-                        <p class="text-xs text-gray-500 mt-1">Le code ne peut pas être modifié après création.</p>
+                        <p class="mt-1 px-3 py-2 bg-line-soft rounded-md text-sm text-ink-body font-mono">{{ $workOrderType->code }}</p>
+                        <p class="text-xs text-ink-muted mt-1">Le code ne peut pas être modifié après création.</p>
                     </div>
 
                     <div>
@@ -25,14 +25,14 @@
 
                     <div>
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="is_active" value="1" @checked($workOrderType->is_active) class="rounded border-gray-300">
+                            <input type="checkbox" name="is_active" value="1" @checked($workOrderType->is_active) class="rounded border-line">
                             Type actif
                         </label>
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('work-order-types.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Enregistrer</button>
+                        <a href="{{ route('work-order-types.index') }}" class="btn btn-ghost">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
                     </div>
                 </form>
             </div>

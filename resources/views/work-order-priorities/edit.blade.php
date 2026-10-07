@@ -19,12 +19,12 @@
 
                     <div>
                         <x-input-label value="Code technique" />
-                        <p class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm text-gray-600 font-mono">{{ $workOrderPriority->code }}</p>
+                        <p class="mt-1 px-3 py-2 bg-line-soft rounded-md text-sm text-ink-body font-mono">{{ $workOrderPriority->code }}</p>
                     </div>
 
                     <div>
                         <x-input-label for="color" value="Couleur" />
-                        <input type="color" id="color" name="color" value="{{ old('color', $workOrderPriority->color) }}" class="mt-1 block w-24 h-10 border-gray-300 rounded-md shadow-sm">
+                        <input type="color" id="color" name="color" value="{{ old('color', $workOrderPriority->color) }}" class="mt-1 block w-24 h-10 border-line rounded-md shadow-sm">
                         <x-input-error :messages="$errors->get('color')" class="mt-2" />
                     </div>
 
@@ -35,14 +35,14 @@
 
                     <div>
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="is_active" value="1" @checked($workOrderPriority->is_active) class="rounded border-gray-300">
+                            <input type="checkbox" name="is_active" value="1" @checked($workOrderPriority->is_active) class="rounded border-line">
                             Priorité active
                         </label>
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('work-order-priorities.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Enregistrer</button>
+                        <a href="{{ route('work-order-priorities.index') }}" class="btn btn-ghost">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
                     </div>
                 </form>
             </div>

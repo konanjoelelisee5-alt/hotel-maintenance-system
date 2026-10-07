@@ -29,14 +29,14 @@
             @foreach ($rows as [$label, $value])
                 <div class="flex justify-between gap-3 px-5 py-2.5">
                     <dt class="text-ink-grey">{{ $label }}</dt>
-                    <dd class="m-0 text-right font-medium text-[#14202B]">{{ $value }}</dd>
+                    <dd class="m-0 text-right font-medium text-ink-deep">{{ $value }}</dd>
                 </div>
             @endforeach
 
             @if ($showTime)
                 <div class="flex justify-between gap-3 px-5 py-2.5">
                     <dt class="text-ink-grey">Temps passé</dt>
-                    <dd class="m-0 text-right font-medium text-[#14202B]">
+                    <dd class="m-0 text-right font-medium text-ink-deep">
                         {{ \App\Support\Duration::human($workOrder->total_worked_minutes) }}
                         @if ($activeSession)
                             <span class="flex items-center justify-end gap-1.5 text-[11.5px] text-green font-semibold mt-0.5">

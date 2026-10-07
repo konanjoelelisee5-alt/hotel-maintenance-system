@@ -227,10 +227,24 @@ class Housekeeping
     public static function headTools(): array
     {
         return [
-            ['label' => 'Plan des étages', 'route' => 'housekeeping.floor-plan', 'icon' => 'pin', 'hk' => 'building', 'description' => 'L\'état de chaque chambre d\'un coup d\'œil'],
+            // 'match' exact : « housekeeping.* » allumerait aussi l'Accueil et les autres outils.
+            ['label' => 'Plan des étages', 'route' => 'housekeeping.floor-plan', 'match' => ['housekeeping.floor-plan'], 'icon' => 'pin', 'hk' => 'building', 'description' => 'L\'état de chaque chambre d\'un coup d\'œil'],
             ['label' => 'Inspections', 'route' => 'inspections.index', 'icon' => 'shield', 'hk' => 'check-circle', 'description' => 'Tournée d\'inspection des chambres'],
-            ['label' => 'Bilan du mois', 'route' => 'housekeeping.monthly-report', 'icon' => 'report', 'hk' => 'activity', 'description' => 'Pannes, délais de réparation, chambres touchées'],
+            ['label' => 'Bilan du mois', 'route' => 'housekeeping.monthly-report', 'match' => ['housekeeping.monthly-report'], 'icon' => 'report', 'hk' => 'activity', 'description' => 'Pannes, délais de réparation, chambres touchées'],
         ];
+    }
+
+    /**
+     * Gouvernante : signalements encore ouverts par agent de son équipe, les plus chargés d'abord.
+     *
+     * @return Collection<int, array{user: ?User, count: int}>
+     */
+    public static function teamLoad(User $head, int $limit = 5): Collection
+    {
+        return WorkOrder::visibleTo($head)->open()->with('reporter')->get()
+            ->groupBy('reported_by')
+            ->map(fn (Collection $orders) => ['user' => $orders->first()->reporter, 'count' => $orders->count()])
+            ->sortByDesc('count')->take($limit)->values();
     }
 
     /** Gouvernantes actives (responsables du service Housekeeping). */

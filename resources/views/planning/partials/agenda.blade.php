@@ -10,7 +10,7 @@
      class="flex flex-col gap-4">
 
     {{-- ===== Barre d'outils : période, navigation, vues ===== --}}
-    <section class="bg-white border border-line rounded-xl px-4 py-3.5 lg:px-5 flex flex-col gap-3">
+    <section class="bg-white border border-line rounded-xl px-4 py-3.5 tab:px-5 flex flex-col gap-3">
         <div class="flex items-center gap-3 flex-wrap">
             <div class="flex items-center gap-2.5 min-w-0 mr-auto">
                 <h2 class="m-0 text-[19px] font-semibold tracking-tight text-navy truncate" x-text="title"></h2>
@@ -18,11 +18,11 @@
             </div>
 
             <div class="flex items-center gap-1.5">
-                <button type="button" @click="go(-1)" class="w-9 h-9 rounded-[9px] border border-line flex items-center justify-center text-[#4A4639] hover:bg-paper" aria-label="Période précédente">
+                <button type="button" @click="go(-1)" class="w-9 h-9 rounded-[9px] border border-line flex items-center justify-center text-ink-body hover:bg-paper" aria-label="Période précédente">
                     <x-nav-icon name="back" class="w-4 h-4" />
                 </button>
                 <button type="button" @click="today()" class="h-9 px-3.5 rounded-[9px] border border-line text-[13px] font-semibold text-navy hover:bg-paper">Aujourd'hui</button>
-                <button type="button" @click="go(1)" class="w-9 h-9 rounded-[9px] border border-line flex items-center justify-center text-[#4A4639] hover:bg-paper" aria-label="Période suivante">
+                <button type="button" @click="go(1)" class="w-9 h-9 rounded-[9px] border border-line flex items-center justify-center text-ink-body hover:bg-paper" aria-label="Période suivante">
                     <x-nav-icon name="back" class="w-4 h-4 rotate-180" />
                 </button>
             </div>
@@ -39,13 +39,13 @@
 
         @if ($technicians)
             {{-- Filtre : une pastille par technicien, avec ses initiales. --}}
-            <div class="flex gap-2 overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0 pb-0.5" role="group" aria-label="Technicien">
+            <div class="flex gap-2 overflow-x-auto -mx-4 px-4 tab:mx-0 tab:px-0 pb-0.5" role="group" aria-label="Technicien">
                 <button type="button" @click="filter('')" :aria-pressed="technicianId === ''"
-                        :class="technicianId === '' ? 'bg-navy text-white border-navy' : 'bg-white text-[#4A4639] border-line hover:bg-paper'"
+                        :class="technicianId === '' ? 'bg-navy text-white border-navy' : 'bg-white text-ink-body border-line hover:bg-paper'"
                         class="flex-shrink-0 h-[34px] px-3.5 rounded-full border text-[13px] font-semibold transition">Toute l'équipe</button>
                 @foreach ($technicians as $technician)
                     <button type="button" @click="filter('{{ $technician->id }}')" :aria-pressed="technicianId === '{{ $technician->id }}'"
-                            :class="technicianId === '{{ $technician->id }}' ? 'bg-navy text-white border-navy' : 'bg-white text-[#4A4639] border-line hover:bg-paper'"
+                            :class="technicianId === '{{ $technician->id }}' ? 'bg-navy text-white border-navy' : 'bg-white text-ink-body border-line hover:bg-paper'"
                             class="flex-shrink-0 inline-flex items-center gap-2 h-[34px] pl-1 pr-3.5 rounded-full border text-[13px] font-medium transition">
                         <span class="w-[26px] h-[26px] rounded-full bg-gold text-navy text-[10.5px] font-bold flex items-center justify-center">{{ $technician->initialsOrGenerated() }}</span>
                         {{ $technician->name }}
@@ -55,13 +55,13 @@
         @endif
     </section>
 
-    <div x-show="failed" x-cloak class="flex items-center justify-between gap-3 px-4 py-3 rounded-[10px] bg-[#FBE4E1] border border-red/25 text-[13px] font-medium text-[#8A1F16]">
+    <div x-show="failed" x-cloak class="flex items-center justify-between gap-3 px-4 py-3 rounded-[10px] bg-danger-soft border border-red/25 text-[13px] font-medium text-danger-ink">
         Impossible de charger le planning.
         <button type="button" @click="load()" class="underline font-semibold">Réessayer</button>
     </div>
 
     {{-- ===== Bande des 7 jours (Jour ; Semaine sur téléphone) — glisser pour changer de semaine ===== --}}
-    <section x-show="view === 'day' || view === 'week'" :class="{ 'lg:hidden': view === 'week' }"
+    <section x-show="view === 'day' || view === 'week'" :class="{ 'split:hidden': view === 'week' }"
              @touchstart.passive="swipeStart($event)" @touchend="swipeEnd($event)"
              class="bg-white border border-line rounded-xl px-2 py-2.5 grid grid-cols-7 gap-1 select-none">
         <template x-for="day in weekDays" :key="day.getTime()">
@@ -81,12 +81,12 @@
     </section>
 
     {{-- ===== Vue Jour : programme du jour choisi ===== --}}
-    <section x-show="view === 'day'" @touchstart.passive="swipeStart($event)" @touchend="swipeEnd($event)" class="lg:max-w-3xl">
+    <section x-show="view === 'day'" @touchstart.passive="swipeStart($event)" @touchend="swipeEnd($event)" class="tab:max-w-3xl">
         @include('planning.partials.agenda-day', ['dayExpr' => 'selected'])
     </section>
 
     {{-- ===== Vue Semaine sur téléphone : la semaine jour par jour ===== --}}
-    <section x-show="view === 'week'" class="lg:hidden flex flex-col gap-5">
+    <section x-show="view === 'week'" class="split:hidden flex flex-col gap-5">
         <template x-for="day in weekDays" :key="day.getTime()">
             <div>
                 <div class="flex items-baseline gap-2 mb-2 px-0.5">
@@ -107,7 +107,7 @@
     </section>
 
     {{-- ===== Vue Semaine sur ordinateur : grille horaire ===== --}}
-    <section x-show="view === 'week'" class="hidden lg:block bg-white border border-line rounded-xl overflow-hidden">
+    <section x-show="view === 'week'" class="hidden split:block bg-white border border-line rounded-xl overflow-hidden">
         <div class="grid grid-cols-[60px_repeat(7,minmax(0,1fr))] border-b border-line bg-paper/60">
             <div></div>
             <template x-for="day in weekDays" :key="day.getTime()">
@@ -138,12 +138,12 @@
                         </template>
 
                         <template x-for="e in layout(day)" :key="e.id">
-                            <a :href="e.url" :style="e.style" :title="`${time(e.startAt)} – ${e.title}`"
-                               class="absolute overflow-hidden rounded-[8px] border-l-[3px] px-2 py-1 text-[12px] leading-tight hover:shadow-md hover:z-10 transition"
+                            <a :href="e.url" :style="e.style + cardStyle(e)" :title="`${time(e.startAt)} – ${e.title}`"
+                               class="absolute overflow-hidden rounded-[8px] border px-2 py-1 text-[12px] leading-tight hover:shadow-md hover:z-10 transition"
                                :class="{ 'opacity-60': isPast(e) }">
-                                <div class="font-mono text-[10.5px] text-[#4A4639]" x-text="time(e.startAt)"></div>
+                                <div class="font-mono text-[10.5px] text-ink-body" x-text="time(e.startAt)"></div>
                                 <div class="font-semibold text-navy truncate" x-text="e.title"></div>
-                                <div x-show="!e.compact" class="text-[11px] text-[#6C6658] truncate" x-text="[e.place, e.technician].filter(Boolean).join(' · ')"></div>
+                                <div x-show="!e.compact" class="text-[11px] text-ink-muted truncate" x-text="[e.place, e.technician].filter(Boolean).join(' · ')"></div>
                             </a>
                         </template>
 
@@ -162,7 +162,7 @@
     </section>
 
     {{-- ===== Vue Mois : grille + programme du jour choisi ===== --}}
-    <div x-show="view === 'month'" class="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)] items-start">
+    <div x-show="view === 'month'" class="grid gap-4 split:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)] items-start">
         <section @touchstart.passive="swipeStart($event)" @touchend="swipeEnd($event)"
                  class="bg-white border border-line rounded-xl overflow-hidden select-none">
             <div class="grid grid-cols-7 border-b border-line bg-paper/60">
@@ -173,19 +173,19 @@
             <div class="grid grid-cols-7">
                 <template x-for="day in monthDays" :key="day.getTime()">
                     <button type="button" @click="pick(day)"
-                            class="min-h-[58px] lg:min-h-[92px] flex flex-col items-center lg:items-stretch gap-1 p-1.5 border-b border-r border-line-soft text-left transition hover:bg-paper"
-                            :class="{ 'bg-paper/50': !isSameMonth(day) && !isSelected(day), 'bg-[#EAF0F6]': isSelected(day) }">
-                        <span class="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-semibold lg:self-end"
+                            class="min-h-[58px] tab:min-h-[92px] flex flex-col items-center tab:items-stretch gap-1 p-1.5 border-b border-r border-line-soft text-left transition hover:bg-paper"
+                            :class="{ 'bg-paper/50': !isSameMonth(day) && !isSelected(day), 'bg-info-bg': isSelected(day) }">
+                        <span class="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-semibold tab:self-end"
                               :class="isToday(day) ? 'bg-navy text-white' : (isSameMonth(day) ? 'text-navy' : 'text-ink-grey/60')" x-text="day.getDate()"></span>
                         {{-- Téléphone : pastilles ; ordinateur : titres --}}
-                        <span class="flex gap-0.5 lg:hidden">
+                        <span class="flex gap-0.5 tab:hidden">
                             <template x-for="e in eventsOn(day).slice(0, 3)" :key="e.id">
                                 <span class="w-1.5 h-1.5 rounded-full" :style="`background-color:${e.color}`"></span>
                             </template>
                         </span>
-                        <span class="hidden lg:flex flex-col gap-0.5 w-full">
+                        <span class="hidden tab:flex flex-col gap-0.5 w-full">
                             <template x-for="e in eventsOn(day).slice(0, 2)" :key="e.id">
-                                <span class="truncate rounded-[5px] border-l-2 px-1.5 py-0.5 text-[11px] font-medium text-navy" :style="cardStyle(e)"
+                                <span class="truncate rounded-[5px] border px-1.5 py-0.5 text-[11px] font-medium text-navy" :style="cardStyle(e)"
                                       x-text="time(e.startAt) + ' ' + e.title"></span>
                             </template>
                             <span x-show="eventsOn(day).length > 2" class="text-[11px] font-semibold text-ink-grey px-1.5" x-text="'+ ' + (eventsOn(day).length - 2) + ' autre(s)'"></span>

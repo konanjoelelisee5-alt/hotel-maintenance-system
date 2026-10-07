@@ -11,8 +11,8 @@
 ])
 
 @php
-    $classes = 'w-full flex items-center gap-3 px-4 py-3 lg:py-2.5 text-left text-[14px] lg:text-[13.5px] font-medium '
-        .($danger ? 'text-red hover:bg-[#FDECEA] focus:bg-[#FDECEA]' : 'text-[#26302B] hover:bg-paper focus:bg-paper')
+    $classes = 'w-full flex items-center gap-3 px-4 py-3 tab:py-2.5 text-left text-[14px] tab:text-[13.5px] font-medium '
+        .($danger ? 'text-red hover:bg-danger-bg focus:bg-danger-bg' : 'text-[#26302B] hover:bg-paper focus:bg-paper')
         .' focus:outline-none';
 @endphp
 

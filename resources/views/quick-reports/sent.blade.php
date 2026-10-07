@@ -10,11 +10,11 @@
     <div class="w-full max-w-[560px] mx-auto tab:mt-6">
         <section class="bg-white border border-line rounded-xl overflow-hidden">
             <div class="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-3 border-b border-line-soft">
-                <span class="w-16 h-16 rounded-full bg-[#E6F3EC] text-green flex items-center justify-center ring-8 ring-[#E6F3EC]/50">
+                <span class="w-16 h-16 rounded-full bg-ok-bg text-green flex items-center justify-center ring-8 ring-ok-bg/50">
                     <x-hk.icon name="check" :size="30" />
                 </span>
                 <h2 class="m-0 mt-2 text-[20px] font-semibold text-navy tracking-tight">Signalement envoyé</h2>
-                <p class="m-0 text-[13.5px] text-[#6C6658] max-w-[380px] leading-relaxed">La maintenance est prévenue. Vous recevrez une notification à chaque étape de la réparation.</p>
+                <p class="m-0 text-[13.5px] text-ink-muted max-w-[380px] leading-relaxed">La maintenance est prévenue. Vous recevrez une notification à chaque étape de la réparation.</p>
             </div>
 
             <dl class="m-0 px-6 py-2 text-[13.5px]">

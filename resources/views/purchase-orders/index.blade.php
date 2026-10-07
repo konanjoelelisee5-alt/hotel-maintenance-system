@@ -24,7 +24,7 @@
         <div class="flex items-end gap-4 flex-wrap px-4 sm:px-6 pt-5 border-b border-line">
             <div class="flex flex-col gap-0.5 pb-3.5">
                 <h2 class="m-0 text-[17px] font-semibold text-navy">{{ $tab === 'all' ? 'Tous les bons de commande' : 'Bons de commande — '.mb_strtolower($tabLabels[$tab]) }}</h2>
-                <div class="text-[12.5px] text-[#6C6658]">{{ $purchaseOrders->total() }} bon(s) · les plus récents en premier</div>
+                <div class="text-[12.5px] text-ink-muted">{{ $purchaseOrders->total() }} bon(s) · les plus récents en premier</div>
             </div>
             <x-tabs :items="$tabItems" :active="$tab" label="Étapes" class="sm:ml-auto max-w-full" />
         </div>
@@ -37,7 +37,7 @@
                 <input type="search" name="search" value="{{ $search }}" placeholder="Numéro ou fournisseur…" class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[13.5px] placeholder:text-ink-grey focus:ring-0">
             </label>
             @if (filled($search))
-                <a href="{{ route('purchase-orders.index', array_filter(['tab' => $tab === 'all' ? null : $tab], 'filled')) }}" class="text-[12.5px] font-semibold text-[#6C6658] hover:text-navy">Effacer la recherche</a>
+                <a href="{{ route('purchase-orders.index', array_filter(['tab' => $tab === 'all' ? null : $tab], 'filled')) }}" class="text-[12.5px] font-semibold text-ink-muted hover:text-navy">Effacer la recherche</a>
             @endif
         </form>
 
@@ -45,32 +45,32 @@
             <div class="px-5 py-12 flex flex-col items-center gap-2 text-center">
                 <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-grey"><x-nav-icon name="truck" class="w-5 h-5" /></div>
                 <div class="text-[14px] font-semibold">Aucun bon de commande</div>
-                <div class="text-[12.5px] text-[#6C6658]">Changez d’onglet ou effacez la recherche.</div>
+                <div class="text-[12.5px] text-ink-muted">Changez d’onglet ou effacez la recherche.</div>
             </div>
         @else
-            <div class="hidden md:grid grid-cols-[minmax(0,1fr)_130px_150px_160px_90px] gap-4 px-6 py-3 bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-[#6C6658]">
+            <div class="hidden split:grid grid-cols-[minmax(0,1fr)_130px_150px_160px_90px] gap-4 px-6 py-3 bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-ink-muted">
                 <span>Commande</span><span>Date</span><span class="text-right">Montant</span><span>Statut</span><span></span>
             </div>
             <ul class="m-0 p-0 list-none divide-y divide-line-soft">
                 @foreach ($purchaseOrders as $po)
-                    <li class="relative grid gap-1 md:grid-cols-[minmax(0,1fr)_130px_150px_160px_90px] md:gap-4 md:items-center px-4 sm:px-6 py-3.5 hover:bg-paper/60">
+                    <li class="relative grid gap-1 split:grid-cols-[minmax(0,1fr)_130px_150px_160px_90px] split:gap-4 split:items-center px-4 sm:px-6 py-3.5 hover:bg-paper/60">
                         <div class="min-w-0">
                             <div class="flex items-center justify-between gap-2">
-                                <a href="{{ route('purchase-orders.show', $po) }}" class="font-mono text-[13px] font-semibold text-navy hover:underline after:absolute after:inset-0 md:after:hidden">{{ $po->number }}</a>
-                                <x-purchase-order-status-badge :status="$po->status" class="md:hidden" />
+                                <a href="{{ route('purchase-orders.show', $po) }}" class="font-mono text-[13px] font-semibold text-navy hover:underline after:absolute after:inset-0 split:after:hidden">{{ $po->number }}</a>
+                                <x-purchase-order-status-badge :status="$po->status" class="split:hidden" />
                             </div>
-                            <div class="text-[13px] text-[#4A4639] truncate">
+                            <div class="text-[13px] text-ink-body truncate">
                                 {{ $po->supplier->name }}
-                                @if ($po->workOrder) <span class="text-[#6C6658]">· pour {{ $po->workOrder->code() }}</span> @endif
+                                @if ($po->workOrder) <span class="text-ink-muted">· pour {{ $po->workOrder->code() }}</span> @endif
                             </div>
                         </div>
                         {{-- Téléphone : date et montant sur une ligne ; bureau : une colonne chacun. --}}
-                        <div class="flex items-baseline justify-between gap-2 md:contents">
-                            <div class="text-[12.5px] text-[#6C6658] md:text-[13px] md:text-[#4A4639]">{{ $po->order_date->format('d/m/Y') }}</div>
-                            <div class="font-mono text-[13.5px] text-navy md:text-right">{{ \App\Support\Money::format($po->total_amount) }}</div>
+                        <div class="flex items-baseline justify-between gap-2 split:contents">
+                            <div class="text-[12.5px] text-ink-muted split:text-[13px] split:text-ink-body">{{ $po->order_date->format('d/m/Y') }}</div>
+                            <div class="font-mono text-[13.5px] text-navy split:text-right">{{ \App\Support\Money::format($po->total_amount) }}</div>
                         </div>
-                        <div class="hidden md:block"><x-purchase-order-status-badge :status="$po->status" /></div>
-                        <div class="hidden md:block text-right">
+                        <div class="hidden split:block"><x-purchase-order-status-badge :status="$po->status" /></div>
+                        <div class="hidden split:block text-right">
                             <a href="{{ route('purchase-orders.show', $po) }}" class="btn btn-sm btn-secondary">Ouvrir</a>
                         </div>
                     </li>

@@ -2,27 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Couleurs de l'application (tailwind.config.js les lit : bg-navy, text-ink-muted, border-line…),
+   en triplets RVB pour garder les opacités (bg-navy/20). Un thème les redéfinit sur un bloc :
+   .theme-sheet plus bas. */
+:root {
+    --c-navy: 14 33 54; --c-navy-dark: 11 27 44; --c-navy-light: 22 52 79;
+    --c-gold: 181 132 53; --c-gold-400: 201 169 97;
+    --c-blue: 38 73 107; --c-red: 179 38 30; --c-amber: 180 116 15; --c-green: 30 122 85;
+    --c-ink-grey: 138 133 120; --c-ink-deep: 20 32 43; --c-ink-strong: 61 58 51; --c-ink-body: 74 70 57;
+    --c-ink-muted: 108 102 88; --c-ink-faint: 160 154 140;
+    --c-warn-ink: 122 90 22; --c-warn-bg: 251 241 223;
+    --c-danger-ink: 138 31 22; --c-danger-bg: 253 236 234; --c-danger-soft: 251 228 225;
+    --c-ok-bg: 230 243 236; --c-info-bg: 234 240 246;
+    --c-side-muted: 143 163 184; --c-side-soft: 185 199 214;
+    --c-canvas: 237 234 227; --c-paper: 250 248 244; --c-line: 226 220 208; --c-line-soft: 243 239 230;
+}
+
+/* Zones qui défilent de côté (pastilles, filtres, tableaux larges, barre d'action) : sur
+   téléphone et tablette (< 1200 px, écran « desk »), on les fait glisser au doigt, la barre
+   de défilement horizontale ne fait que barrer l'écran. On la masque ; le défilement reste.
+   Sur ordinateur elle reste : à la souris, c'est le seul moyen de défiler de côté. */
+@media (max-width: 1199.98px) {
+    .overflow-x-auto, .overflow-x-scroll, .overflow-auto { scrollbar-width: none; }
+    .overflow-x-auto::-webkit-scrollbar, .overflow-x-scroll::-webkit-scrollbar, .overflow-auto::-webkit-scrollbar { display: none; }
+}
+
 /* Alpine : éléments masqués tant qu'Alpine n'a pas démarré (ex. menu mobile). */
 [x-cloak] { display: none !important; }
 
 /* ==========================================================================
-   Boutons de la refonte (fiches, panneaux) : .btn + une variante.
+   Bouton unique de l'application : .btn + une variante (+ taille), ou <x-button>.
+   États : normal, appuyé (:active), désactivé (:disabled / aria-disabled),
+   et data-state="loading | success | error", posé par resources/js/ui.js
+   (envoi de formulaire) ou par les écrans qui envoient en fetch.
    ========================================================================== */
 @layer components {
     .btn {
-        @apply inline-flex items-center justify-center gap-2 h-[40px] px-4 rounded-[9px] text-[13px] font-semibold
-            whitespace-nowrap transition disabled:opacity-60 disabled:cursor-not-allowed;
+        @apply relative inline-flex items-center justify-center gap-2 h-[40px] px-4 rounded-[9px] text-[13px] font-semibold
+            whitespace-nowrap select-none transition duration-150
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30 focus-visible:ring-offset-1
+            disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:cursor-not-allowed;
     }
+    .btn:active:not(:disabled):not([aria-disabled="true"]) { transform: translateY(1px) scale(.985); }
     .btn svg, .btn > span:has(> svg) { @apply w-4 h-4 flex-shrink-0; }
     .btn-primary { @apply bg-navy text-white hover:bg-navy-light; }
     .btn-gold { @apply bg-gold text-navy hover:bg-gold-400; }
-    .btn-secondary { @apply border border-line bg-white text-[#3d3a33] hover:bg-paper; }
-    .btn-danger { @apply border border-red/30 bg-white text-red hover:bg-[#FBE4E1]; }
+    .btn-success { @apply bg-green text-white hover:bg-[#186446]; }
+    .btn-secondary { @apply border border-line bg-white text-ink-strong hover:bg-paper; }
+    .btn-danger { @apply border border-red/30 bg-white text-red hover:bg-danger-soft; }
     .btn-danger-solid { @apply bg-red text-white hover:bg-[#9A2019]; }
-    .btn-ghost { @apply text-[#4A4639] hover:bg-line-soft; }
+    .btn-ghost { @apply text-ink-body hover:bg-line-soft; }
     .btn-sm { @apply h-[32px] px-3 text-[12.5px] rounded-[8px]; }
     .btn-lg { @apply h-[48px] px-5 text-[14px] rounded-[10px]; }
+
+    /* En cours d'envoi : le libellé laisse place à un indicateur, les clics sont ignorés. */
+    .btn[data-state="loading"] { @apply cursor-wait pointer-events-none; color: transparent !important; }
+    .btn[data-state="loading"]::after {
+        content: ''; position: absolute; inset: 0; margin: auto; width: 1rem; height: 1rem;
+        border-radius: 9999px; border: 2px solid currentColor; border-top-color: transparent;
+        color: #fff; animation: btn-spin .7s linear infinite;
+    }
+    .btn-secondary[data-state="loading"]::after, .btn-ghost[data-state="loading"]::after,
+    .btn-danger[data-state="loading"]::after, .btn-gold[data-state="loading"]::after { color: rgb(var(--c-navy)); }
+    .btn[data-state="success"] { @apply bg-green text-white border-green pointer-events-none; }
+    /* Les écrans en fetch désactivent aussi le bouton pendant l'envoi : l'état reste lisible. */
+    .btn[data-state="loading"]:disabled, .btn[data-state="success"]:disabled { opacity: 1; }
+    .btn[data-state="error"] { @apply ring-2 ring-red/40; animation: btn-shake .35s ease-in-out; }
 }
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+@keyframes btn-shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+@media (prefers-reduced-motion: reduce) {
+    .btn[data-state="loading"]::after { animation-duration: 2s; }
+    .btn[data-state="error"] { animation: none; }
+}
+
+/* Transition entre les pages : le contenu apparaît en fondu court. (Les transitions
+   natives du navigateur échouaient sur la connexion et la déconnexion — envoi suivi
+   d'une redirection — avec une erreur en console.) */
+main { animation: page-in .18s ease-out; }
+@keyframes page-in { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { main { animation: none; } }
+
+/* Clavier du téléphone ouvert (resources/js/ui.js) : les barres collées en bas se
+   remettent dans le flux et la navigation basse s'efface, pour ne masquer ni le
+   champ en cours de saisie ni le bouton d'envoi. */
+.kb-open [data-thumb-bar] { position: static !important; box-shadow: none !important; }
+
+/* Zone du pouce (action de la page en bas de l'écran) : boutons d'au moins 44 px ; une
+   action seule occupe toute la largeur, atteignable de la main droite comme de la gauche. */
+[data-thumb-bar] .btn { min-height: 44px; }
+[data-thumb-bar] > .btn:only-child,
+[data-thumb-bar] > form:only-child,
+[data-thumb-bar] > form:only-child > .btn { flex: 1 1 auto; width: 100%; }
+.kb-open [data-bottom-nav] { display: none !important; }
 
 /* ==========================================================================
    Fenêtres (modales) — resources/js/modal.js, components/modal-panel.blade.php
@@ -69,14 +141,14 @@
 /* Champs : mêmes formes que la refonte (rayon 9 px, filet beige, focus navy), dans les
    fenêtres (.modal-form) comme sur les fiches (.ui-form, ex. fiche d'un OT). */
 :is(.modal-form, .ui-form) label:not(:has(input)) {
-    @apply block text-[12px] font-semibold uppercase tracking-wide text-[#6C6658] mb-1.5;
+    @apply block text-[12px] font-semibold uppercase tracking-wide text-ink-muted mb-1.5;
 }
 :is(.modal-form, .ui-form) label:has(input[type="checkbox"]) {
-    @apply inline-flex items-center gap-2.5 text-[14px] font-medium text-[#14202B] cursor-pointer;
+    @apply inline-flex items-center gap-2.5 text-[14px] font-medium text-ink-deep cursor-pointer;
 }
 :is(.modal-form, .ui-form) :is(input[type="text"], input[type="email"], input[type="password"], input[type="number"],
     input[type="date"], input[type="datetime-local"], input[type="tel"], input[type="search"], select, textarea) {
-    @apply block w-full mt-0 px-3.5 py-2.5 rounded-[9px] border border-line bg-white text-[14px] text-[#14202B]
+    @apply block w-full mt-0 px-3.5 py-2.5 rounded-[9px] border border-line bg-white text-[14px] text-ink-deep
         shadow-none placeholder:text-ink-grey transition focus:border-navy focus:ring-2 focus:ring-navy/15 focus:outline-none;
 }
 :is(.modal-form, .ui-form) select {
@@ -91,10 +163,10 @@
 /* Choix exclusifs (ex. Chambre / Espace commun) : pastilles, la choisie en navy. */
 :is(.modal-form, .ui-form) label:has(input[type="radio"]) {
     @apply inline-flex items-center gap-2.5 h-[42px] px-4 rounded-[9px] border border-line bg-white
-        text-[14px] font-medium text-[#4A4639] cursor-pointer transition hover:bg-paper;
+        text-[14px] font-medium text-ink-body cursor-pointer transition hover:bg-paper;
 }
 :is(.modal-form, .ui-form) label:has(input[type="radio"]:checked) {
-    @apply border-navy bg-[#EAF0F6] text-navy font-semibold;
+    @apply border-navy bg-info-bg text-navy font-semibold;
 }
 :is(.modal-form, .ui-form) input[type="radio"] {
     @apply w-4 h-4 border-line text-navy focus:ring-navy/20;
@@ -114,8 +186,8 @@
 }
 /* Bandeau en tête du formulaire : résumé des erreurs, droits, réseau. */
 .modal-form [data-modal-banner] {
-    @apply flex items-start gap-2.5 mb-6 px-4 py-3 rounded-[10px] bg-[#FBE4E1] border border-red/25
-        text-[13px] font-medium leading-snug text-[#8A1F16];
+    @apply flex items-start gap-2.5 mb-6 px-4 py-3 rounded-[10px] bg-danger-soft border border-red/25
+        text-[13px] font-medium leading-snug text-danger-ink;
 }
 .modal-form [data-modal-banner] svg {
     @apply w-[18px] h-[18px] flex-shrink-0 mt-px text-red;
@@ -127,7 +199,7 @@
 /* Boutons hors pied (ex. « Réinitialiser le mot de passe ») : bouton secondaire. */
 .modal-form button[type="submit"] {
     @apply inline-flex items-center justify-center gap-2 h-[40px] px-4 rounded-[9px] border border-line bg-white
-        text-[13px] font-semibold text-[#3d3a33] shadow-none transition hover:bg-paper disabled:opacity-60;
+        text-[13px] font-semibold text-ink-strong shadow-none transition hover:bg-paper disabled:opacity-60;
 }
 
 /* Pied de formulaire (la ligne qui porte le bouton d'envoi) : collé en bas de la
@@ -141,11 +213,90 @@
     @apply w-auto h-[42px] px-5 border-0 bg-navy text-white text-[13.5px] hover:bg-navy-light;
 }
 .modal-form form > div:has(> button[type="submit"]) > [data-modal-close] {
-    @apply inline-flex items-center h-[42px] px-4 rounded-[9px] text-[13.5px] font-semibold text-[#4A4639]
+    @apply inline-flex items-center h-[42px] px-4 rounded-[9px] text-[13.5px] font-semibold text-ink-body
         no-underline hover:bg-line-soft hover:no-underline transition;
 }
 
 /* Envoi en cours : petit cercle qui tourne dans le bouton. */
 .modal-spinner {
     @apply inline-block w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin;
+}
+
+/* ==========================================================================
+   Réception (layouts.sheet) : feuille blanche aux grands arrondis sur un gris
+   perle, encre presque noire, accent bleu ciel. Les pages partagées (demandes, fiche
+   d'OT, chambres bloquées, bilan…) prennent ces couleurs sous .theme-sheet, sans
+   rien changer pour les autres rôles.
+   ========================================================================== */
+.theme-sheet {
+    --c-navy: 23 25 31; --c-navy-dark: 15 19 30; --c-navy-light: 48 52 64;
+    --c-gold: 47 111 214; --c-gold-400: 37 96 196;
+    --c-blue: 47 111 214; --c-red: 214 52 60; --c-amber: 194 98 12; --c-green: 18 134 98;
+    --c-ink-grey: 112 116 126; --c-ink-deep: 23 25 31; --c-ink-strong: 52 55 64; --c-ink-body: 72 75 85;
+    --c-ink-muted: 100 104 114; --c-ink-faint: 160 163 171;
+    --c-warn-ink: 146 84 10; --c-warn-bg: 254 243 226;
+    --c-danger-ink: 168 32 38; --c-danger-bg: 254 238 238; --c-danger-soft: 253 228 228;
+    --c-ok-bg: 228 246 238; --c-info-bg: 234 242 253;
+    --c-side-muted: 112 116 126; --c-side-soft: 72 75 85;
+    --c-canvas: 233 233 238; --c-paper: 246 246 248; --c-line: 233 233 238; --c-line-soft: 242 242 245;
+    /* Couleurs propres à la réception (courbe, pastilles) */
+    --rc-sky: 223 236 253;      /* aplat bleu pâle : bouton doux, bulle */
+    --rc-sky-ink: 28 76 150;    /* texte sur aplat bleu pâle */
+    --rc-orange: 240 160 88;    /* comparaison (semaine précédente) */
+    font-family: 'Manrope', 'Archivo', ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: 'tnum' 0;
+}
+.theme-sheet .font-sans { font-family: inherit; }
+/* Pas de police « machine à écrire » dans la feuille : références, heures et durées gardent
+   la police du texte, en chiffres de largeur égale pour rester alignés. */
+.theme-sheet .font-mono { font-family: inherit; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.theme-sheet ::selection { background: rgb(var(--rc-sky)); color: rgb(var(--rc-sky-ink)); }
+.theme-sheet :focus-visible { outline-color: rgb(var(--c-blue)); }
+.theme-sheet .tabular { font-variant-numeric: tabular-nums; }
+
+/* Formes : arrondis plus généreux que l'admin, comme la maquette. */
+.theme-sheet .rounded-xl { border-radius: 18px; }
+.theme-sheet .btn { border-radius: 12px; font-weight: 600; }
+.theme-sheet .btn-sm { border-radius: 10px; }
+.theme-sheet .btn-lg { border-radius: 14px; }
+.theme-sheet .btn-gold { background: rgb(var(--rc-sky)); color: rgb(var(--rc-sky-ink)); }
+.theme-sheet .btn-gold:hover { background: rgb(205 225 251); }
+.theme-sheet .btn-secondary { border-color: rgb(var(--c-line)); }
+.theme-sheet :is(.modal-form, .ui-form) :is(input[type="text"], input[type="email"], input[type="password"], input[type="number"],
+    input[type="date"], input[type="time"], input[type="datetime-local"], input[type="tel"], input[type="search"], select, textarea) {
+    border-radius: 12px; background: rgb(var(--c-paper)); border-color: transparent;
+}
+.theme-sheet :is(.modal-form, .ui-form) :is(input, select, textarea):focus { background: #fff; border-color: rgb(var(--c-blue)); }
+.theme-sheet :is(.modal-form, .ui-form) label:has(input[type="radio"]) { border-radius: 12px; }
+.theme-sheet :is(.modal-form, .ui-form) label:has(input[type="radio"]:checked) { border-color: rgb(var(--c-blue)); color: rgb(var(--rc-sky-ink)); }
+
+/* Barres de défilement fines, dans la teinte de l'encre. */
+@media (min-width: 1200px) {
+    .theme-sheet * { scrollbar-width: thin; scrollbar-color: rgb(var(--c-ink-faint) / .5) transparent; }
+}
+
+/* Fluidité : la page suivante remplace la précédente en fondu, la sidebar et la colonne de
+   droite restent en place. Activé par layouts.sheet seulement (@view-transition dans
+   sa balise <style>) ; navigateurs sans « view transitions » : l'entrée douce de <main>. */
+.theme-sheet [data-rc-sidebar] { view-transition-name: rc-sidebar; }
+.theme-sheet [data-rc-aside] { view-transition-name: rc-aside; }
+::view-transition-old(root) { animation: rc-fade-out .16s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: rc-fade-in .28s cubic-bezier(.16, 1, .3, 1) both; }
+::view-transition-group(rc-sidebar), ::view-transition-group(rc-aside) { animation-duration: 0s; }
+@keyframes rc-fade-out { to { opacity: 0; } }
+@keyframes rc-fade-in { from { opacity: 0; transform: translateY(6px); } }
+.theme-sheet main { animation: rc-rise .42s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes rc-rise { from { opacity: 0; transform: translateY(8px); } }
+
+/* Courbe des demandes : tracé à l'arrivée. */
+.rc-draw { stroke-dasharray: var(--len, 1200); stroke-dashoffset: var(--len, 1200); animation: rc-draw 1.1s cubic-bezier(.65, 0, .35, 1) .15s forwards; }
+.rc-draw-late { animation-delay: .35s; }
+.rc-area { opacity: 0; animation: rc-area-in .8s ease-out .7s forwards; }
+@keyframes rc-draw { to { stroke-dashoffset: 0; } }
+@keyframes rc-area-in { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+    .theme-sheet main { animation: none; }
+    .rc-draw, .rc-area { animation: none; stroke-dashoffset: 0; opacity: 1; }
 }

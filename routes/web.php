@@ -6,6 +6,7 @@ use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HousekeepingSupervisionController;
 use App\Http\Controllers\QuickReportController;
+use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\RoomBlockController;
 use App\Http\Controllers\RoomInspectionController;
 use App\Http\Controllers\TechnicianAvailabilityController;
@@ -41,6 +42,9 @@ use App\Http\Controllers\PartReservationController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\MaintenancePlanController;
 use App\Http\Controllers\OnCallController;
+use App\Http\Controllers\PartRequestController;
+use App\Http\Controllers\WorkOrderAcknowledgementController;
+use App\Http\Controllers\OpenAccessController;
 
 
 // === PAGE D'ACCUEIL ===
@@ -78,6 +82,12 @@ Route::middleware(['auth', 'role:housekeeping'])->group(function () {
 
 Route::middleware(['auth', 'role:reception'])->group(function () {
     Route::get('/reception/dashboard', [DashboardController::class, 'reception'])->name('reception.dashboard');
+    // Situation du client d'une chambre en panne (relogé, sorti, arrivée prévue…).
+    Route::post('/reception/chambres/{room}/situation', [ReceptionController::class, 'updateSituation'])->name('reception.situation');
+    // Écran du comptoir : actualisation automatique.
+    Route::get('/reception/etat', [ReceptionController::class, 'state'])->name('reception.state');
+    // Responsable de réception (droit vérifié dans le contrôleur).
+    Route::get('/reception/bilan', [ReceptionController::class, 'monthlyReport'])->name('reception.monthly-report');
 });
 
 // === MODULE B : GESTION DES ORDRES DE TRAVAIL (OT) ===
@@ -160,6 +170,8 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Accès ouvert (APP_OPEN_ACCESS) : passer d'un rôle à l'autre. 404 sinon.
+    Route::post('/voir-en-tant-que/{user}', OpenAccessController::class)->name('open-access.switch');
     // Pas d'auto-suppression : un compte porte l'historique des OT (signalés,
     // assignés, rapports). Seul un admin le retire, en le désactivant.
 });
@@ -301,6 +313,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/work-orders/{workOrder}/reservations', [PartReservationController::class, 'store'])->name('work-orders.reservations.store');
     Route::post('/work-orders/{workOrder}/reservations/{reservation}/withdraw', [PartReservationController::class, 'withdraw'])->name('work-orders.reservations.withdraw');
     Route::delete('/work-orders/{workOrder}/reservations/{reservation}', [PartReservationController::class, 'cancel'])->name('work-orders.reservations.cancel');
+
+    // Technicien : prise en charge (« J'ai vu ») et pièce absente du magasin.
+    Route::post('/work-orders/{workOrder}/vu', WorkOrderAcknowledgementController::class)->name('work-orders.acknowledge');
+    Route::post('/work-orders/{workOrder}/demandes-pieces', [PartRequestController::class, 'store'])->name('work-orders.part-requests.store');
+    // Le contrôleur vérifie le rôle (admin, manager).
+    Route::post('/demandes-pieces/{partRequest}/traiter', [PartRequestController::class, 'handle'])->name('part-requests.handle');
 });
 
 require __DIR__.'/auth.php';

@@ -15,10 +15,10 @@
 
         {{-- Compteurs : chacun mène à sa section. --}}
         <section class="bg-white border border-line rounded-xl overflow-hidden">
-            <div class="grid grid-cols-2 {{ count($counters) === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }} gap-px bg-line-soft">
+            <div class="grid grid-cols-2 {{ count($counters) === 4 ? 'split:grid-cols-4' : 'tab:grid-cols-3' }} gap-px bg-line-soft">
                 @foreach ($counters as [$anchor, $label, $count, $sub, $tone])
                     <a href="{{ $anchor }}" class="bg-white px-5 py-4 flex flex-col gap-1 hover:bg-paper transition">
-                        <span class="flex items-center gap-2 text-[12.5px] text-[#4A4639]">
+                        <span class="flex items-center gap-2 text-[12.5px] text-ink-body">
                             <span class="w-[7px] h-[7px] rounded-full {{ $dot[$tone] }}"></span> {{ $label }}
                         </span>
                         <span class="text-[28px] leading-tight font-semibold tracking-tight {{ $count > 0 && in_array($tone, ['amber', 'red'], true) ? \App\Support\Swatch::text($tone) : 'text-navy' }}">{{ $count }}</span>
@@ -28,8 +28,8 @@
             </div>
 
             {{-- Le circuit, et le rappel Opera (l'application n'y est pas reliée). --}}
-            <div class="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6 px-5 py-3.5 border-t border-line-soft bg-paper/50">
-                <ol class="m-0 p-0 list-none flex items-center gap-2 text-[12px] text-[#4A4639] flex-wrap">
+            <div class="flex flex-col tab:flex-row tab:items-center gap-3 tab:gap-6 px-5 py-3.5 border-t border-line-soft bg-paper/50">
+                <ol class="m-0 p-0 list-none flex items-center gap-2 text-[12px] text-ink-body flex-wrap">
                     @foreach ([['Demande', 'gouvernante / maintenance'], ['Décision', 'réception'], ['Remise en vente', 'gouvernante, après vérification']] as [$step, $who])
                         <li class="flex items-center gap-2">
                             <span class="w-5 h-5 rounded-full bg-navy text-white text-[10.5px] font-bold flex items-center justify-center">{{ $loop->iteration }}</span>
@@ -38,14 +38,14 @@
                         </li>
                     @endforeach
                 </ol>
-                <p class="m-0 lg:ml-auto flex items-start gap-2 text-[12px] text-[#7A5A16]">
+                <p class="m-0 tab:ml-auto flex items-start gap-2 text-[12px] text-warn-ink">
                     <x-nav-icon name="alert" class="w-4 h-4 flex-shrink-0 mt-px" />
                     <span><strong>Opera n'est pas mis à jour automatiquement</strong> : refaites chaque blocage / remise en vente dans Opera.</span>
                 </p>
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] gap-5 items-start">
+        <div class="grid grid-cols-1 split:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] gap-5 items-start">
 
             {{-- ===== Colonne principale : ce qui demande une action ===== --}}
             <div class="flex flex-col gap-5 min-w-0">
@@ -53,7 +53,7 @@
                 {{-- 1. Demandes à valider (la réception décide : c'est elle qui vend les chambres) --}}
                 <x-panel id="a-valider" title="Demandes de blocage à valider" icon="ban" flush>
                     <x-slot:badge>
-                        <span class="px-2 py-0.5 rounded-full text-[11.5px] font-semibold {{ $pending->isNotEmpty() ? 'bg-[#FBF1DF] text-[#7A5A16]' : 'bg-line-soft text-[#4A4639]' }}">{{ $pending->count() }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11.5px] font-semibold {{ $pending->isNotEmpty() ? 'bg-warn-bg text-warn-ink' : 'bg-line-soft text-ink-body' }}">{{ $pending->count() }}</span>
                     </x-slot:badge>
 
                     <div class="divide-y divide-line-soft">
@@ -82,7 +82,7 @@
                                             </form>
                                         </div>
                                     @else
-                                        <span class="px-2.5 py-1 rounded-full bg-[#FBF1DF] text-[#7A5A16] text-[12px] font-semibold">En attente de la réception</span>
+                                        <span class="px-2.5 py-1 rounded-full bg-warn-bg text-warn-ink text-[12px] font-semibold">En attente de la réception</span>
                                     @endcan
                                 </x-slot:actions>
                             </x-room-row>
@@ -95,7 +95,7 @@
                 {{-- 2. Chambres hors vente (la gouvernante les remet en vente après vérification) --}}
                 <x-panel id="hors-vente" title="Chambres hors vente" icon="building" flush>
                     <x-slot:badge>
-                        <span class="px-2 py-0.5 rounded-full text-[11.5px] font-semibold {{ $blocked->isNotEmpty() ? 'bg-[#FBE4E1] text-red' : 'bg-line-soft text-[#4A4639]' }}">{{ $blocked->count() }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11.5px] font-semibold {{ $blocked->isNotEmpty() ? 'bg-danger-soft text-red' : 'bg-line-soft text-ink-body' }}">{{ $blocked->count() }}</span>
                     </x-slot:badge>
 
                     <div class="divide-y divide-line-soft">
@@ -108,11 +108,11 @@
                             <x-room-row :room="$block->room" tone="red" :title="$block->reason" :work-order="$block->workOrder">
                                 <x-slot:badge>
                                     @if ($repaired)
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E6F3EC] text-green text-[11.5px] font-semibold"><x-nav-icon name="check" class="w-3 h-3" /> Réparée</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-ok-bg text-green text-[11.5px] font-semibold"><x-nav-icon name="check" class="w-3 h-3" /> Réparée</span>
                                     @elseif ($cancelled)
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FBE4E1] text-red text-[11.5px] font-semibold"><x-nav-icon name="x" class="w-3 h-3" /> OT annulé</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-danger-soft text-red text-[11.5px] font-semibold"><x-nav-icon name="x" class="w-3 h-3" /> OT annulé</span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FBF1DF] text-[#7A5A16] text-[11.5px] font-semibold"><x-nav-icon name="wrench" class="w-3 h-3" /> Réparation en cours</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warn-bg text-warn-ink text-[11.5px] font-semibold"><x-nav-icon name="wrench" class="w-3 h-3" /> Réparation en cours</span>
                                     @endif
                                 </x-slot:badge>
                                 <x-slot:meta>
@@ -146,7 +146,7 @@
                 @if ($canRequest)
                     <x-panel id="a-decider" title="Libres en panne : faut-il bloquer ?" icon="info" flush>
                         <x-slot:badge>
-                            <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-[#4A4639]">{{ $candidates->count() }}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-ink-body">{{ $candidates->count() }}</span>
                         </x-slot:badge>
                         <div class="divide-y divide-line-soft">
                             @forelse ($candidates as $wo)
@@ -172,7 +172,7 @@
                 {{-- 4. Clients concernés : pas de blocage, la réception gère (excuses, délogement dans Opera) --}}
                 <x-panel id="clients" title="Chambres occupées en panne" icon="user" flush>
                     <x-slot:badge>
-                        <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-[#4A4639]">{{ $guests->count() }}</span>
+                        <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-ink-body">{{ $guests->count() }}</span>
                     </x-slot:badge>
                     <p class="m-0 px-5 pt-3 text-[12px] text-ink-grey">On répare avant le retour du client ; sinon la réception décide d'un délogement.</p>
                     <div class="divide-y divide-line-soft">
@@ -200,7 +200,7 @@
                 @if ($history->isNotEmpty())
                     <x-panel title="Historique récent" icon="history" collapsible :open="false">
                         <x-slot:badge>
-                            <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-[#4A4639]">{{ $history->count() }}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-ink-body">{{ $history->count() }}</span>
                         </x-slot:badge>
                         <ul class="m-0 p-0 list-none flex flex-col gap-3">
                             @foreach ($history as $block)
@@ -209,7 +209,7 @@
                                     <span class="mt-1 w-2 h-2 flex-shrink-0 rounded-full {{ $released ? 'bg-green' : 'bg-ink-grey' }}"></span>
                                     <span class="min-w-0">
                                         <span class="font-semibold text-navy">{{ $block->room->label }}</span>
-                                        <span class="text-[#4A4639]">· {{ $block->status_label }}</span>
+                                        <span class="text-ink-body">· {{ $block->status_label }}</span>
                                         <span class="block text-ink-grey">
                                             @if ($released)
                                                 par {{ $block->releaser?->name }} {{ $block->released_at?->locale('fr')->diffForHumans() }}

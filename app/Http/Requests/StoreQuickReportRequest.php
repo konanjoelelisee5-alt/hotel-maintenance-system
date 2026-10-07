@@ -43,6 +43,8 @@ class StoreQuickReportRequest extends FormRequest
             // Pour une chambre seulement : décide de l'échéance et de qui prévenir.
             'room_occupancy' => ['nullable', 'required_unless:common_area,1', Rule::enum(RoomOccupancy::class)],
             'urgent' => ['boolean'],
+            // Réception : la panne vient d'un client, qui attend une réponse (type « Demande client »).
+            'guest_complaint' => ['boolean'],
             'audio' => ['nullable', 'file', 'max:10240', 'mimetypes:'.implode(',', self::AUDIO_MIMETYPES)],
             'photo' => ['nullable', 'image', 'max:10240'],
             'note' => ['nullable', 'string', 'max:1000'],

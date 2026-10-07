@@ -3,14 +3,14 @@
 <x-panel id="report" title="Rapport d'intervention" icon="report">
     <x-slot:badge>
         @if ($report?->is_signed)
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E6F3EC] text-green text-[11.5px] font-semibold"><x-nav-icon name="check" class="w-3 h-3" /> Signé</span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-ok-bg text-green text-[11.5px] font-semibold"><x-nav-icon name="check" class="w-3 h-3" /> Signé</span>
         @elseif ($report)
-            <span class="px-2 py-0.5 rounded-full bg-[#FBF1DF] text-[#7A5A16] text-[11.5px] font-semibold">Brouillon</span>
+            <span class="px-2 py-0.5 rounded-full bg-warn-bg text-warn-ink text-[11.5px] font-semibold">Brouillon</span>
         @endif
     </x-slot:badge>
 
     @if ($report?->is_signed)
-        <div class="flex gap-2.5 mb-4 px-3.5 py-3 rounded-[10px] bg-[#E6F3EC] text-[13px] text-success">
+        <div class="flex gap-2.5 mb-4 px-3.5 py-3 rounded-[10px] bg-ok-bg text-[13px] text-success">
             <x-nav-icon name="check" class="w-4 h-4 flex-shrink-0 mt-0.5 text-green" />
             <span>Rapport signé par <strong>{{ $report->signed_by_name }}</strong> le {{ $report->signed_at->format('d/m/Y à H\hi') }}
                 — intervention réalisée par {{ $report->technician?->name ?? '—' }}. Document verrouillé.</span>
@@ -25,7 +25,7 @@
                 @if (filled($text))
                     <div>
                         <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-grey">{{ $label }}</dt>
-                        <dd class="m-0 mt-1 text-[#3d3a33] leading-relaxed whitespace-pre-line">{{ $text }}</dd>
+                        <dd class="m-0 mt-1 text-ink-strong leading-relaxed whitespace-pre-line">{{ $text }}</dd>
                     </div>
                 @endif
             @endforeach
@@ -64,7 +64,7 @@
 
             <div>
                 <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-[12px] font-semibold uppercase tracking-wide text-[#6C6658]">Signature électronique</span>
+                    <span class="text-[12px] font-semibold uppercase tracking-wide text-ink-muted">Signature électronique</span>
                     <button type="button" id="clear-signature" class="btn btn-sm btn-ghost">Effacer</button>
                 </div>
                 <div class="rounded-[10px] border-2 border-dashed border-line bg-paper">

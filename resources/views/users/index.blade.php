@@ -15,7 +15,7 @@
 
     {{-- Mot de passe provisoire : affiché une seule fois, juste après sa création. --}}
     @if (session('temporary_password'))
-        <div class="flex flex-col gap-2 p-4 rounded-xl border border-gold/40 bg-[#FBF1DF] text-[#4A3B12]" role="status">
+        <div class="flex flex-col gap-2 p-4 rounded-xl border border-gold/40 bg-warn-bg text-[#4A3B12]" role="status">
             <div class="text-[13.5px]">
                 Mot de passe provisoire de <strong>{{ session('temporary_password')['name'] }}</strong> :
                 <code class="ml-1 px-2 py-0.5 rounded-md bg-white border border-gold/30 font-mono text-[15px] select-all">{{ session('temporary_password')['password'] }}</code>
@@ -28,7 +28,7 @@
         <div class="flex items-end gap-4 flex-wrap px-4 sm:px-6 pt-5 border-b border-line">
             <div class="flex flex-col gap-0.5 pb-3.5">
                 <h2 class="m-0 text-[17px] font-semibold text-navy">{{ $tabs[$role] === 'Tous' ? 'Tous les comptes' : $tabs[$role] }}</h2>
-                <div class="text-[12.5px] text-[#6C6658]">{{ $users->total() }} compte(s) · actifs en premier</div>
+                <div class="text-[12.5px] text-ink-muted">{{ $users->total() }} compte(s) · actifs en premier</div>
             </div>
             <x-tabs :items="$tabItems" :active="$role" label="Rôles" class="sm:ml-auto max-w-full" />
         </div>
@@ -41,7 +41,7 @@
                 <input type="search" name="search" value="{{ $search }}" placeholder="Nom ou e-mail…" class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[13.5px] placeholder:text-ink-grey focus:ring-0">
             </label>
             @if (filled($search))
-                <a href="{{ route('users.index', array_filter(['role' => $role], 'filled')) }}" class="text-[12.5px] font-semibold text-[#6C6658] hover:text-navy">Effacer la recherche</a>
+                <a href="{{ route('users.index', array_filter(['role' => $role], 'filled')) }}" class="text-[12.5px] font-semibold text-ink-muted hover:text-navy">Effacer la recherche</a>
             @endif
         </form>
 
@@ -49,14 +49,14 @@
             <div class="px-5 py-12 flex flex-col items-center gap-2 text-center">
                 <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-grey"><x-nav-icon name="users" class="w-5 h-5" /></div>
                 <div class="text-[14px] font-semibold">Aucun compte ne correspond</div>
-                <div class="text-[12.5px] text-[#6C6658]">Changez d'onglet ou effacez la recherche.</div>
+                <div class="text-[12.5px] text-ink-muted">Changez d'onglet ou effacez la recherche.</div>
             </div>
         @else
             <ul class="m-0 p-0 list-none divide-y divide-line-soft">
                 @foreach ($users as $user)
                     <li class="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 py-3.5 {{ $user->is_active ? '' : 'bg-paper/50' }}">
                         <div class="flex items-center gap-3 min-w-0 flex-1">
-                            <span class="w-10 h-10 rounded-full flex items-center justify-center text-[12.5px] font-bold flex-shrink-0 {{ $user->is_active ? 'bg-gold text-navy' : 'bg-line text-[#6C6658]' }}">{{ $user->initialsOrGenerated() }}</span>
+                            <span class="w-10 h-10 rounded-full flex items-center justify-center text-[12.5px] font-bold flex-shrink-0 {{ $user->is_active ? 'bg-gold text-navy' : 'bg-line text-ink-muted' }}">{{ $user->initialsOrGenerated() }}</span>
                             <span class="flex flex-col gap-0.5 min-w-0">
                                 <span class="flex items-center gap-2 flex-wrap">
                                     <span class="text-[14.5px] font-semibold text-navy">{{ $user->name }}</span>
@@ -70,12 +70,12 @@
                                         <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ \App\Support\Swatch::pill('blue') }}">Vous</span>
                                     @endif
                                 </span>
-                                <span class="text-[12.5px] text-[#6C6658] truncate">{{ $user->email }}</span>
+                                <span class="text-[12.5px] text-ink-muted truncate">{{ $user->email }}</span>
                             </span>
                         </div>
 
                         <div class="flex items-center justify-between sm:justify-end gap-3 sm:w-[340px] flex-shrink-0 pl-[52px] sm:pl-0">
-                            <span class="text-[13px] text-[#4A4639]">{{ $user->role_label }}</span>
+                            <span class="text-[13px] text-ink-body">{{ $user->role_label }}</span>
                             <span class="flex items-center gap-2">
                                 <a href="{{ route('users.edit', $user) }}" data-modal class="btn btn-sm btn-secondary">Modifier</a>
                                 @if ($user->is_active && $user->id !== auth()->id())

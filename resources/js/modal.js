@@ -136,7 +136,7 @@ function setBusy(button, state) {
         button.setAttribute('disabled', '');
         button.innerHTML = '<span class="modal-spinner" aria-hidden="true"></span> Enregistrement…';
     } else if (state === 'done') {
-        button.innerHTML = '✓ Enregistré';
+        button.textContent = 'Enregistré';
     } else {
         button.removeAttribute('disabled');
         if (button.dataset.label) button.innerHTML = button.dataset.label;

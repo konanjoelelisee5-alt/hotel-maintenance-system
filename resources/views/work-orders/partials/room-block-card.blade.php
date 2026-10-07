@@ -23,7 +23,7 @@
 
         @if ($workOrder->room_occupancy === \App\Enums\RoomOccupancy::ClientAbsent && $workOrder->due_date)
             @php $overdue = $workOrder->due_date->isPast() && $isOpen; @endphp
-            <div class="flex gap-2.5 px-3.5 py-2.5 rounded-[10px] {{ $overdue ? 'bg-[#FBE4E1] text-[#8A1F16]' : 'bg-[#FBF1DF] text-[#7A5A16]' }}">
+            <div class="flex gap-2.5 px-3.5 py-2.5 rounded-[10px] {{ $overdue ? 'bg-danger-soft text-danger-ink' : 'bg-warn-bg text-warn-ink' }}">
                 <x-nav-icon name="clock" class="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>
                     À réparer avant le retour du client : <strong>{{ $workOrder->due_date->format('H\hi') }}</strong>

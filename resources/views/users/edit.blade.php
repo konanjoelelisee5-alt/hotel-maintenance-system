@@ -26,7 +26,7 @@
             <div x-data="{ role: @js(old('role', $user->role->value)), alerts: @js(old('_token') ? (bool) old('receives_maintenance_alerts') : $user->receives_maintenance_alerts) }" class="space-y-4">
             <div>
                 <x-input-label for="role" value="Rôle" />
-                <select id="role" name="role" x-model="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required
+                <select id="role" name="role" x-model="role" class="mt-1 block w-full border-line rounded-md shadow-sm" required
                     @if ($user->id === auth()->id()) disabled @endif>
                     <option value="admin" @selected(old('role', $user->role->value) === 'admin')>Administrateur</option>
                     <option value="manager" @selected(old('role', $user->role->value) === 'manager')>Manager</option>
@@ -36,7 +36,7 @@
                 </select>
                 @if ($user->id === auth()->id())
                     <input type="hidden" name="role" value="{{ $user->role->value }}">
-                    <p class="text-xs text-gray-500 mt-1">Vous ne pouvez pas modifier votre propre rôle.</p>
+                    <p class="text-xs text-ink-muted mt-1">Vous ne pouvez pas modifier votre propre rôle.</p>
                 @endif
                 <x-input-error :messages="$errors->get('role')" class="mt-2" />
             </div>
@@ -49,7 +49,7 @@
                 <label class="flex items-center gap-2 text-sm">
                     <input type="checkbox" name="is_active" value="1" @checked($user->is_active)
                         @if ($user->id === auth()->id()) disabled @endif
-                        class="rounded border-gray-300">
+                        class="rounded border-line">
                     Compte actif
                 </label>
                 @if ($user->id === auth()->id())
@@ -58,8 +58,8 @@
             </div>
 
             <div class="flex justify-end gap-3">
-                <a href="{{ route('users.index') }}" data-modal-close class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-                <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Enregistrer</button>
+                <a href="{{ route('users.index') }}" data-modal-close class="btn btn-ghost">Annuler</a>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
             </div>
         </form>
     </div>

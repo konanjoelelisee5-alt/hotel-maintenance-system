@@ -14,7 +14,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="priority" value="Priorité concernée (optionnel)" />
-                            <select id="priority" name="priority" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <select id="priority" name="priority" class="mt-1 block w-full border-line rounded-md shadow-sm">
                                 <option value="">-- Toutes les priorités --</option>
                                 <option value="basse" @selected(old('priority') === 'basse')>Basse</option>
                                 <option value="moyenne" @selected(old('priority') === 'moyenne')>Moyenne</option>
@@ -25,7 +25,7 @@
 
                         <div>
                             <x-input-label for="work_order_type" value="Type d'OT concerné (optionnel)" />
-                            <select id="work_order_type" name="work_order_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <select id="work_order_type" name="work_order_type" class="mt-1 block w-full border-line rounded-md shadow-sm">
                                 <option value="">-- Tous les types --</option>
                                 <option value="maintenance" @selected(old('work_order_type') === 'maintenance')>Maintenance</option>
                                 <option value="demande_client" @selected(old('work_order_type') === 'demande_client')>Demande client</option>
@@ -48,8 +48,8 @@
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('sla-policies.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Créer</button>
+                        <a href="{{ route('sla-policies.index') }}" class="btn btn-ghost">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Créer</button>
                     </div>
                 </form>
             </div>

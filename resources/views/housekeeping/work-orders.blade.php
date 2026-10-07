@@ -1,4 +1,4 @@
-{{-- « Signalements » du Housekeeping (WorkOrderController::housekeepingScreen) :
+{{-- « Signalements » du Housekeeping (HousekeepingWorkOrderController::screen) :
      « En cours » (filtres de statut) ou « Historique » (terminés, regroupés par jour
      comme l'historique de Chrome) ; un OT ouvert s'affiche en fiche lecture seule.
      < 1000 px : la liste OU la fiche ; ≥ 1000 px : les deux côte à côte. L'OT ouvert
@@ -61,7 +61,7 @@
             <div class="flex flex-col bg-paper/40 split:overflow-y-auto">
                 @foreach ($groups as $day => $items)
                     @if ($vue === 'historique')
-                        <h3 class="sticky top-0 z-10 m-0 px-4 py-2 bg-paper border-b border-line-soft text-[12px] font-semibold text-[#4A4639]">
+                        <h3 class="sticky top-0 z-10 m-0 px-4 py-2 bg-paper border-b border-line-soft text-[12px] font-semibold text-ink-body">
                             {{ $hk::dayLabel(\Illuminate\Support\Carbon::parse($day)) }}
                             <span class="font-mono font-normal text-ink-grey">· {{ $items->count() }}</span>
                         </h3>

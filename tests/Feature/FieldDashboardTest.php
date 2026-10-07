@@ -50,7 +50,7 @@ class FieldDashboardTest extends TestCase
 
             // Recherche + nouvel ordre en en-tête, bande d'indicateurs, onglets à compteurs.
             $this->assertStringContainsString('placeholder="Rechercher un ordre, une chambre…"', $html, $user->role->value);
-            $this->assertStringContainsString('<h1 class="m-0 text-[19px] font-semibold tracking-tight">Tableau de bord</h1>', $html);
+            $this->assertStringContainsString('<title>Tableau de bord · ', $html);
             $this->assertStringContainsString('aria-label="Filtres"', $html);
         }
 

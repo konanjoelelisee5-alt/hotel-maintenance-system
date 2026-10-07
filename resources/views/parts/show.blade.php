@@ -32,9 +32,9 @@
     </x-slot:primaryAction>
 
     {{-- Fiche d'identité de la pièce + jauge de stock --}}
-    <section class="bg-white border border-line rounded-xl px-5 lg:px-6 py-5 flex flex-col gap-4">
+    <section class="bg-white border border-line rounded-xl px-5 tab:px-6 py-5 flex flex-col gap-4">
         <div class="flex items-center gap-2 flex-wrap">
-            <span class="font-mono text-[12px] text-[#4A4639] px-2 py-0.5 rounded-md bg-paper border border-line">{{ $part->sku }}</span>
+            <span class="font-mono text-[12px] text-ink-body px-2 py-0.5 rounded-md bg-paper border border-line">{{ $part->sku }}</span>
             @if (! $part->is_active)
                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ \App\Support\Swatch::pill('muted') }}">Retirée du catalogue</span>
             @elseif ($low)
@@ -42,13 +42,13 @@
             @else
                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ \App\Support\Swatch::pill('green') }}">Stock suffisant</span>
             @endif
-            <span class="text-[12.5px] text-[#6C6658]">Unité : {{ $part->unit ?: '—' }} · Seuil d’alerte : {{ $part->reorder_threshold }}</span>
+            <span class="text-[12.5px] text-ink-muted">Unité : {{ $part->unit ?: '—' }} · Seuil d’alerte : {{ $part->reorder_threshold }}</span>
         </div>
 
         <div>
             <div class="flex items-baseline justify-between gap-3 text-[13px]">
-                <span class="text-[#4A4639]"><strong class="text-[22px] text-navy">{{ $part->quantity_available }}</strong> disponible(s) sur {{ $part->quantity_on_hand }}</span>
-                <span class="text-[12px] text-[#6C6658]">repère : seuil d’alerte</span>
+                <span class="text-ink-body"><strong class="text-[22px] text-navy">{{ $part->quantity_available }}</strong> disponible(s) sur {{ $part->quantity_on_hand }}</span>
+                <span class="text-[12px] text-ink-muted">repère : seuil d’alerte</span>
             </div>
             <div class="relative mt-2 h-[8px] rounded-full bg-line-soft">
                 <div class="h-full rounded-full {{ $low ? 'bg-red' : 'bg-green' }}" style="width: {{ $availableAt }}%"></div>
@@ -57,7 +57,7 @@
         </div>
 
         @if ($low)
-            <div class="flex items-start gap-2.5 px-3.5 py-3 rounded-[10px] bg-[#FDECEA] text-[13px] text-[#8A1F16]">
+            <div class="flex items-start gap-2.5 px-3.5 py-3 rounded-[10px] bg-danger-bg text-[13px] text-danger-ink">
                 <x-nav-icon name="alert" class="w-[18px] h-[18px] flex-shrink-0" />
                 <span>Le stock est passé sous le seuil d’alerte : pensez à réapprovisionner (menu ⋮ → Commander).</span>
             </div>
@@ -66,10 +66,10 @@
 
     <x-kpi-band :items="$kpis" tiles />
 
-    <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px] items-start">
+    <div class="grid gap-5 split:grid-cols-[minmax(0,1fr)_380px] items-start">
         {{-- Historique : chaque entrée, sortie ou ajustement, le plus récent en haut --}}
         <x-panel title="Historique des mouvements" icon="history" flush>
-            <x-slot:badge><span class="font-mono text-[12px] text-[#6C6658]">{{ $part->stockMovements->count() }}</span></x-slot:badge>
+            <x-slot:badge><span class="font-mono text-[12px] text-ink-muted">{{ $part->stockMovements->count() }}</span></x-slot:badge>
             @forelse ($part->stockMovements->sortByDesc('created_at') as $movement)
                 @php
                     [$sign, $color, $label] = $movementStyle[$movement->type] ?? ['', 'grey', $movement->type_label];
@@ -86,9 +86,9 @@
                                     {{ $qtySign }}{{ abs($movement->quantity) }} {{ $part->unit }}
                                 </span>
                             </span>
-                            <span class="font-mono text-[11.5px] text-[#6C6658] whitespace-nowrap">{{ $movement->created_at->format('d/m/Y H:i') }}</span>
+                            <span class="font-mono text-[11.5px] text-ink-muted whitespace-nowrap">{{ $movement->created_at->format('d/m/Y H:i') }}</span>
                         </div>
-                        <div class="text-[12.5px] text-[#6C6658] mt-0.5">
+                        <div class="text-[12.5px] text-ink-muted mt-0.5">
                             {{ $movement->creator?->name ?? '—' }}
                             @if ($movement->workOrder)
                                 · <a href="{{ route('work-orders.show', $movement->workOrder) }}" class="text-navy font-medium hover:underline">{{ $movement->workOrder->code() }}</a>
@@ -98,7 +98,7 @@
                     </div>
                 </div>
             @empty
-                <p class="m-0 px-5 py-6 text-[13px] text-[#6C6658]">Aucun mouvement enregistré pour cette pièce.</p>
+                <p class="m-0 px-5 py-6 text-[13px] text-ink-muted">Aucun mouvement enregistré pour cette pièce.</p>
             @endforelse
         </x-panel>
 
@@ -118,13 +118,13 @@
                                 </label>
                             @endforeach
                         </div>
-                        <label class="flex flex-col gap-1 text-[12.5px] font-semibold text-[#4A4639]">Quantité ({{ $part->unit ?: 'unité' }})
+                        <label class="flex flex-col gap-1 text-[12.5px] font-semibold text-ink-body">Quantité ({{ $part->unit ?: 'unité' }})
                             <input type="number" name="quantity" value="{{ old('quantity') }}" required>
                         </label>
-                        <p class="m-0 -mt-1.5 text-[12px] text-[#6C6658]" x-show="type === 'ajustement'" x-cloak>
+                        <p class="m-0 -mt-1.5 text-[12px] text-ink-muted" x-show="type === 'ajustement'" x-cloak>
                             Inventaire : quantité à ajouter (positive) ou à retirer (négative, ex. −2) pour coller au stock réel.
                         </p>
-                        <label class="flex flex-col gap-1 text-[12.5px] font-semibold text-[#4A4639]"><span>Note <span class="font-normal text-[#6C6658]">(facultatif)</span></span>
+                        <label class="flex flex-col gap-1 text-[12.5px] font-semibold text-ink-body"><span>Note <span class="font-normal text-ink-muted">(facultatif)</span></span>
                             <input type="text" name="note" value="{{ old('note') }}" placeholder="Ex. : livraison sans bon, casse, inventaire mensuel">
                         </label>
                         <x-input-error :messages="$errors->all()" />
@@ -135,16 +135,16 @@
 
             {{-- Réservations : pièces promises à des OT --}}
             <x-panel title="Réservations" icon="part" flush>
-                <x-slot:badge><span class="font-mono text-[12px] text-[#6C6658]">{{ $part->reservations->where('status', 'reservee')->count() }} en cours</span></x-slot:badge>
+                <x-slot:badge><span class="font-mono text-[12px] text-ink-muted">{{ $part->reservations->where('status', 'reservee')->count() }} en cours</span></x-slot:badge>
                 @forelse ($part->reservations->sortByDesc('created_at') as $reservation)
                     @php $resColor = ['reservee' => 'gold', 'sortie' => 'green', 'annulee' => 'muted'][$reservation->status] ?? 'grey'; @endphp
                     <div class="flex items-center justify-between gap-3 px-5 py-3 border-b border-line-soft last:border-b-0">
                         <span class="min-w-0 text-[13px]">
                             @if ($reservation->workOrder)
                                 <a href="{{ route('work-orders.show', $reservation->workOrder) }}" class="font-mono font-semibold text-navy hover:underline">{{ $reservation->workOrder->code() }}</a>
-                                <span class="block text-[12px] text-[#6C6658] truncate">{{ $reservation->workOrder->title }}</span>
+                                <span class="block text-[12px] text-ink-muted truncate">{{ $reservation->workOrder->title }}</span>
                             @else
-                                <span class="text-[#6C6658]">OT supprimé</span>
+                                <span class="text-ink-muted">OT supprimé</span>
                             @endif
                         </span>
                         <span class="flex items-center gap-2 flex-shrink-0">
@@ -153,7 +153,7 @@
                         </span>
                     </div>
                 @empty
-                    <p class="m-0 px-5 py-5 text-[13px] text-[#6C6658]">Aucune réservation pour cette pièce.</p>
+                    <p class="m-0 px-5 py-5 text-[13px] text-ink-muted">Aucune réservation pour cette pièce.</p>
                 @endforelse
             </x-panel>
         </div>

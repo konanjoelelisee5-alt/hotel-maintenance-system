@@ -12,13 +12,13 @@
         <div>
             <x-input-label for="code" value="Code technique (unique, ex: critique)" />
             <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code')" required />
-            <p class="text-xs text-gray-500 mt-1">Sans espace ni accent. Ne pourra plus être modifié après création.</p>
+            <p class="text-xs text-ink-muted mt-1">Sans espace ni accent. Ne pourra plus être modifié après création.</p>
             <x-input-error :messages="$errors->get('code')" class="mt-2" />
         </div>
 
         <div>
             <x-input-label for="color" value="Couleur" />
-            <input type="color" id="color" name="color" value="{{ old('color', '#6b7280') }}" class="mt-1 block w-24 h-10 border-gray-300 rounded-md shadow-sm">
+            <input type="color" id="color" name="color" value="{{ old('color', '#6b7280') }}" class="mt-1 block w-24 h-10 border-line rounded-md shadow-sm">
             <x-input-error :messages="$errors->get('color')" class="mt-2" />
         </div>
 
@@ -28,8 +28,8 @@
         </div>
 
         <div class="flex justify-end gap-3">
-            <a href="{{ route('work-order-priorities.index') }}" data-modal-close class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-            <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Créer</button>
+            <a href="{{ route('work-order-priorities.index') }}" data-modal-close class="btn btn-ghost">Annuler</a>
+            <button type="submit" class="btn btn-primary">Créer</button>
         </div>
     </form>
 </x-form-page>

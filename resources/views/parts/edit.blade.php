@@ -7,7 +7,7 @@
 
         <div>
             <x-input-label value="Référence (SKU)" />
-            <p class="mt-1 px-3 py-2 rounded-[9px] bg-paper border border-line font-mono text-[13px] text-[#4A4639]">{{ $part->sku }}</p>
+            <p class="mt-1 px-3 py-2 rounded-[9px] bg-paper border border-line font-mono text-[13px] text-ink-body">{{ $part->sku }}</p>
         </div>
 
         <div>

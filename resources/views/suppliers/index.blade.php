@@ -22,7 +22,7 @@
         <div class="flex items-end gap-4 flex-wrap px-4 sm:px-6 pt-5 border-b border-line">
             <div class="flex flex-col gap-0.5 pb-3.5">
                 <h2 class="m-0 text-[17px] font-semibold text-navy">{{ $tab === 'active' ? 'Fournisseurs actifs' : 'Fournisseurs désactivés' }}</h2>
-                <div class="text-[12.5px] text-[#6C6658]">{{ $suppliers->total() }} fournisseur(s) · par nom</div>
+                <div class="text-[12.5px] text-ink-muted">{{ $suppliers->total() }} fournisseur(s) · par nom</div>
             </div>
             <x-tabs :items="$tabItems" :active="$tab" label="Filtres" class="sm:ml-auto max-w-full" />
         </div>
@@ -35,7 +35,7 @@
                 <input type="search" name="search" value="{{ $search }}" placeholder="Nom, contact ou e-mail…" class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[13.5px] placeholder:text-ink-grey focus:ring-0">
             </label>
             @if (filled($search))
-                <a href="{{ route('suppliers.index', array_filter(['tab' => $tab === 'inactive' ? 'inactive' : null], 'filled')) }}" class="text-[12.5px] font-semibold text-[#6C6658] hover:text-navy">Effacer la recherche</a>
+                <a href="{{ route('suppliers.index', array_filter(['tab' => $tab === 'inactive' ? 'inactive' : null], 'filled')) }}" class="text-[12.5px] font-semibold text-ink-muted hover:text-navy">Effacer la recherche</a>
             @endif
         </form>
 
@@ -43,31 +43,31 @@
             <div class="px-5 py-12 flex flex-col items-center gap-2 text-center">
                 <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-grey"><x-nav-icon name="truck" class="w-5 h-5" /></div>
                 <div class="text-[14px] font-semibold">Aucun fournisseur</div>
-                <div class="text-[12.5px] text-[#6C6658]">Ajoutez la société à qui vous commandez vos pièces.</div>
+                <div class="text-[12.5px] text-ink-muted">Ajoutez la société à qui vous commandez vos pièces.</div>
             </div>
         @else
-            <div class="hidden md:grid grid-cols-[minmax(0,1fr)_minmax(0,220px)_150px_170px_90px] gap-4 px-6 py-3 bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-[#6C6658]">
+            <div class="hidden split:grid grid-cols-[minmax(0,1fr)_minmax(0,220px)_150px_170px_90px] gap-4 px-6 py-3 bg-paper border-b border-line text-[11.5px] font-semibold uppercase tracking-wide text-ink-muted">
                 <span>Fournisseur</span><span>Contact</span><span class="text-right">Commandes</span><span class="text-right">Total acheté</span><span></span>
             </div>
             <ul class="m-0 p-0 list-none divide-y divide-line-soft">
                 @foreach ($suppliers as $supplier)
-                    <li class="relative grid gap-1.5 md:grid-cols-[minmax(0,1fr)_minmax(0,220px)_150px_170px_90px] md:gap-4 md:items-center px-4 sm:px-6 py-3.5 hover:bg-paper/60">
+                    <li class="relative grid gap-1.5 split:grid-cols-[minmax(0,1fr)_minmax(0,220px)_150px_170px_90px] split:gap-4 split:items-center px-4 sm:px-6 py-3.5 hover:bg-paper/60">
                         <div class="flex items-center gap-3 min-w-0">
                             <span class="w-10 h-10 rounded-[10px] bg-paper border border-line flex items-center justify-center text-gold flex-shrink-0"><x-nav-icon name="truck" class="w-5 h-5" /></span>
                             <span class="min-w-0">
-                                <a href="{{ route('suppliers.show', $supplier) }}" class="block text-[14.5px] font-semibold text-navy truncate hover:underline after:absolute after:inset-0 md:after:hidden">{{ $supplier->name }}</a>
+                                <a href="{{ route('suppliers.show', $supplier) }}" class="block text-[14.5px] font-semibold text-navy truncate hover:underline after:absolute after:inset-0 split:after:hidden">{{ $supplier->name }}</a>
                                 @if ($supplier->open_orders_count)
                                     <span class="text-[12px] text-blue font-medium">{{ $supplier->open_orders_count }} commande(s) en cours</span>
                                 @endif
                             </span>
                         </div>
-                        <div class="text-[13px] text-[#4A4639] min-w-0 pl-[52px] md:pl-0">
+                        <div class="text-[13px] text-ink-body min-w-0 pl-[52px] split:pl-0">
                             <div class="truncate">{{ $supplier->contact_person ?? '—' }}</div>
-                            <div class="text-[12px] text-[#6C6658] truncate">{{ collect([$supplier->phone, $supplier->email])->filter()->implode(' · ') ?: 'Pas de coordonnées' }}</div>
+                            <div class="text-[12px] text-ink-muted truncate">{{ collect([$supplier->phone, $supplier->email])->filter()->implode(' · ') ?: 'Pas de coordonnées' }}</div>
                         </div>
-                        <div class="text-[13px] md:text-right pl-[52px] md:pl-0"><span class="font-mono">{{ $supplier->purchase_orders_count }}</span> <span class="md:hidden text-[#6C6658]">commande(s)</span></div>
-                        <div class="font-mono text-[13.5px] text-navy md:text-right pl-[52px] md:pl-0">{{ \App\Support\Money::format($supplier->purchased_amount ?? 0) }}</div>
-                        <div class="hidden md:block text-right">
+                        <div class="text-[13px] split:text-right pl-[52px] split:pl-0"><span class="font-mono">{{ $supplier->purchase_orders_count }}</span> <span class="split:hidden text-ink-muted">commande(s)</span></div>
+                        <div class="font-mono text-[13.5px] text-navy split:text-right pl-[52px] split:pl-0">{{ \App\Support\Money::format($supplier->purchased_amount ?? 0) }}</div>
+                        <div class="hidden split:block text-right">
                             <a href="{{ route('suppliers.show', $supplier) }}" class="btn btn-sm btn-secondary">Ouvrir</a>
                         </div>
                     </li>

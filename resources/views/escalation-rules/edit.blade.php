@@ -14,7 +14,7 @@
 
                     <div>
                         <x-input-label for="trigger_type" value="Déclencheur" />
-                        <select id="trigger_type" name="trigger_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                        <select id="trigger_type" name="trigger_type" class="mt-1 block w-full border-line rounded-md shadow-sm" required>
                             <option value="reponse_proche" @selected(old('trigger_type', $escalationRule->trigger_type) === 'reponse_proche')>Réponse bientôt due</option>
                             <option value="reponse_depassee" @selected(old('trigger_type', $escalationRule->trigger_type) === 'reponse_depassee')>Réponse dépassée</option>
                             <option value="resolution_proche" @selected(old('trigger_type', $escalationRule->trigger_type) === 'resolution_proche')>Résolution bientôt due</option>
@@ -25,12 +25,12 @@
                     <div>
                         <x-input-label for="offset_minutes" value="Décalage en minutes" />
                         <x-text-input id="offset_minutes" name="offset_minutes" type="number" class="mt-1 block w-full" :value="old('offset_minutes', $escalationRule->offset_minutes)" required />
-                        <p class="text-xs text-gray-500 mt-1">Positif = avant l'échéance. Négatif = après l'échéance.</p>
+                        <p class="text-xs text-ink-muted mt-1">Positif = avant l'échéance. Négatif = après l'échéance.</p>
                     </div>
 
                     <div>
                         <x-input-label for="notify_target" value="Qui notifier" />
-                        <select id="notify_target" name="notify_target" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                        <select id="notify_target" name="notify_target" class="mt-1 block w-full border-line rounded-md shadow-sm" required>
                             <option value="technicien_assigne" @selected(old('notify_target', $escalationRule->notify_target) === 'technicien_assigne')>Technicien assigné</option>
                             <option value="manager" @selected(old('notify_target', $escalationRule->notify_target) === 'manager')>Managers</option>
                             <option value="admin" @selected(old('notify_target', $escalationRule->notify_target) === 'admin')>Administrateurs</option>
@@ -40,14 +40,14 @@
 
                     <div>
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="is_active" value="1" @checked($escalationRule->is_active) class="rounded border-gray-300">
+                            <input type="checkbox" name="is_active" value="1" @checked($escalationRule->is_active) class="rounded border-line">
                             Règle active
                         </label>
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="{{ route('escalation-rules.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Annuler</a>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">Enregistrer</button>
+                        <a href="{{ route('escalation-rules.index') }}" class="btn btn-ghost">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
                     </div>
                 </form>
             </div>

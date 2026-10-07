@@ -30,8 +30,9 @@ class AppLayout extends Component
         $user = auth()->user();
         $notifications = $user->notifications()->latest('created_at')->limit(6)->get();
 
-        // Housekeeping : sa propre coquille (barre basse, rail, sidebar), mêmes menus.
-        return view($user->role === UserRole::Housekeeping ? 'layouts.housekeeping' : 'layouts.app', [
+        // Une seule coquille pour tous les rôles : la « feuille » claire (layouts.sheet) ; chaque
+        // rôle y a ses menus (Navigation) et ses particularités (poste partagé, envois hors réseau).
+        return view('layouts.sheet', [
             'nav' => Navigation::forSidebar($user),
             'bottomNav' => Navigation::forBottomNav($user),
             'notifications' => $notifications,

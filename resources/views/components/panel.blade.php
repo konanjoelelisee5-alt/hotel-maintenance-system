@@ -7,7 +7,7 @@
 @php
     $frame = 'bg-white rounded-xl border '.($overflow ? '' : 'overflow-hidden ').($tone === 'danger' ? 'border-red/30' : 'border-line');
     $iconTile = 'w-8 h-8 flex-shrink-0 rounded-[8px] border flex items-center justify-center '
-        .($tone === 'danger' ? 'bg-[#FBE4E1] border-red/20 text-red' : 'bg-paper border-line text-gold');
+        .($tone === 'danger' ? 'bg-danger-soft border-red/20 text-red' : 'bg-paper border-line text-gold');
     $body = $flush ? '' : 'px-5 py-4';
     // Titre affiché comme texte : < > & échappés, l'apostrophe gardée telle quelle (« Pilotage de l'OT »).
 @endphp

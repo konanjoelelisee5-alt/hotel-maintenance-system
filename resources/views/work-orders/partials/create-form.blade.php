@@ -14,14 +14,14 @@
     <div>
         <x-input-label for="description" value="Description" />
         <textarea id="description" name="description" rows="4"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('description') }}</textarea>
+            class="mt-1 block w-full border-line rounded-md shadow-sm">{{ old('description') }}</textarea>
         <x-input-error :messages="$errors->get('description')" class="mt-2" />
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label for="type_id" value="Type" />
-            <select id="type_id" name="type_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+            <select id="type_id" name="type_id" class="mt-1 block w-full border-line rounded-md shadow-sm" required>
                 @foreach ($types as $type)
                     <option value="{{ $type->id }}" @selected(old('type_id') == $type->id)>{{ $type->label }}</option>
                 @endforeach
@@ -31,7 +31,7 @@
 
         <div>
             <x-input-label for="priority_id" value="Priorité" />
-            <select id="priority_id" name="priority_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+            <select id="priority_id" name="priority_id" class="mt-1 block w-full border-line rounded-md shadow-sm" required>
                 @foreach ($priorities as $priority)
                     <option value="{{ $priority->id }}" @selected(old('priority_id') == $priority->id)>{{ $priority->label }}</option>
                 @endforeach
@@ -49,7 +49,7 @@
 
         <div>
             <x-input-label for="equipment_id" value="Équipement" />
-            <select id="equipment_id" name="equipment_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <select id="equipment_id" name="equipment_id" class="mt-1 block w-full border-line rounded-md shadow-sm">
                 <option value="">-- Aucun --</option>
                 @foreach ($equipments as $equipment)
                     <option value="{{ $equipment->id }}" @selected(old('equipment_id') == $equipment->id)>
@@ -65,7 +65,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label for="assigned_to" value="Assigner à (technicien)" />
-            <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-line rounded-md shadow-sm">
                 <option value="">-- Non assigné --</option>
                 @foreach ($technicians as $technician)
                     <option value="{{ $technician->id }}" @selected(old('assigned_to') == $technician->id)>
@@ -87,7 +87,7 @@
     {{-- Page : collé au-dessus de la barre de navigation mobile pour rester visible
          clavier ouvert ; fenêtre : collé en bas de la fenêtre. --}}
     {{-- Dans la fenêtre, le pied est mis en forme par .modal-form (resources/css/app.css). --}}
-    <div class="{{ $inModal ? '' : 'sticky bottom-[64px] lg:static -mx-6 lg:mx-0 px-6 lg:px-0 py-3 lg:py-0 bg-white/95 backdrop-blur lg:bg-transparent border-t border-line lg:border-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3' }}">
+    <div class="{{ $inModal ? '' : 'sticky bottom-[64px] tab:static -mx-6 tab:mx-0 px-6 tab:px-0 py-3 tab:py-0 bg-white/95 backdrop-blur tab:bg-transparent border-t border-line tab:border-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3' }}">
         @if ($inModal)
             <button type="button" data-modal-close class="text-center px-4 py-2 text-sm text-ink-grey hover:underline">
                 Annuler

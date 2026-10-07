@@ -45,7 +45,7 @@
                                 <x-hk.icon :name="$icon($n)" :size="16" />
                             </span>
                             <span class="flex-1 min-w-0 flex flex-col gap-0.5">
-                                <span class="text-[13.5px] leading-snug {{ $isUnread ? 'font-semibold text-navy' : 'text-[#6C6658]' }}">{{ $n->data['message'] ?? ($n->data['title'] ?? 'Notification') }}</span>
+                                <span class="text-[13.5px] leading-snug {{ $isUnread ? 'font-semibold text-navy' : 'text-ink-muted' }}">{{ $n->data['message'] ?? ($n->data['title'] ?? 'Notification') }}</span>
                                 <span class="font-mono text-[11.5px] text-ink-grey">{{ $n->created_at->locale('fr')->diffForHumans() }}</span>
                             </span>
                             @if ($isUnread)

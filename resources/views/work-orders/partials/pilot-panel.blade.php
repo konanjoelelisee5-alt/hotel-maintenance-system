@@ -13,7 +13,10 @@
     // Formulaire de motif à rouvrir après une erreur de saisie.
     $openReason = $errors->has('reason') ? old('_action') : null;
     $user = auth()->user();
-    $canReassign = $assignee && in_array($status, ['ouvert', 'en_cours', 'en_attente', 'rejete'], true);
+    // Affecter / réaffecter depuis le menu ⋮ ; sauf quand c'est déjà le bouton principal
+    // (OT ouvert ou en cours sans intervenant). Un OT en attente sans intervenant s'affecte ici.
+    $assignsAsPrimary = in_array($status, ['ouvert', 'en_cours'], true) && ! $assignee;
+    $canReassign = ! $assignsAsPrimary && in_array($status, ['ouvert', 'en_cours', 'en_attente', 'rejete'], true);
     $hasMenu = ! in_array($status, ['ferme', 'annule'], true)
         && ($canReassign || $user->can('update', $workOrder) || $user->can('takeOver', $workOrder)
             || $user->can('suspend', $workOrder) || $user->can('cancel', $workOrder));
@@ -34,7 +37,7 @@
                 <span class="w-9 h-9 flex-shrink-0 rounded-full bg-white border border-gold/30 flex items-center justify-center text-gold">
                     <x-nav-icon name="info" class="w-[18px] h-[18px]" />
                 </span>
-                <div class="text-[13.5px] leading-snug text-[#3d3a33] min-w-0">
+                <div class="text-[13.5px] leading-snug text-ink-strong min-w-0">
                     <div class="text-[11px] font-semibold text-[#7D7768] uppercase tracking-wide mb-0.5">Prochaine étape</div>
                     @switch(true)
                         @case(in_array($status, ['ouvert', 'en_cours'], true) && ! $assignee)
@@ -70,7 +73,7 @@
             </div>
 
             <div class="flex-shrink-0 flex items-center gap-2">
-                @if (in_array($status, ['ouvert', 'en_cours'], true) && ! $assignee)
+                @if ($assignsAsPrimary)
                     <a href="{{ route('work-orders.schedule', $workOrder) }}" class="btn btn-primary flex-1 sm:flex-none"><x-nav-icon name="user" /> Affecter et planifier</a>
                 @elseif ($status === 'en_attente' && auth()->user()->can('resume', $workOrder))
                     <form method="POST" action="{{ route('work-orders.resume', $workOrder) }}" class="flex-1 sm:flex-none">
@@ -84,7 +87,7 @@
                 @if ($hasMenu)
                     <x-more-menu label="Autres actions sur l'OT" title="Autres actions">
                         @if ($canReassign)
-                            <x-more-menu.item :href="route('work-orders.schedule', $workOrder)" icon="swap">Réaffecter / replanifier</x-more-menu.item>
+                            <x-more-menu.item :href="route('work-orders.schedule', $workOrder)" icon="swap">{{ $assignee ? 'Réaffecter / replanifier' : 'Affecter et planifier' }}</x-more-menu.item>
                         @endif
                         @can('update', $workOrder)
                             <x-more-menu.item :href="route('work-orders.edit', $workOrder)" modal icon="pencil">Modifier la priorité ou le type</x-more-menu.item>

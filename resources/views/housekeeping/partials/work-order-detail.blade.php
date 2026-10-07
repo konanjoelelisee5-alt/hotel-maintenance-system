@@ -2,7 +2,7 @@
      Actions du demandeur, toutes sans modifier l'OT : retirer un signalement fait par
      erreur (15 min, sans technicien), ajouter une précision (texte, vocal, photo),
      confirmer la réparation ; la gouvernante demande aussi le blocage de la chambre.
-     Variables : $workOrder, $repeatCount (WorkOrderController::housekeepingScreen). --}}
+     Variables : $workOrder, $repeatCount (HousekeepingWorkOrderController::screen). --}}
 @php
     $hk = \App\Support\Housekeeping::class;
     $user = auth()->user();
@@ -59,8 +59,8 @@
                     </span>
                     <div class="min-w-0">
                         <h2 class="m-0 text-[18px] font-semibold text-navy leading-tight">{{ $workOrder->room?->label ?? 'Parties communes' }}</h2>
-                        <p class="m-0 mt-0.5 text-[13px] text-[#6C6658]">
-                            <span class="font-mono text-[#26496B]">{{ $workOrder->code() }}</span> · {{ $category ? $hk::categoryLabel($category) : $workOrder->title }}
+                        <p class="m-0 mt-0.5 text-[13px] text-ink-muted">
+                            <span class="font-mono text-blue">{{ $workOrder->code() }}</span> · {{ $category ? $hk::categoryLabel($category) : $workOrder->title }}
                         </p>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                 <span class="inline-flex items-center gap-1.5 text-[12px] text-ink-grey"><x-hk.icon name="lock" :size="13" /> Lecture seule · mise à jour par la maintenance</span>
             </div>
             @if ($cancel?->note)
-                <p class="m-0 px-3.5 py-2.5 rounded-[8px] bg-line-soft text-[13px] text-[#4A4639]">
+                <p class="m-0 px-3.5 py-2.5 rounded-[8px] bg-line-soft text-[13px] text-ink-body">
                     {{ \Illuminate\Support\Str::after($cancel->note, ': ') }}
                     <span class="font-mono text-[11.5px] text-ink-grey">· {{ $cancel->created_at->format('d/m H:i') }}</span>
                 </p>
@@ -95,32 +95,7 @@
 
     {{-- Retirer : motif obligatoire, l'OT passe « annulé » sans être supprimé. --}}
     @if ($withdrawLeft)
-        <section x-data="{ open: {{ $errors->has('reason') ? 'true' : 'false' }} }" @hk-withdraw-open.window="open = true" x-show="open" x-cloak
-                 class="bg-white border border-red/30 rounded-xl overflow-hidden">
-            <form method="POST" action="{{ route('quick-reports.withdraw', $workOrder) }}" class="ui-form flex flex-col gap-4 px-5 py-4">
-                @csrf
-                <div>
-                    <h3 class="m-0 text-[14.5px] font-semibold text-navy">Retirer ce signalement ?</h3>
-                    <p class="m-0 mt-0.5 text-[12.5px] text-[#6C6658]">La maintenance ne se déplacera pas. Le signalement reste visible dans votre historique, avec le motif.</p>
-                </div>
-                <fieldset class="m-0 p-0 border-0 grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
-                    <legend class="sr-only">Motif</legend>
-                    @foreach ($hk::WITHDRAW_REASONS as $key => $label)
-                        <label class="!flex !normal-case !tracking-normal !mb-0 items-center gap-2.5 min-h-[44px] px-3 rounded-[10px] border border-line text-[13.5px] font-medium text-navy cursor-pointer has-[:checked]:border-navy has-[:checked]:bg-paper">
-                            <input type="radio" name="reason" value="{{ $key }}" class="text-navy focus:ring-navy/30" @checked(old('reason') === $key)>
-                            {{ $label }}
-                        </label>
-                    @endforeach
-                </fieldset>
-                <x-input-error :messages="$errors->get('reason')" />
-                <input type="text" name="detail" maxlength="300" value="{{ old('detail') }}" placeholder="Précision (facultatif)" aria-label="Précision sur le motif"
-                       class="w-full h-10 rounded-[10px] border-line text-[13.5px]">
-                <div class="flex flex-wrap gap-2.5">
-                    <button type="submit" class="btn btn-danger-solid">Retirer le signalement</button>
-                    <button type="button" class="btn btn-ghost" @click="open = false">Garder</button>
-                </div>
-            </form>
-        </section>
+        @include('work-orders.partials.withdraw-form')
     @endif
 
     {{-- Ajouter une précision : texte, message vocal, photo (au moins l'un des trois). --}}
@@ -130,7 +105,7 @@
 
     {{-- Panne qui revient dans la même chambre --}}
     @if ($repeatCount >= 2)
-        <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-amber/30 bg-[#FBF1DF] text-[#7A5A16]">
+        <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-amber/30 bg-warn-bg text-warn-ink">
             <x-hk.icon name="alert-triangle" :size="18" class="mt-0.5" />
             <p class="m-0 text-[13px] leading-relaxed">
                 <strong>Panne récurrente :</strong> {{ $repeatCount }}ᵉ signalement « {{ $hk::categoryLabel($category) }} » dans cette chambre en {{ $hk::REPEAT_DAYS }} jours.
@@ -150,9 +125,9 @@
                     <span class="font-medium text-navy">{{ $report->technician?->name ?? 'Technicien' }}</span>
                     @if ($workOrder->completed_at)<span class="ml-auto font-mono text-[12px] text-ink-grey">{{ $workOrder->completed_at->format('d/m/Y H:i') }}</span>@endif
                 </div>
-                <p class="m-0 text-[#4A4639] leading-relaxed whitespace-pre-line">{{ $report->work_performed }}</p>
+                <p class="m-0 text-ink-body leading-relaxed whitespace-pre-line">{{ $report->work_performed }}</p>
                 @if ($report->recommendations)
-                    <p class="m-0 px-3.5 py-2.5 rounded-[8px] bg-paper border-l-2 border-gold text-[13px] text-[#4A4639]"><span class="font-semibold text-navy">Conseil du technicien :</span> {{ $report->recommendations }}</p>
+                    <p class="m-0 px-3.5 py-2.5 rounded-[8px] bg-warn-bg/60 border border-gold/30 text-[13px] text-ink-body"><span class="font-semibold text-navy">Conseil du technicien :</span> {{ $report->recommendations }}</p>
                 @endif
                 @if ($interventionPhotos->isNotEmpty())
                     <div class="grid grid-cols-2 gap-2">
@@ -177,7 +152,7 @@
                             <span class="font-semibold text-navy">Signalement · {{ $workOrder->reporter?->name ?? '—' }}</span>
                             <span class="font-mono text-ink-grey">{{ $workOrder->created_at->format('d/m H:i') }}</span>
                         </div>
-                        @if ($note)<p class="m-0 text-[13.5px] text-[#4A4639] leading-relaxed">{{ $note }}</p>@endif
+                        @if ($note)<p class="m-0 text-[13.5px] text-ink-body leading-relaxed">{{ $note }}</p>@endif
                         @include('housekeeping.partials.media', ['files' => $originalFiles])
                         @if (! $note && $originalFiles->isEmpty())<p class="m-0 text-[13px] text-ink-grey">Ni message ni photo.</p>@endif
                     </li>
@@ -187,7 +162,7 @@
                                 <span class="font-semibold text-navy">Précision · {{ $c['who']?->name ?? '—' }}</span>
                                 <span class="font-mono text-ink-grey">{{ $c['at']->format('d/m H:i') }}</span>
                             </div>
-                            @if ($c['text'] && ! str_ends_with($c['text'], 'ajouté(s).'))<p class="m-0 text-[13.5px] text-[#4A4639] leading-relaxed">{{ $c['text'] }}</p>@endif
+                            @if ($c['text'] && ! str_ends_with($c['text'], 'ajouté(s).'))<p class="m-0 text-[13.5px] text-ink-body leading-relaxed">{{ $c['text'] }}</p>@endif
                             @include('housekeeping.partials.media', ['files' => $c['files']])
                         </li>
                     @endforeach
@@ -230,7 +205,7 @@
                             <div class="flex flex-col gap-0.5 min-w-0 -mt-px">
                                 <span class="text-[13.5px] {{ $s['done'] ? 'font-semibold text-navy' : 'font-medium text-ink-grey' }}">{{ $s['label'] }}</span>
                                 @if ($s['at'])<span class="font-mono text-[11.5px] text-ink-grey">{{ $s['at']->format('d/m/Y H:i') }}</span>@endif
-                                @if ($s['meta'])<span class="text-[12.5px] text-[#6C6658]">{{ $s['meta'] }}</span>@endif
+                                @if ($s['meta'])<span class="text-[12.5px] text-ink-muted">{{ $s['meta'] }}</span>@endif
                             </div>
                         </li>
                     @endforeach

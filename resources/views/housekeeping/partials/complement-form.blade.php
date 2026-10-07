@@ -10,7 +10,7 @@
         <span class="w-8 h-8 rounded-[8px] border border-line bg-paper text-gold flex items-center justify-center flex-shrink-0"><x-hk.icon name="plus" :size="16" /></span>
         <div class="min-w-0 flex-1">
             <h3 class="m-0 text-[14.5px] font-semibold text-navy">Ajouter une précision</h3>
-            <p class="m-0 text-[12.5px] text-[#6C6658]">Le technicien la verra dans sa fiche. Rien de ce qui a été envoyé n'est modifié.</p>
+            <p class="m-0 text-[12.5px] text-ink-muted">Le technicien la verra dans sa fiche. Rien de ce qui a été envoyé n'est modifié.</p>
         </div>
         <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-ink-grey hover:bg-paper" @click="close" aria-label="Fermer"><x-hk.icon name="x" :size="16" /></button>
     </header>
@@ -49,13 +49,13 @@
             </div>
         </div>
 
-        <p x-show="error" x-cloak x-text="error" class="m-0 px-3.5 py-2.5 rounded-lg bg-[#FDECEA] text-[#8A1F16] text-[13px]"></p>
+        <p x-show="error" x-cloak x-text="error" class="m-0 px-3.5 py-2.5 rounded-lg bg-danger-bg text-danger-ink text-[13px]"></p>
 
         <div class="flex flex-wrap gap-2.5">
-            <button type="button" @click="send" :disabled="!canSend" class="btn btn-primary">
-                <span x-show="!sending"><x-hk.icon name="send" :size="16" /></span>
-                <span x-show="sending" class="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
-                <span x-text="sending ? 'Envoi…' : 'Envoyer la précision'"></span>
+            <button type="button" @click="send" :disabled="!canSend" :data-state="btnState || null" class="btn btn-primary">
+                <x-hk.icon name="send" :size="16" x-show="btnState !== 'success'" />
+                <x-hk.icon name="check" :size="16" x-show="btnState === 'success'" x-cloak />
+                <span x-text="btnState === 'success' ? 'Envoyé' : 'Envoyer la précision'">Envoyer la précision</span>
             </button>
             <button type="button" class="btn btn-ghost" @click="close">Annuler</button>
         </div>
@@ -67,22 +67,8 @@
         function hkComplement(config) {
             // Enregistreur et fichiers gardés hors de l'état Alpine (un Proxy les casse).
             let recorder = null, stream = null, chunks = [], timer = null, audioBlob = null, photoBlob = null;
-            const extensionFor = (type) => type.includes('mp4') ? 'm4a' : (type.includes('ogg') ? 'ogg' : 'webm');
-            // Photo réduite sur le téléphone (1600 px, JPEG), comme au signalement : envoi rapide en 3G.
-            const shrink = (file, max = 1600) => new Promise((resolve) => {
-                const url = URL.createObjectURL(file), img = new Image();
-                img.onload = () => {
-                    const scale = Math.min(1, max / Math.max(img.width, img.height));
-                    const canvas = document.createElement('canvas');
-                    canvas.width = Math.round(img.width * scale);
-                    canvas.height = Math.round(img.height * scale);
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    URL.revokeObjectURL(url);
-                    canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.8);
-                };
-                img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
-                img.src = url;
-            });
+            const extensionFor = (type) => window.hkMedia.extensionFor(type);
+            const shrink = (file) => window.hkMedia.shrink(file);
 
             return {
                 open: false,
@@ -93,6 +79,7 @@
                 audioUrl: null,
                 photoUrl: null,
                 sending: false,
+                btnState: '', // état du bouton d'envoi (.btn data-state) : loading, success, error
                 error: '',
 
                 get canSend() { return !this.sending && this.rec !== 'on' && (this.note.trim() !== '' || !!this.audioUrl || !!this.photoUrl); },
@@ -107,7 +94,7 @@
                         this.error = 'Le micro est bloqué. Autorisez le micro pour ce site dans le navigateur.';
                         return;
                     }
-                    const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].find((t) => MediaRecorder.isTypeSupported(t));
+                    const type = window.hkMedia.recorderType();
                     recorder = new MediaRecorder(stream, { ...(type ? { mimeType: type } : {}), audioBitsPerSecond: 32000 });
                     chunks = [];
                     recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
@@ -149,6 +136,7 @@
                 async send() {
                     if (!this.canSend) return;
                     this.sending = true;
+                    this.btnState = 'loading';
                     this.error = '';
                     const data = new FormData();
                     data.append('_token', document.querySelector('meta[name=csrf-token]').content);
@@ -160,7 +148,7 @@
                             method: 'POST', body: data, credentials: 'same-origin',
                             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                         });
-                        if (res.ok) { window.location.href = (await res.json()).redirect; return; }
+                        if (res.ok) { this.btnState = 'success'; window.location.href = (await res.json()).redirect; return; }
                         if (res.status === 422) {
                             const json = await res.json();
                             this.error = Object.values(json.errors || {})[0]?.[0] || json.message;
@@ -173,6 +161,8 @@
                         this.error = 'Pas de réseau. Réessayez quand le wifi revient.';
                     }
                     this.sending = false;
+                    this.btnState = 'error';
+                    setTimeout(() => { if (this.btnState === 'error') this.btnState = ''; }, 900);
                 },
             };
         }

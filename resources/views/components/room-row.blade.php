@@ -7,9 +7,9 @@
      stacked : boutons toujours sous le texte (colonnes étroites). --}}
 @php
     $tile = [
-        'amber' => 'bg-[#FBF1DF] text-[#7A5A16] border-amber/30',
-        'red' => 'bg-[#FBE4E1] text-red border-red/25',
-        'navy' => 'bg-[#EAF0F6] text-navy border-navy/15',
+        'amber' => 'bg-warn-bg text-warn-ink border-amber/30',
+        'red' => 'bg-danger-soft text-red border-red/25',
+        'navy' => 'bg-info-bg text-navy border-navy/15',
         'gold' => 'bg-[#FBF6EC] text-gold-700 border-gold/30',
         'grey' => 'bg-line-soft text-ink-grey border-line',
     ][$tone] ?? '';
@@ -26,15 +26,15 @@
             <div class="flex items-center gap-2 flex-wrap">
                 <span class="text-[14.5px] font-semibold text-navy">{{ $room?->label ?? 'Lieu supprimé' }}</span>
                 @if ($workOrder)
-                    <a href="{{ route('work-orders.show', $workOrder) }}" class="font-mono text-[11.5px] text-[#4A4639] px-1.5 py-0.5 rounded-md bg-paper border border-line hover:border-navy/40 hover:text-navy">{{ $workOrder->code() }}</a>
+                    <a href="{{ route('work-orders.show', $workOrder) }}" class="font-mono text-[11.5px] text-ink-body px-1.5 py-0.5 rounded-md bg-paper border border-line hover:border-navy/40 hover:text-navy">{{ $workOrder->code() }}</a>
                 @endif
                 {{ $badge ?? '' }}
             </div>
             @if ($title)
-                <p class="m-0 mt-0.5 text-[13.5px] text-[#3d3a33] leading-snug">{{ $title }}</p>
+                <p class="m-0 mt-0.5 text-[13.5px] text-ink-strong leading-snug">{{ $title }}</p>
             @endif
             @isset($meta)
-                <div class="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1.5 text-[12px] text-[#6C6658]">{{ $meta }}</div>
+                <div class="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1.5 text-[12px] text-ink-muted">{{ $meta }}</div>
             @endisset
         </div>
     </div>

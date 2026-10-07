@@ -2,7 +2,7 @@
 <x-panel id="comments" title="Commentaires" icon="comment" flush>
     <x-slot:badge>
         @if ($workOrder->comments->isNotEmpty())
-            <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-[#4A4639]">{{ $workOrder->comments->count() }}</span>
+            <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-ink-body">{{ $workOrder->comments->count() }}</span>
         @endif
     </x-slot:badge>
 
@@ -19,7 +19,7 @@
                         <span class="text-ink-grey" title="{{ $comment->created_at->format('d/m/Y H:i') }}">{{ $comment->created_at->locale('fr')->diffForHumans() }}</span>
                     </div>
                     <p class="m-0 px-3.5 py-2.5 text-[13.5px] leading-relaxed whitespace-pre-line
-                        {{ $mine ? 'bg-[#EAF0F6] rounded-[14px] rounded-tr-[4px] text-navy' : 'bg-paper border border-line-soft rounded-[14px] rounded-tl-[4px] text-[#3d3a33]' }}">{{ $comment->content }}</p>
+                        {{ $mine ? 'bg-info-bg rounded-[14px] rounded-tr-[4px] text-navy' : 'bg-paper border border-line-soft rounded-[14px] rounded-tl-[4px] text-ink-strong' }}">{{ $comment->content }}</p>
                 </div>
             </div>
         @empty

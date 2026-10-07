@@ -2,7 +2,7 @@
      statuts écrits en clair (badges) et motif cité quand il y en a un. --}}
 <x-panel title="Historique" icon="history" collapsible :open="$workOrder->statusHistories->count() <= 6">
     <x-slot:badge>
-        <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-[#4A4639]">{{ $workOrder->statusHistories->count() }}</span>
+        <span class="px-2 py-0.5 rounded-full bg-line-soft text-[11.5px] font-semibold text-ink-body">{{ $workOrder->statusHistories->count() }}</span>
     </x-slot:badge>
 
     @if ($workOrder->statusHistories->isEmpty())
@@ -19,15 +19,15 @@
                         <div class="flex items-center gap-x-2 gap-y-1 flex-wrap text-[13px]">
                             <span class="font-semibold text-navy">{{ $history->changedBy?->name ?? 'Système' }}</span>
                             @if ($history->old_status)
-                                <span class="text-[#6C6658]">a passé l'OT en</span>
+                                <span class="text-ink-muted">a passé l'OT en</span>
                                 <x-work-order-status-badge :status="$history->new_status" class="!py-0.5" />
                             @else
-                                <span class="text-[#6C6658]">a créé l'OT</span>
+                                <span class="text-ink-muted">a créé l'OT</span>
                             @endif
                             <span class="ml-auto text-[11.5px] text-ink-grey whitespace-nowrap">{{ $history->created_at->format('d/m/Y H\hi') }}</span>
                         </div>
                         @if ($history->note)
-                            <p class="m-0 mt-1.5 px-3 py-2 rounded-[8px] bg-paper border-l-2 border-line text-[12.5px] text-[#4A4639]">{{ $history->note }}</p>
+                            <p class="m-0 mt-1.5 px-3 py-2 rounded-[8px] bg-paper border border-line-soft text-[12.5px] text-ink-body">{{ $history->note }}</p>
                         @endif
                     </div>
                 </li>

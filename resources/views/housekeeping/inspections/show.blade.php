@@ -1,4 +1,4 @@
-{{-- Inspection d'une chambre. En cours : la liste des points par zone, chaque point
+{{-- Inspection d'une chambre. En cours : une zone par étape (x-wizard), chaque point
      enregistré dès qu'il est noté (fetch) ; un point non conforme reçoit un commentaire
      et une photo. Terminée : le résumé, avec les OT créés ou complétés.
      Données : RoomInspectionController::show(). --}}
@@ -12,118 +12,156 @@
      d'avancement occupe le bas de l'écran). --}}
 <x-app-layout crumb="Inspections" :page-title="'Inspection · '.$inspection->room->label" :back-route="route('inspections.index')" :focus="! $inspection->isDone()">
     @if (! $inspection->isDone())
-        {{-- ===== En cours ===== --}}
+        {{-- ===== En cours : une zone par étape (comme le signalement), puis remarques et fin.
+             « Continuer » reste grisé tant qu'un point de la zone n'est pas noté. ===== --}}
+        @php $steps = [...$zones->keys()->all(), 'Remarques et fin']; @endphp
         <form method="POST" action="{{ route('inspections.complete', $inspection) }}"
               x-data="roomInspection(@js([
                   'items' => $inspection->items->map(fn ($i) => ['id' => $i->id, 'zone' => $i->zone, 'category' => $i->category, 'result' => $i->result, 'comment' => $i->comment ?? '', 'hasPhoto' => (bool) $i->photo_path])->values(),
+                  'zones' => $zones->keys()->values(),
                   'pointUrl' => route('inspections.points.update', [$inspection, '__ID__']),
                   'photoUrl' => route('inspections.points.photo', [$inspection, '__ID__']),
               ]))"
-              class="grid gap-5 split:grid-cols-[minmax(0,1fr)_320px] items-start pb-28 split:pb-0">
+              class="grid gap-5 desk:grid-cols-[minmax(0,1fr)_320px] items-start pb-28 desk:pb-0">
             @csrf
-            <div class="flex flex-col gap-5 min-w-0">
+            <div class="flex flex-col gap-5 min-w-0 w-full max-w-[760px]">
+                <x-wizard.progress :steps="$steps" />
+
                 @if ($previous)
-                    <p class="m-0 px-4 py-3 rounded-xl bg-[#EAF0F6] text-[13px] text-[#26496B]">
+                    <p x-show="step === 1" class="m-0 px-4 py-3 rounded-xl bg-info-bg text-[13px] text-blue">
                         Dernière inspection {{ $previous->completed_at->locale('fr')->diffForHumans() }} ({{ $previous->conformity() ?? '—' }} % conforme).
                     </p>
                 @endif
 
                 @foreach ($zones as $zone => $items)
-                    <section class="bg-white border border-line rounded-xl overflow-hidden">
-                        <header class="flex items-center gap-3 px-5 py-3 border-b border-line-soft">
-                            <h2 class="m-0 flex-1 text-[15px] font-semibold text-navy">{{ $zone }}</h2>
-                            <button type="button" @click="allOk(@js($zone))" class="btn btn-sm btn-secondary"><x-hk.icon name="check-check" :size="14" /> Tout conforme</button>
-                        </header>
-                        @foreach ($items as $item)
-                            <div class="px-5 py-3 border-b border-line-soft last:border-b-0 flex flex-col gap-2.5" x-data="{ id: {{ $item->id }} }">
-                                <div class="flex flex-col min-[480px]:flex-row min-[480px]:items-center gap-2.5">
-                                    <div class="flex-1 min-w-0 flex items-center gap-2.5">
-                                        <x-hk.icon :name="$hk::categoryIcon(\App\Enums\IssueCategory::from($item->category))" :size="16" class="text-gold" />
-                                        <span class="text-[13.5px] font-medium text-navy">{{ $item->label }}</span>
-                                        <span x-show="point(id).saving" class="text-[11px] text-ink-grey">…</span>
-                                        <span x-show="point(id).error" x-cloak class="text-[11px] text-red">non enregistré, retouchez</span>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-1 p-[3px] rounded-[10px] bg-line-soft border border-line flex-shrink-0" role="radiogroup" aria-label="{{ $item->label }}">
-                                        @foreach (['ok' => ['check', 'Conforme', 'bg-green text-white'], 'nok' => ['x', 'Non conforme', 'bg-red text-white'], 'na' => ['more', 'Sans objet', 'bg-white text-navy shadow-sm']] as $value => [$icon, $label, $on])
-                                            <button type="button" role="radio" :aria-checked="point(id).result === '{{ $value }}'" @click="setResult(id, '{{ $value }}')"
-                                                    class="h-9 px-2.5 rounded-[7px] text-[12px] font-semibold inline-flex items-center justify-center gap-1 whitespace-nowrap transition"
-                                                    :class="point(id).result === '{{ $value }}' ? '{{ $on }}' : 'text-ink-grey hover:text-navy'">
-                                                <x-hk.icon :name="$icon" :size="13" /> {{ $value === 'na' ? 'S.O.' : $label }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                {{-- Non conforme : ce qui ne va pas, et une photo pour le technicien. --}}
-                                <div x-show="point(id).result === 'nok'" x-cloak class="flex flex-col min-[480px]:flex-row gap-2 pl-0 min-[480px]:pl-[26px]">
-                                    <input type="text" maxlength="500" placeholder="Ce qui ne va pas (facultatif)" aria-label="Commentaire : {{ $item->label }}"
-                                           x-model="point(id).comment" @change="save(id)"
-                                           class="flex-1 min-w-0 h-10 px-3 rounded-[9px] border border-line text-[13.5px] focus:border-navy focus:ring-navy/20">
-                                    <label class="btn btn-secondary cursor-pointer flex-shrink-0">
-                                        <x-hk.icon name="camera" :size="15" />
-                                        <span x-text="point(id).uploading ? 'Envoi…' : (point(id).hasPhoto ? 'Photo jointe' : 'Photo')"></span>
-                                        <input type="file" accept="image/*" capture="environment" class="sr-only" @change="uploadPhoto(id, $event)">
-                                    </label>
-                                </div>
+                    <section x-show="step === {{ $loop->iteration }}" @if (! $loop->first) x-cloak @endif class="flex flex-col gap-4">
+                        <div class="flex items-end gap-3">
+                            <div class="flex-1 min-w-0">
+                                <h2 class="m-0 text-[19px] font-semibold text-navy tracking-tight">{{ $zone }}</h2>
+                                <p class="m-0 mt-0.5 text-[13px] text-ink-muted">Notez chaque point : conforme, non conforme ou sans objet.</p>
                             </div>
-                        @endforeach
+                            <button type="button" @click="allOk(@js($zone))" class="btn btn-sm btn-secondary flex-shrink-0"><x-hk.icon name="check-check" :size="14" /> Tout conforme</button>
+                        </div>
+                        <div class="bg-white border border-line rounded-xl overflow-hidden">
+                            @foreach ($items as $item)
+                                <div class="px-5 py-3 border-b border-line-soft last:border-b-0 flex flex-col gap-2.5" x-data="{ id: {{ $item->id }} }">
+                                    <div class="flex flex-col min-[480px]:flex-row min-[480px]:items-center gap-2.5">
+                                        <div class="flex-1 min-w-0 flex items-center gap-2.5">
+                                            <x-hk.icon :name="$hk::categoryIcon(\App\Enums\IssueCategory::from($item->category))" :size="16" class="text-gold" />
+                                            <span class="text-[13.5px] font-medium text-navy">{{ $item->label }}</span>
+                                            <span x-show="point(id).saving" class="text-[11px] text-ink-grey">…</span>
+                                            <span x-show="point(id).error" x-cloak class="text-[11px] text-red">non enregistré, retouchez</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-1 p-[3px] rounded-[10px] bg-line-soft border border-line flex-shrink-0" role="radiogroup" aria-label="{{ $item->label }}">
+                                            @foreach (['ok' => ['check', 'Conforme', 'bg-green text-white'], 'nok' => ['x', 'Non conforme', 'bg-red text-white'], 'na' => ['more', 'Sans objet', 'bg-white text-navy shadow-sm']] as $value => [$icon, $label, $on])
+                                                <button type="button" role="radio" :aria-checked="point(id).result === '{{ $value }}'" @click="setResult(id, '{{ $value }}')"
+                                                        class="h-9 px-2.5 rounded-[7px] text-[12px] font-semibold inline-flex items-center justify-center gap-1 whitespace-nowrap transition"
+                                                        :class="point(id).result === '{{ $value }}' ? '{{ $on }}' : 'text-ink-grey hover:text-navy'">
+                                                    <x-hk.icon :name="$icon" :size="13" /> {{ $value === 'na' ? 'S.O.' : $label }}
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    {{-- Non conforme : ce qui ne va pas, et une photo pour le technicien. --}}
+                                    <div x-show="point(id).result === 'nok'" x-cloak class="flex flex-col min-[480px]:flex-row gap-2 pl-0 min-[480px]:pl-[26px]">
+                                        <input type="text" maxlength="500" placeholder="Ce qui ne va pas (facultatif)" aria-label="Commentaire : {{ $item->label }}"
+                                               x-model="point(id).comment" @change="save(id)"
+                                               class="flex-1 min-w-0 h-10 px-3 rounded-[9px] border border-line text-[13.5px] focus:border-navy focus:ring-navy/20">
+                                        <label class="btn btn-secondary cursor-pointer flex-shrink-0">
+                                            <x-hk.icon name="camera" :size="15" />
+                                            <span x-text="point(id).uploading ? 'Envoi…' : (point(id).hasPhoto ? 'Photo jointe' : 'Photo')"></span>
+                                            <input type="file" accept="image/*" capture="environment" class="sr-only" @change="uploadPhoto(id, $event)">
+                                        </label>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </section>
                 @endforeach
 
-                <section class="bg-white border border-line rounded-xl px-5 py-4 ui-form">
-                    <label for="notes">Remarques (facultatif)</label>
-                    <textarea id="notes" name="notes" rows="2" maxlength="1000" placeholder="Ex. : chambre à repeindre au prochain creux d'occupation."></textarea>
+                {{-- Dernière étape : remarques, bilan, fin --}}
+                <section x-show="step === {{ count($steps) }}" x-cloak class="flex flex-col gap-4">
+                    <div>
+                        <h2 class="m-0 text-[19px] font-semibold text-navy tracking-tight">Remarques et fin</h2>
+                        <p class="m-0 mt-0.5 text-[13px] text-ink-muted" x-text="summary"></p>
+                    </div>
+                    <div class="bg-white border border-line rounded-xl px-5 py-4 ui-form">
+                        <label for="notes">Remarques (facultatif)</label>
+                        <textarea id="notes" name="notes" rows="3" maxlength="1000" placeholder="Ex. : chambre à repeindre au prochain creux d'occupation."></textarea>
+                    </div>
                 </section>
+
+                <x-wizard.actions :last="count($steps)" submit-label="Terminer l'inspection" submit-icon="check" submit-class="btn-primary" />
+
+                <button type="submit" form="abandon-inspection" class="self-center desk:self-start text-[12.5px] font-semibold text-red hover:underline">Abandonner cette inspection</button>
             </div>
 
-            {{-- Avancement et fin --}}
-            <aside class="fixed split:sticky inset-x-0 bottom-0 split:top-[88px] z-30 bg-white border-t split:border border-line split:rounded-xl px-4 split:px-5 pt-3 split:py-4 pb-[calc(12px+env(safe-area-inset-bottom))] flex flex-col gap-3 shadow-[0_-8px_24px_-16px_rgba(14,33,54,.35)] split:shadow-none">
+            {{-- Ordinateur : avancement de toute la chambre, zone par zone --}}
+            <aside class="hidden desk:flex sticky top-[88px] flex-col gap-3 bg-white border border-line rounded-xl px-5 py-4">
                 <div class="flex items-center justify-between text-[13px]">
                     <span class="font-semibold text-navy">Avancement</span>
-                    <span class="font-mono text-[#4A4639]"><span x-text="answered">0</span>/<span x-text="items.length">0</span></span>
+                    <span class="font-mono text-ink-body"><span x-text="answered">0</span>/<span x-text="items.length">0</span></span>
                 </div>
                 <div class="h-1.5 rounded-full bg-line overflow-hidden"><div class="h-full bg-navy transition-all" :style="'width:' + (answered / items.length * 100) + '%'"></div></div>
-                <p class="hidden split:block m-0 text-[12.5px] text-[#6C6658]" x-text="summary"></p>
-                <div class="flex gap-2">
-                    <button type="submit" :disabled="answered < items.length || busy" class="btn btn-primary flex-1">
-                        <x-hk.icon name="check" :size="16" /> Terminer l'inspection
-                    </button>
-                </div>
-                <p class="split:hidden m-0 -mt-1 text-[12px] text-ink-grey text-center" x-text="answered < items.length ? 'Notez tous les points pour terminer.' : summary"></p>
-                <button type="submit" form="abandon-inspection" class="hidden split:block text-[12.5px] font-semibold text-red hover:underline">Abandonner cette inspection</button>
+                <ul class="m-0 p-0 list-none flex flex-col">
+                    <template x-for="(zone, index) in zones" :key="zone">
+                        <li class="flex items-center justify-between gap-2 py-2 border-b border-line-soft last:border-b-0 text-[13px]">
+                            <span :class="step === index + 1 ? 'font-semibold text-navy' : 'text-ink-body'" x-text="zone"></span>
+                            <span class="font-mono text-[12px]" :class="zoneDone(zone) ? 'text-green' : 'text-ink-grey'" x-text="zoneAnswered(zone) + '/' + zoneItems(zone).length"></span>
+                        </li>
+                    </template>
+                </ul>
+                <p class="m-0 text-[12.5px] text-ink-muted" x-text="summary"></p>
             </aside>
         </form>
 
-        <form id="abandon-inspection" method="POST" action="{{ route('inspections.destroy', $inspection) }}" class="split:hidden text-center"
+        <form id="abandon-inspection" method="POST" action="{{ route('inspections.destroy', $inspection) }}" class="hidden"
               data-confirm="Les points déjà notés seront effacés. Rien n'a encore été envoyé à la maintenance." data-confirm-title="Abandonner l'inspection ?" data-confirm-label="Abandonner" data-confirm-tone="danger">
             @csrf
             @method('DELETE')
-            <button type="submit" class="text-[12.5px] font-semibold text-red hover:underline">Abandonner cette inspection</button>
         </form>
 
         @push('scripts')
             <script>
                 function roomInspection(config) {
                     const csrf = () => document.querySelector('meta[name=csrf-token]').content;
-                    const shrink = (file, max = 1600) => new Promise((resolve) => {
-                        const url = URL.createObjectURL(file), img = new Image();
-                        img.onload = () => {
-                            const scale = Math.min(1, max / Math.max(img.width, img.height));
-                            const canvas = document.createElement('canvas');
-                            canvas.width = Math.round(img.width * scale);
-                            canvas.height = Math.round(img.height * scale);
-                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                            URL.revokeObjectURL(url);
-                            canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.8);
-                        };
-                        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
-                        img.src = url;
-                    });
+                    const shrink = (file) => window.hkMedia.shrink(file);
 
                     return {
                         items: config.items.map((i) => ({ ...i, saving: false, error: false, uploading: false })),
+                        zones: config.zones,
+                        step: 1,
                         busy: false,
+                        btnState: '',
                         point(id) { return this.items.find((i) => i.id === id); },
                         get answered() { return this.items.filter((i) => i.result).length; },
+
+                        // ----- Étapes : une zone par étape, puis remarques et fin -----
+                        init() {
+                            // Reprise d'une inspection commencée : on revient à la première zone incomplète.
+                            const firstOpen = this.zones.findIndex((z) => !this.zoneDone(z));
+                            this.step = firstOpen === -1 ? this.zones.length + 1 : firstOpen + 1;
+                            history.replaceState({ step: this.step }, '', '#etape-' + this.step);
+                            window.addEventListener('popstate', (e) => { this.step = Math.min(e.state?.step ?? 1, this.step); });
+                        },
+                        zoneItems(zone) { return this.items.filter((i) => i.zone === zone); },
+                        zoneAnswered(zone) { return this.zoneItems(zone).filter((i) => i.result).length; },
+                        zoneDone(zone) { return this.zoneAnswered(zone) === this.zoneItems(zone).length; },
+                        get stepValid() { return this.step > this.zones.length ? this.canSend : this.zoneDone(this.zones[this.step - 1]); },
+                        get canSend() { return this.answered === this.items.length && !this.busy; },
+                        get hint() {
+                            if (this.step > this.zones.length) return '';
+                            const zone = this.zones[this.step - 1];
+                            const left = this.zoneItems(zone).length - this.zoneAnswered(zone);
+                            return left > 1 ? 'Encore ' + left + ' points à noter dans cette zone.' : 'Encore 1 point à noter dans cette zone.';
+                        },
+                        next() {
+                            if (!this.stepValid || this.step > this.zones.length) return;
+                            this.step++;
+                            history.pushState({ step: this.step }, '', '#etape-' + this.step);
+                            window.scrollTo({ top: 0 });
+                        },
+                        back() { history.back(); },
                         get summary() {
                             const nok = this.items.filter((i) => i.result === 'nok');
                             if (!nok.length) return 'Tout est conforme : aucun OT ne sera créé.';
@@ -182,10 +220,10 @@
             <div class="flex flex-col gap-5 min-w-0">
                 <section class="bg-white border border-line rounded-xl px-5 py-5 flex items-center gap-4">
                     <span class="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 font-mono text-[17px] font-semibold
-                                 {{ $score === 100 ? 'bg-[#E6F3EC] text-green' : ($score >= 80 ? 'bg-[#FBF1DF] text-[#7A5A16]' : 'bg-[#FDECEA] text-red') }}">{{ $score ?? '—' }}%</span>
+                                 {{ $score === 100 ? 'bg-ok-bg text-green' : ($score >= 80 ? 'bg-warn-bg text-warn-ink' : 'bg-danger-bg text-red') }}">{{ $score ?? '—' }}%</span>
                     <div class="min-w-0">
                         <h2 class="m-0 text-[17px] font-semibold text-navy">{{ $nok->isEmpty() ? 'Tout est conforme' : $nok->count().' point(s) non conforme(s)' }}</h2>
-                        <p class="m-0 mt-0.5 text-[13px] text-[#6C6658]">{{ $inspection->completed_at->locale('fr')->translatedFormat('l j F Y à H\hi') }} · {{ $inspection->inspector->name }}</p>
+                        <p class="m-0 mt-0.5 text-[13px] text-ink-muted">{{ $inspection->completed_at->locale('fr')->translatedFormat('l j F Y à H\hi') }} · {{ $inspection->inspector->name }}</p>
                         <p class="m-0 mt-1 text-[12.5px] text-ink-grey">
                             {{ $inspection->items->where('result', 'ok')->count() }} conforme(s) · {{ $nok->count() }} non conforme(s) · {{ $inspection->items->where('result', 'na')->count() }} sans objet
                         </p>
@@ -200,10 +238,10 @@
                                 <x-hk.icon :name="$hk::categoryIcon(\App\Enums\IssueCategory::from($item->category))" :size="16" class="text-red mt-0.5" />
                                 <div class="flex-1 min-w-0">
                                     <div class="text-[13.5px] font-medium text-navy">{{ $item->label }} <span class="text-ink-grey font-normal">· {{ $item->zone }}</span></div>
-                                    @if ($item->comment)<div class="text-[12.5px] text-[#6C6658]">{{ $item->comment }}</div>@endif
+                                    @if ($item->comment)<div class="text-[12.5px] text-ink-muted">{{ $item->comment }}</div>@endif
                                 </div>
                                 @if ($item->workOrder)
-                                    <a href="{{ route('work-orders.show', $item->workOrder) }}" class="font-mono text-[12px] text-[#26496B] hover:underline whitespace-nowrap">{{ $item->workOrder->code() }}</a>
+                                    <a href="{{ route('work-orders.show', $item->workOrder) }}" class="font-mono text-[12px] text-blue hover:underline whitespace-nowrap">{{ $item->workOrder->code() }}</a>
                                 @endif
                             </div>
                         @endforeach
@@ -233,7 +271,7 @@
                     @forelse ($orders as $order)
                         <a href="{{ route('work-orders.show', $order) }}" class="flex items-center justify-between gap-2 py-2 border-b border-line-soft last:border-b-0 text-[13px] hover:underline">
                             <span class="truncate">{{ ($c = $hk::category($order)) ? $hk::categoryLabel($c) : $order->title }}</span>
-                            <span class="font-mono text-[12px] text-[#26496B]">{{ $order->code() }}</span>
+                            <span class="font-mono text-[12px] text-blue">{{ $order->code() }}</span>
                         </a>
                     @empty
                         <p class="m-0 text-[13px] text-ink-grey">Rien : la chambre est conforme.</p>
@@ -242,7 +280,7 @@
                 @if ($inspection->notes)
                     <section class="bg-white border border-line rounded-xl px-5 py-4">
                         <h2 class="m-0 mb-1.5 text-[14.5px] font-semibold text-navy">Remarques</h2>
-                        <p class="m-0 text-[13px] text-[#4A4639] whitespace-pre-line">{{ $inspection->notes }}</p>
+                        <p class="m-0 text-[13px] text-ink-body whitespace-pre-line">{{ $inspection->notes }}</p>
                     </section>
                 @endif
                 <form method="POST" action="{{ route('inspections.store') }}">

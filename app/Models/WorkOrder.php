@@ -22,7 +22,7 @@ class WorkOrder extends Model
         'scheduled_at', 'estimated_duration_minutes', 'scheduled_by',
         'sla_policy_id', 'sla_response_due_at', 'sla_resolution_due_at', 'sla_breached',
         'room_occupancy', 'reception_alerted_at',
-        'requester_confirmed_at', 'requester_confirmed_by',
+        'requester_confirmed_at', 'requester_confirmed_by', 'acknowledged_at',
     ];
 
     /** Délai pendant lequel le demandeur peut confirmer la réparation ou rouvrir l'OT. */
@@ -32,6 +32,7 @@ class WorkOrder extends Model
         'room_occupancy' => RoomOccupancy::class,
         'reception_alerted_at' => 'datetime',
         'requester_confirmed_at' => 'datetime',
+        'acknowledged_at' => 'datetime',
         'due_date' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -43,6 +44,13 @@ class WorkOrder extends Model
 
     protected static function booted(): void
     {
+        // Nouveau technicien : c'est à lui de dire « J'ai vu, je m'en occupe ».
+        static::updating(function (WorkOrder $workOrder) {
+            if ($workOrder->isDirty('assigned_to') && ! $workOrder->isDirty('acknowledged_at')) {
+                $workOrder->acknowledged_at = null;
+            }
+        });
+
         static::created(function (WorkOrder $workOrder) {
             $workOrder->applySlaPolicy();
         });
@@ -156,6 +164,11 @@ class WorkOrder extends Model
     public function escalationLogs()
     {
         return $this->hasMany(EscalationLog::class);
+    }
+
+    public function partRequests()
+    {
+        return $this->hasMany(PartRequest::class)->latest();
     }
 
     public function partReservations()
@@ -462,5 +475,82 @@ class WorkOrder extends Model
             'width' => $late ? 100 : $this->slaProgressPercent(),
             'late' => $late,
         ];
+    }
+
+    /**
+     * Affecté mais pas encore pris en charge par son technicien (« J'ai vu, je m'en
+     * occupe », chrono démarré ou avancement déclaré).
+     */
+    public function awaitsAcknowledgement(): bool
+    {
+        return $this->assigned_to !== null
+            && $this->acknowledged_at === null
+            && in_array($this->status, ['ouvert', 'rejete'], true);
+    }
+
+    /** Fenêtre des réparations précédentes montrées sur la fiche (même chambre ou équipement). */
+    public const PREVIOUS_REPAIRS_DAYS = 180;
+
+    /**
+     * Situation du client à connaître avant d'entrer dans la chambre (OT pas encore
+     * réparé, chambre de client) : déclarée par l'agent au signalement, mise à jour par
+     * la réception. Ton = clé de Swatch.
+     *
+     * @return array{tone: string, title: string, detail: string, note: ?WorkOrderComment}|null
+     */
+    public function guestNotice(): ?array
+    {
+        if (in_array($this->status, self::FINISHED_STATUSES, true) || ! $this->room || $this->room->isCommonArea()) {
+            return null;
+        }
+
+        $at = $this->due_date;
+        $moment = $at ? ($at->isToday() ? 'à ' : ($at->isTomorrow() ? 'demain à ' : 'le '.$at->format('d/m').' à ')).$at->format('H\hi') : null;
+
+        $notice = match (true) {
+            $this->room_occupancy === RoomOccupancy::ClientPresent => ['amber', 'Client dans la chambre', 'Frappez et présentez-vous avant d\'entrer.'],
+            $this->room_occupancy === RoomOccupancy::ClientAbsent => ['blue', 'Client sorti', $moment ? "Retour prévu {$moment} : réparez avant." : 'Réparez avant son retour.'],
+            $this->room_occupancy === RoomOccupancy::Depart => ['blue', 'Départ du client aujourd\'hui', 'La chambre se libère après son départ.'],
+            $this->room_occupancy === RoomOccupancy::Libre && $moment !== null => ['amber', 'Chambre libre, un client arrive '.$moment, 'Réparez avant son arrivée.'],
+            $this->room_occupancy === RoomOccupancy::Libre => ['green', 'Chambre libre', 'Vous pouvez entrer.'],
+            default => null,
+        };
+
+        if (! $notice) {
+            return null;
+        }
+
+        // Dernier message de la réception (situation déclarée, précision du client).
+        $note = $this->comments
+            ->filter(fn (WorkOrderComment $c) =>$c->user?->role === UserRole::Reception)
+            ->sortByDesc('created_at')
+            ->first();
+
+        return ['tone' => $notice[0], 'title' => $notice[1], 'detail' => $notice[2], 'note' => $note];
+    }
+
+    /**
+     * Réparations déjà faites au même endroit (l'équipement s'il est connu, sinon la
+     * chambre) : le technicien voit si la panne revient et ce qui a été fait.
+     *
+     * @return \Illuminate\Support\Collection<int, WorkOrder>
+     */
+    public function previousRepairs(int $limit = 5): \Illuminate\Support\Collection
+    {
+        if (! $this->equipment_id && ! $this->room_id) {
+            return collect();
+        }
+
+        return self::query()
+            ->whereKeyNot($this->id)
+            ->whereIn('status', ['resolu', 'ferme'])
+            ->when($this->equipment_id,
+                fn (Builder $q) => $q->where('equipment_id', $this->equipment_id),
+                fn (Builder $q) => $q->where('room_id', $this->room_id))
+            ->where('completed_at', '>=', now()->subDays(self::PREVIOUS_REPAIRS_DAYS))
+            ->with('assignee', 'interventionReport')
+            ->latest('completed_at')
+            ->limit($limit)
+            ->get();
     }
 }
