@@ -214,9 +214,16 @@ class MaintenancePlan extends Model
             $assignee->notify(new \App\Notifications\PreventiveWorkOrderGeneratedNotification($workOrder));
         }
 
+        // Échéances manquées (planificateur arrêté plusieurs jours) : un seul OT pour le
+        // retard, puis le plan repart à sa prochaine échéance à venir, sans avalanche d'OT.
+        $next = $this->computeNextOccurrence($dueAt);
+        while ($next->lte(today())) {
+            $next = $this->computeNextOccurrence($next);
+        }
+
         $this->update([
             'last_generated_at' => now(),
-            'next_due_at' => $this->computeNextOccurrence($dueAt),
+            'next_due_at' => $next,
         ]);
 
         return $workOrder;

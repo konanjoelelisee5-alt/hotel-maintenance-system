@@ -23,6 +23,18 @@ class SchedulerHealthTest extends TestCase
         $this->assertSame('never', $this->state('Génération des OT préventifs'));
     }
 
+    public function test_daily_task_waits_for_its_hour_when_the_scheduler_runs(): void
+    {
+        // Le planificateur tourne (vérification SLA passée) : la génération des préventifs,
+        // quotidienne à 5 h, n'est pas « jamais exécutée », elle attend son heure.
+        $this->travelTo(now()->setTime(11, 30));
+        $this->artisan('work-orders:check-sla');
+
+        $preventive = SchedulerHealth::report()->firstWhere('label', 'Génération des OT préventifs');
+        $this->assertSame('waiting', $preventive['state']);
+        $this->assertSame("En attente : premier passage prévu au prochain quart d'heure (rattrapage du jour)", $preventive['text']);
+    }
+
     public function test_sla_check_records_its_run(): void
     {
         $this->artisan('work-orders:check-sla')->assertSuccessful();

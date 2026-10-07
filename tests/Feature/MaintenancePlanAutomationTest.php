@@ -48,6 +48,46 @@ class MaintenancePlanAutomationTest extends TestCase
         ], $overrides));
     }
 
+    // ===== Rattrapage quand l'ordinateur était éteint =====
+
+    public function test_generation_missed_at_five_is_caught_up_once_later_that_day(): void
+    {
+        // schedule:run lance chaque tâche dans un autre processus : on vérifie la règle de
+        // l'horloger (routes/console.php), « faut-il lancer les préventifs maintenant ? ».
+        $event = collect(app(\Illuminate\Console\Scheduling\Schedule::class)->events())
+            ->first(fn ($e) => str_contains($e->command, 'maintenance:generate-preventive-work-orders'));
+        $shouldRun = fn () => $event->isDue(app()) && $event->filtersPass(app());
+
+        $this->travelTo(today()->setTime(4, 45));
+        $this->assertFalse($shouldRun(), 'avant 5 h');
+
+        // PC allumé à 9 h seulement : la génération du jour est rattrapée.
+        $this->travelTo(today()->setTime(9, 0));
+        $this->assertTrue($shouldRun(), 'rattrapage à 9 h');
+
+        // Une fois passée, les quarts d'heure suivants de la journée ne la relancent pas…
+        $this->artisan('maintenance:generate-preventive-work-orders');
+        $this->travelTo(today()->setTime(9, 15));
+        $this->assertFalse($shouldRun(), 'déjà faite aujourd\'hui');
+
+        // … jusqu'au lendemain 5 h.
+        $this->travelTo(today()->addDay()->setTime(5, 0));
+        $this->assertTrue($shouldRun(), 'lendemain 5 h');
+    }
+
+    public function test_several_missed_days_give_one_work_order_not_an_avalanche(): void
+    {
+        // Plan quotidien, planificateur arrêté 3 jours : un seul OT pour le retard, puis
+        // le plan repart à demain.
+        $plan = $this->makePlan(['frequency_unit' => 'jour', 'frequency_interval' => 1, 'start_date' => today()->subDays(3)]);
+
+        $this->artisan('maintenance:generate-preventive-work-orders')->assertSuccessful();
+        $this->artisan('maintenance:generate-preventive-work-orders')->assertSuccessful();
+
+        $this->assertSame(1, WorkOrder::where('maintenance_plan_id', $plan->id)->count());
+        $this->assertTrue($plan->fresh()->next_due_at->isSameDay(today()->addDay()));
+    }
+
     // ===== Bouton « Générer un OT maintenant » =====
 
     public function test_generate_now_button_opens_the_new_work_order(): void
