@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\OpenAccess;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,8 @@ class EnsurePasswordIsChanged
 
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->must_change_password && ! $request->routeIs(...self::ALLOWED_ROUTES)) {
+        // Accès ouvert (démonstration) : on peut entrer dans un compte au mot de passe provisoire.
+        if ($request->user()?->must_change_password && ! OpenAccess::enabled() && ! $request->routeIs(...self::ALLOWED_ROUTES)) {
             return redirect()->route('profile.edit')
                 ->with('warning', 'Votre mot de passe a été réinitialisé par un administrateur. Choisissez-en un nouveau pour continuer.');
         }

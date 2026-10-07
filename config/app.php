@@ -42,6 +42,14 @@ return [
     'debug' => (bool) env('APP_DEBUG', false),
 
     /*
+    | Accès ouvert (démonstration, hors production) : plus aucun contrôle de rôle ni de
+    | policy, et sélecteur « Voir en tant que » pour passer d'un rôle à l'autre.
+    | Voir App\Support\OpenAccess. À laisser à false en mise en service.
+    */
+
+    'open_access' => (bool) env('APP_OPEN_ACCESS', false),
+
+    /*
     | Instance de démonstration (comptes connus, mot de passe "password").
     | Seule une instance déclarée démo accepte les données de démo en production.
     */
