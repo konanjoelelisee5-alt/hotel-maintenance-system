@@ -10,7 +10,9 @@ use Illuminate\Support\Collection;
  * Accès ouvert (APP_OPEN_ACCESS=true) : pour parcourir toutes les interfaces pendant
  * la mise au point. Le middleware de rôle, les contrôles de rôle des contrôleurs et les
  * policies de consultation (VIEW_ABILITIES) laissent tout passer, et un sélecteur permet
- * de se connecter en un clic comme un compte de chaque rôle. Jamais actif en production, même si le .env l'active.
+ * de se connecter en un clic comme un compte de chaque rôle.
+ * En production, seulement sur un site de démonstration (SEED_DEMO_DATA=true, ex. Render) :
+ * le vrai site de l'hôtel ne l'a jamais, même si APP_OPEN_ACCESS y restait activé.
  */
 class OpenAccess
 {
@@ -19,7 +21,7 @@ class OpenAccess
 
     public static function enabled(): bool
     {
-        return (bool) config('app.open_access') && ! app()->isProduction();
+        return (bool) config('app.open_access') && (! app()->isProduction() || (bool) config('app.demo'));
     }
 
     /**

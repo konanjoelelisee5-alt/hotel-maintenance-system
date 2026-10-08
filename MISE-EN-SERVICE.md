@@ -26,7 +26,7 @@ Ces points bloquent ou gênent la mise en service ; ils seront développés, pui
   - `npm ci` puis `npm run build`
 - [ ] Créer le fichier `.env` de production :
   - `APP_ENV=production`, `APP_DEBUG=false`
-  - `APP_OPEN_ACCESS=false` (ou ligne absente) : l'accès ouvert de démonstration lève tous les contrôles de rôle. Il est de toute façon ignoré en production, mais ne doit pas rester actif sur un serveur de test accessible au personnel.
+  - `APP_OPEN_ACCESS=false` (ou ligne absente) : l'accès ouvert de démonstration (bouton « Voir en tant que ») lève les contrôles de rôle. En production, il ne s'active qu'avec `SEED_DEMO_DATA=true` (site de démo Render) : sans ce réglage, il est ignoré, mais il ne doit pas rester actif sur un serveur de test accessible au personnel.
   - `APP_URL=https://…` (l'adresse définitive)
   - `APP_LOCALE=fr`
   - `APP_KEY` : `php artisan key:generate` (une seule fois)

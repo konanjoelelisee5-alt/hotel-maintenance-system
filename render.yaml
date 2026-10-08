@@ -61,3 +61,7 @@ services:
       # Charge les comptes et données de démo si la base est vide
       - key: SEED_DEMO_DATA
         value: "true"
+      # Bouton « Voir en tant que » : passer d'un rôle à l'autre pendant la démo
+      # (actif seulement avec SEED_DEMO_DATA, cf. App\Support\OpenAccess)
+      - key: APP_OPEN_ACCESS
+        value: "true"
