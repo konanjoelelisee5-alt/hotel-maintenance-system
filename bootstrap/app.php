@@ -12,12 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-    // Adresse réelle du visiteur derrière un proxy (Render : TRUSTED_PROXIES=*). Sans proxy
-    // (serveur dans l'hôtel), ne faire confiance à personne : sinon un en-tête
-    // X-Forwarded-For inventé suffit à changer d'adresse et à contourner les limites d'essais.
-    if ($proxies = env('TRUSTED_PROXIES')) {
-        $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
-    }
+    // Proxys de confiance : réglés par config('app.trusted_proxies'), cf. AppServiceProvider.
     $middleware->web(append: [
         \App\Http\Middleware\SecurityHeaders::class,
         \App\Http\Middleware\RejectArrayQueryParameters::class,

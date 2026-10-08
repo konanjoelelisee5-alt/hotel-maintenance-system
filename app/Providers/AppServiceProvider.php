@@ -7,6 +7,7 @@ use App\Services\PhoneAlerts\LogPhoneAlertSender;
 use App\Support\AuthenticationAudit;
 use App\Support\OpenAccess;
 use App\Support\SchedulerHealth;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
@@ -35,6 +36,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Connexions, déconnexions, échecs et blocages au journal d'activité.
         Event::subscribe(AuthenticationAudit::class);
+
+        // Proxys de confiance (config/app.php, TRUSTED_PROXIES) : aucun par défaut.
+        if ($proxies = config('app.trusted_proxies')) {
+            TrustProxies::at($proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
 
         // En production, les liens (dont ceux des courriels « mot de passe oublié ») partent
         // toujours de l'adresse officielle : un en-tête Host inventé ne doit pas pouvoir y

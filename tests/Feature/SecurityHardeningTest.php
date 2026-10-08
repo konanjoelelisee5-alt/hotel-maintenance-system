@@ -65,6 +65,20 @@ class SecurityHardeningTest extends TestCase
         $this->assertNotSame('6.6.6.6', request()->ip());
     }
 
+    public function test_behind_a_declared_proxy_the_real_visitor_address_is_used(): void
+    {
+        // Render : TRUSTED_PROXIES=* (lu depuis la configuration, conservée en cache même
+        // quand Apache ne transmet pas l'environnement à PHP).
+        config(['app.trusted_proxies' => '*']);
+        (new \App\Providers\AppServiceProvider($this->app))->boot();
+
+        $this->get('/login', ['X-Forwarded-For' => '41.202.1.1', 'X-Forwarded-Proto' => 'https'])
+            ->assertHeader('Strict-Transport-Security');
+        $this->assertSame('41.202.1.1', request()->ip());
+
+        \Illuminate\Http\Middleware\TrustProxies::flushState();
+    }
+
     public function test_pages_carry_anti_framing_and_security_headers(): void
     {
         $this->get('/login')

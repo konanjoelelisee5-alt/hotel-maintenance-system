@@ -50,6 +50,16 @@ return [
     'open_access' => (bool) env('APP_OPEN_ACCESS', false),
 
     /*
+    | Proxy devant l'application (Render : « * ») pour lire l'adresse réelle du visiteur et
+    | savoir qu'il est en https. Vide si le serveur est exposé directement : sinon un en-tête
+    | X-Forwarded-For inventé suffit à changer d'adresse et à contourner les limites d'essais.
+    | Lu ici (et non dans bootstrap/app.php) : la configuration mise en cache le conserve,
+    | même quand le serveur web ne transmet pas les variables d'environnement à PHP.
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
     | Instance de démonstration (comptes connus, mot de passe "password").
     | Seule une instance déclarée démo accepte les données de démo en production.
     */
