@@ -24,8 +24,8 @@ class PartController extends Controller
         $parts = $applyTab(Part::query(), $tab)
             // Recherche groupée : sans parenthèses, le « OU » annulait le filtre d'onglet.
             ->when($request->filled('search'), fn ($q) => $q->where(fn ($s) => $s
-                ->where('name', 'like', '%'.$request->search.'%')
-                ->orWhere('sku', 'like', '%'.$request->search.'%')))
+                ->where('name', 'like', '%'.$request->string('search').'%')
+                ->orWhere('sku', 'like', '%'.$request->string('search').'%')))
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();

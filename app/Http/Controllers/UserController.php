@@ -36,8 +36,8 @@ class UserController extends Controller
 
         $users = $applyTab(User::query(), $role)
             ->when($request->filled('search'), fn ($q) => $q->where(fn ($s) => $s
-                ->where('name', 'like', '%'.$request->search.'%')
-                ->orWhere('email', 'like', '%'.$request->search.'%')))
+                ->where('name', 'like', '%'.$request->string('search').'%')
+                ->orWhere('email', 'like', '%'.$request->string('search').'%')))
             ->orderByDesc('is_active')
             ->orderBy('name')
             ->paginate(20)

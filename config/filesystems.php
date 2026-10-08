@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Pas de route /storage/... : les fichiers privés passent par FileDownloadController (droits vérifiés).
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

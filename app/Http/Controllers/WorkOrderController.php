@@ -34,7 +34,9 @@ class WorkOrderController extends Controller
 
         $q = $request->string('q')->toString();
         $filter = $request->string('filter')->toString() ?: ($authUser->role->seesAllWorkOrders() ? 'all' : 'mine');
-        $sort = $request->string('sort')->toString() ?: 'due';
+        $sortOptions = ['due' => 'Échéance SLA', 'priority' => 'Priorité', 'created' => 'Date de création'];
+        // Tri inconnu (adresse modifiée à la main) : tri par défaut, plutôt qu'une erreur.
+        $sort = array_key_exists($request->string('sort')->toString(), $sortOptions) ? $request->string('sort')->toString() : 'due';
 
         // Un onglet = un filtre ; les compteurs des onglets et des indicateurs
         // utilisent exactement la même règle que la liste.
@@ -57,8 +59,8 @@ class WorkOrderController extends Controller
                 ->orWhereHas('room', fn ($r) => $r->where('number', 'like', "%{$q}%"))
             ))
             ->tap(fn ($qr) => $applyFilter($qr, $filter))
-            ->when($request->filled('status'), fn ($qr) => $qr->where('status', $request->status))
-            ->when($request->filled('priority_id'), fn ($qr) => $qr->where('priority_id', $request->priority_id))
+            ->when($request->filled('status'), fn ($qr) => $qr->where('status', $request->string('status')->toString()))
+            ->when($request->filled('priority_id'), fn ($qr) => $qr->where('priority_id', $request->integer('priority_id')))
             ->when($sort === 'priority', fn ($qr) => $qr->join('work_order_priorities', 'work_order_priorities.id', '=', 'work_orders.priority_id')
                 ->orderBy('work_order_priorities.position')
                 ->select('work_orders.*'))
@@ -70,8 +72,6 @@ class WorkOrderController extends Controller
                 ->orderBy('sla_resolution_due_at'))
             ->paginate(15)
             ->withQueryString();
-
-        $sortOptions = ['due' => 'Échéance SLA', 'priority' => 'Priorité', 'created' => 'Date de création'];
 
         $isSupervisor = $authUser->role->seesAllWorkOrders();
         $filters = $isSupervisor

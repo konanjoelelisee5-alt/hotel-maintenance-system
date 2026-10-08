@@ -9,6 +9,7 @@ use App\Support\OpenAccess;
 use App\Support\SchedulerHealth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -34,6 +35,16 @@ class AppServiceProvider extends ServiceProvider
     {
         // Connexions, déconnexions, échecs et blocages au journal d'activité.
         Event::subscribe(AuthenticationAudit::class);
+
+        // En production, les liens (dont ceux des courriels « mot de passe oublié ») partent
+        // toujours de l'adresse officielle : un en-tête Host inventé ne doit pas pouvoir y
+        // glisser le site d'un attaquant et lui faire recevoir le jeton de réinitialisation.
+        if ($this->app->isProduction() && config('app.url')) {
+            URL::forceRootUrl(config('app.url'));
+            if (str_starts_with(config('app.url'), 'https://')) {
+                URL::forceScheme('https');
+            }
+        }
 
         // Accès ouvert (démonstration) : on peut OUVRIR toutes les pages. Les autres droits
         // (qui répare, qui pilote…) restent ceux du rôle : ils construisent la fiche de

@@ -38,12 +38,18 @@ class LoginRequest extends FormRequest
      *
      * @throws ValidationException
      */
+    /** Échecs tolérés par compte (e-mail + adresse IP), puis par adresse IP tous comptes confondus. */
+    public const MAX_ATTEMPTS_PER_ACCOUNT = 5;
+
+    public const MAX_ATTEMPTS_PER_IP = 20;
+
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+            RateLimiter::hit($this->ipThrottleKey());
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -54,19 +60,27 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Ensure the login request is not rate limited.
+     * Ensure the login request is not rate limited : trop d'échecs sur ce compte, ou trop
+     * d'échecs depuis cette adresse IP sur des comptes différents (un mot de passe courant
+     * essayé sur chaque e-mail, « password spraying »).
      *
      * @throws ValidationException
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        $key = match (true) {
+            RateLimiter::tooManyAttempts($this->throttleKey(), self::MAX_ATTEMPTS_PER_ACCOUNT) => $this->throttleKey(),
+            RateLimiter::tooManyAttempts($this->ipThrottleKey(), self::MAX_ATTEMPTS_PER_IP) => $this->ipThrottleKey(),
+            default => null,
+        };
+
+        if ($key === null) {
             return;
         }
 
         event(new Lockout($this));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        $seconds = RateLimiter::availableIn($key);
 
         throw ValidationException::withMessages([
             'email' => trans('auth.throttle', [
@@ -82,5 +96,10 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+    }
+
+    public function ipThrottleKey(): string
+    {
+        return 'login-ip|'.$this->ip();
     }
 }

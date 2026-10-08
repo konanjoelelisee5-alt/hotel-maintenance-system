@@ -23,8 +23,8 @@ class RoomController extends Controller
             ->when($request->filled('floor'), fn ($q) => $q->where('floor', $request->floor))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('search'), fn ($q) => $q->where(fn ($w) => $w
-                ->where('number', 'like', '%'.$request->search.'%')
-                ->orWhere('name', 'like', '%'.$request->search.'%')))
+                ->where('number', 'like', '%'.$request->string('search').'%')
+                ->orWhere('name', 'like', '%'.$request->string('search').'%')))
             ->ordered()
             ->paginate(25)
             ->withQueryString();

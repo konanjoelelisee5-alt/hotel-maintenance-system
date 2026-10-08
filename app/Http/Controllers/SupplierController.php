@@ -18,9 +18,9 @@ class SupplierController extends Controller
 
         $suppliers = Supplier::where('is_active', $tab === 'active')
             ->when($request->filled('search'), fn ($q) => $q->where(fn ($s) => $s
-                ->where('name', 'like', '%'.$request->search.'%')
-                ->orWhere('contact_person', 'like', '%'.$request->search.'%')
-                ->orWhere('email', 'like', '%'.$request->search.'%')))
+                ->where('name', 'like', '%'.$request->string('search').'%')
+                ->orWhere('contact_person', 'like', '%'.$request->string('search').'%')
+                ->orWhere('email', 'like', '%'.$request->string('search').'%')))
             ->withCount(['purchaseOrders', 'purchaseOrders as open_orders_count' => fn ($q) => $q->whereIn('status', $openStatuses)])
             ->withSum(['purchaseOrders as purchased_amount' => fn ($q) => $q->where('status', '!=', 'annulee')], 'total_amount')
             ->orderBy('name')

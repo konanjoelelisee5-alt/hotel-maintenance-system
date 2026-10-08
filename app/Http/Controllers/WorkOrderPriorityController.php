@@ -26,7 +26,7 @@ class WorkOrderPriorityController extends Controller
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:50', 'unique:work_order_priorities,code'],
             'label' => ['required', 'string', 'max:255'],
-            'color' => ['required', 'string', 'max:7'],
+            'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'], // glissée dans un attribut style : un vrai code couleur seulement
             'position' => ['nullable', 'integer', 'min:0'],
         ]);
 
@@ -44,7 +44,7 @@ class WorkOrderPriorityController extends Controller
     {
         $validated = $request->validate([
             'label' => ['required', 'string', 'max:255'],
-            'color' => ['required', 'string', 'max:7'],
+            'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'], // glissée dans un attribut style : un vrai code couleur seulement
             'position' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ]);

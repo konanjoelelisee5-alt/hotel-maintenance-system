@@ -1,0 +1,5 @@
+# Le projet est rangé dans le dossier web de XAMPP (htdocs) : sans ce fichier, Apache
+# servirait tout le dossier à qui le demande (.env et sa clé secrète, journaux, base SQLite,
+# .git). Seul public/ doit être exposé : php artisan serve, ou un serveur dont la racine
+# web est public/ (Render, serveur de l'hôtel). Ici, Apache refuse tout.
+Require all denied

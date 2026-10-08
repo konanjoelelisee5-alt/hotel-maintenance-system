@@ -31,8 +31,8 @@ class PurchaseOrderController extends Controller
         $purchaseOrders = $applyTab(PurchaseOrder::with(['supplier', 'workOrder']), $tab)
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('search'), fn ($q) => $q->where(fn ($s) => $s
-                ->where('number', 'like', '%'.$request->search.'%')
-                ->orWhereHas('supplier', fn ($f) => $f->where('name', 'like', '%'.$request->search.'%'))))
+                ->where('number', 'like', '%'.$request->string('search').'%')
+                ->orWhereHas('supplier', fn ($f) => $f->where('name', 'like', '%'.$request->string('search').'%'))))
             ->latest()
             ->paginate(15)
             ->withQueryString();

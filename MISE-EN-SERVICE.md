@@ -20,7 +20,13 @@ Ces points bloquent ou gênent la mise en service ; ils seront développés, pui
 - [ ] Choisir où tourne l'application : serveur dans l'hôtel, ou serveur sur Internet.
 - [ ] Obtenir un **nom de domaine** (ou un sous-domaine du site de l'hôtel, ex. `gmao.<domaine>`).
 - [ ] Installer un **certificat https** (Let's Encrypt, gratuit). Sans https, le micro, la photo et le scan QR ne marchent pas sur les téléphones.
-- [ ] Installer PHP 8.3, MySQL, Composer et Node.js sur le serveur.
+- [ ] Installer PHP 8.4, MySQL, Composer et Node.js sur le serveur.
+- [ ] **Sécurité du serveur** (audit du 8 octobre 2026) :
+  - la racine web du serveur doit être le dossier `public/` du projet, jamais le projet entier (sinon `.env`, les journaux et la base sont téléchargeables) ;
+  - MySQL : un mot de passe solide pour `root` et un compte dédié à l'application, et `bind-address=127.0.0.1` si la base est sur le même serveur ;
+  - pare-feu : n'ouvrir que les ports 80 et 443 ;
+  - `TRUSTED_PROXIES` : vide si le serveur est exposé directement, `*` seulement derrière un proxy (hébergeur, répartiteur de charge) ;
+  - `APP_DEBUG=false` ; ne jamais copier le `.env` de développement : générer une nouvelle `APP_KEY`.
 - [ ] Copier le code, puis :
   - `composer install --no-dev --optimize-autoloader`
   - `npm ci` puis `npm run build`
