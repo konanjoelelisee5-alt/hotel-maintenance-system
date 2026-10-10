@@ -99,7 +99,7 @@ Sur de vrais téléphones : au moins un **Android** et un **iPhone**, en https.
   - [ ] Responsable de réception : lire le bilan du mois (réclamations clients, délais) et l'imprimer.
 - [ ] **Manager / admin** : affecter, planifier, contrôle qualité, recevoir l'alerte d'astreinte par SMS (nuit et jour) ; créer un bon de commande en 3 étapes (fournisseur, articles, vérification).
 - [ ] **Ergonomie sur vrai téléphone** (Android et iPhone) : saisir dans un champ en bas d'écran (précision, motif, numéro de chambre) — le clavier ne doit masquer ni le champ ni le bouton d'envoi ; la flèche « retour » ramène à l'écran précédent ; couper le réseau affiche le bandeau « Pas de connexion Internet ».
-- [ ] **Ergonomie sur vraie tablette** (portrait et paysage), pour chaque rôle : la barre de gauche (rail) donne directement accès à tous les écrans, sans menu à dérouler ; sur téléphone, le menu (3 traits) est en haut à gauche et s'ouvre depuis la gauche ; listes en cartes sur deux colonnes ; aucun écran ne défile de côté.
+- [ ] **Ergonomie sur vraie tablette** (portrait et paysage), pour chaque rôle : le menu (3 traits, en haut à gauche) s'ouvre depuis la gauche et donne accès à tous les écrans ; la colonne de droite de l'accueil (astreinte, activité) passe sous le contenu ; aucun écran ne défile de côté.
 - [ ] Noter les remarques de chacun et les transmettre pour correction.
 
 ## 5. Mise en production

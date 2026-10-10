@@ -31,8 +31,8 @@
 <x-app-layout crumb="Exploitation" page-title="Rapports & indicateurs">
     <x-slot:primaryAction>
         {{-- Les exports reprennent les filtres de l'URL : ils correspondent à ce qui est affiché. --}}
-        <a href="{{ route('reports.export.csv', request()->query()) }}" class="btn btn-secondary"><x-nav-icon name="list" /> Export CSV</a>
-        <a href="{{ route('reports.export.pdf', request()->query()) }}" class="btn btn-primary"><x-nav-icon name="report" /> Export PDF</a>
+        <a href="{{ route('reports.export.csv', request()->query()) }}" data-no-loading class="btn btn-secondary"><x-nav-icon name="list" /> Export CSV</a>
+        <a href="{{ route('reports.export.pdf', request()->query()) }}" data-no-loading class="btn btn-primary"><x-nav-icon name="report" /> Export PDF</a>
     </x-slot:primaryAction>
 
     <div class="ui-form flex flex-col gap-5">

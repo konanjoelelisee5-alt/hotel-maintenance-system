@@ -7,6 +7,8 @@
 //    dans le flux, navigation basse masquée — resources/css/app.css).
 // 4. Connexion Internet perdue / retrouvée : bandeau #offline-banner des layouts.
 // 5. window.hkMedia : outils photo et son partagés par les écrans de signalement.
+// 6. Chargement d'une page : barre de progression en haut dès le clic, puis formes
+//    grises à la place du contenu si l'attente dure.
 
 // ---------------------------------------------------------------------------
 // 1. Anti double envoi
@@ -145,3 +147,102 @@ window.hkMedia = {
         } catch (e) { /* son indisponible */ }
     },
 };
+
+// ---------------------------------------------------------------------------
+// 6. Chargement d'une page
+// ---------------------------------------------------------------------------
+// Après un clic sur un lien ou l'envoi d'un formulaire, la page suivante peut mettre un
+// moment à arriver (réseau des étages, serveur qui se réveille) : sans signe, on reclique.
+// - tout de suite : une fine barre en haut de l'écran, qui avance jusqu'à l'arrivée ;
+// - après WAIT_MS : le contenu s'efface derrière des formes grises (« ça arrive »).
+// Pas pour les liens qui ne quittent pas la page : nouvel onglet, téléchargement
+// (data-no-loading), fenêtre (data-modal), ancre, appel, SMS, courriel.
+const WAIT_MS = 450;
+let loadingTimer = null;
+let trickleTimer = null;
+let safetyTimer = null;
+
+function progressBar() {
+    let bar = document.getElementById('page-progress');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'page-progress';
+        bar.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(bar);
+    }
+    return bar;
+}
+
+function skeleton(main) {
+    if (main.querySelector(':scope > .page-skeleton')) return;
+    const box = document.createElement('div');
+    box.className = 'page-skeleton';
+    box.setAttribute('aria-hidden', 'true');
+    box.innerHTML = '<span class="w-1/3 h-7"></span><span class="w-full h-14 rounded-full"></span>'
+        + '<span class="w-full h-24"></span><span class="w-2/3 h-5"></span><span class="w-full h-5"></span><span class="w-5/6 h-5"></span>';
+    main.appendChild(box);
+}
+
+function startLoading() {
+    stopLoading();
+    const bar = progressBar();
+    let width = 12;
+    bar.style.width = width + '%';
+    document.documentElement.classList.add('is-loading');
+    document.documentElement.setAttribute('aria-busy', 'true');
+    // La barre ralentit en approchant de la fin : elle ne promet jamais d'arriver avant la page.
+    trickleTimer = setInterval(() => {
+        width += (90 - width) * 0.08;
+        bar.style.width = width.toFixed(1) + '%';
+    }, 250);
+    loadingTimer = setTimeout(() => {
+        document.documentElement.classList.add('is-waiting');
+        const main = document.querySelector('main');
+        if (main) skeleton(main);
+    }, WAIT_MS);
+    // Rien n'est arrivé (téléchargement non repéré, réseau coupé) : on rend la main.
+    safetyTimer = setTimeout(stopLoading, 15000);
+}
+
+function stopLoading() {
+    clearTimeout(loadingTimer);
+    clearInterval(trickleTimer);
+    clearTimeout(safetyTimer);
+    document.documentElement.classList.remove('is-loading', 'is-waiting');
+    document.documentElement.removeAttribute('aria-busy');
+    document.querySelectorAll('.page-skeleton').forEach((s) => s.remove());
+    const bar = document.getElementById('page-progress');
+    if (bar) bar.style.width = '0';
+}
+
+function leavesThePage(link, event) {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return false;
+    if (link.target && link.target !== '_self') return false;
+    if (link.hasAttribute('download') || 'noLoading' in link.dataset || 'modal' in link.dataset) return false;
+    let url;
+    try { url = new URL(link.href, location.href); } catch (e) { return false; }
+    if (url.origin !== location.origin) return false;
+    // Même page, seule l'ancre change : pas de chargement.
+    if (url.pathname === location.pathname && url.search === location.search && url.hash) return false;
+    return true;
+}
+
+// Écouté en dernier (bulle) : un clic déjà pris en charge (fenêtre, confirmation, menu)
+// arrive ici « defaultPrevented » et n'allume rien. Exception : le bouton retour [data-back],
+// qui annule le lien pour revenir en arrière dans l'historique… et charge donc une page.
+document.addEventListener('click', (event) => {
+    const link = event.target.closest?.('a[href]');
+    if (!link || !leavesThePage(link, event)) return;
+    if (event.defaultPrevented && !('back' in link.dataset)) return;
+    startLoading();
+});
+
+document.addEventListener('submit', (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || event.defaultPrevented || 'noLoading' in form.dataset) return;
+    if (form.target && form.target !== '_self') return;
+    startLoading();
+});
+
+// Page affichée (y compris restaurée par « Précédent ») : plus rien ne charge.
+window.addEventListener('pageshow', stopLoading);

@@ -300,3 +300,43 @@ main { animation: page-in .18s ease-out; }
     .theme-sheet main { animation: none; }
     .rc-draw, .rc-area { animation: none; stroke-dashoffset: 0; opacity: 1; }
 }
+
+/* ==========================================================================
+   Chargement d'une page (resources/js/ui.js, partie 6) : barre de progression en haut
+   dès le clic, puis formes grises à la place du contenu si l'attente dure.
+   ========================================================================== */
+#page-progress {
+    position: fixed; top: 0; left: 0; z-index: 90;
+    height: 3px; width: 0;
+    background: rgb(var(--c-blue));
+    box-shadow: 0 0 10px rgb(var(--c-blue) / .45);
+    border-radius: 0 3px 3px 0;
+    opacity: 0; pointer-events: none;
+    transition: width .25s ease-out, opacity .2s ease;
+}
+html.is-loading #page-progress { opacity: 1; }
+html.is-loading, html.is-loading * { cursor: progress; }
+
+/* Le contenu de la page s'efface (sans bouger la mise en page) et des formes grises
+   annoncent la suivante. */
+html.is-waiting main { position: relative; }
+html.is-waiting main > :not(.page-skeleton) { opacity: 0; transition: opacity .18s ease; }
+.page-skeleton {
+    position: absolute; top: 1rem; left: 1.25rem; right: 1.25rem;
+    display: flex; flex-direction: column; gap: 14px;
+    animation: skeleton-in .2s ease-out both;
+}
+@media (min-width: 700px) { .page-skeleton { left: 2.5rem; right: 2.5rem; } }
+.page-skeleton span {
+    display: block; border-radius: 14px;
+    background: linear-gradient(90deg, rgb(var(--c-line-soft)) 0%, rgb(var(--c-paper)) 45%, rgb(var(--c-line-soft)) 90%);
+    background-size: 220% 100%;
+    animation: skeleton-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer { from { background-position: 100% 0; } to { background-position: -120% 0; } }
+@keyframes skeleton-in { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    #page-progress { transition: opacity .2s ease; }
+    .page-skeleton, .page-skeleton span { animation: none; }
+}
