@@ -307,12 +307,13 @@ main { animation: page-in .18s ease-out; }
    ========================================================================== */
 #page-progress {
     position: fixed; top: 0; left: 0; z-index: 90;
-    height: 3px; width: 0;
+    height: 3px; width: 100%;
     background: rgb(var(--c-blue));
     box-shadow: 0 0 10px rgb(var(--c-blue) / .45);
-    border-radius: 0 3px 3px 0;
+    /* Avance par transform (scaleX) : pas de recalcul de la mise en page à chaque pas. */
+    transform: scaleX(0); transform-origin: left center;
     opacity: 0; pointer-events: none;
-    transition: width .25s ease-out, opacity .2s ease;
+    transition: transform .25s ease-out, opacity .2s ease;
 }
 html.is-loading #page-progress { opacity: 1; }
 html.is-loading, html.is-loading * { cursor: progress; }

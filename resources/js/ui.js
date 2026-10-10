@@ -187,13 +187,13 @@ function startLoading() {
     stopLoading();
     const bar = progressBar();
     let width = 12;
-    bar.style.width = width + '%';
+    bar.style.transform = `scaleX(${width / 100})`;
     document.documentElement.classList.add('is-loading');
     document.documentElement.setAttribute('aria-busy', 'true');
     // La barre ralentit en approchant de la fin : elle ne promet jamais d'arriver avant la page.
     trickleTimer = setInterval(() => {
         width += (90 - width) * 0.08;
-        bar.style.width = width.toFixed(1) + '%';
+        bar.style.transform = `scaleX(${(width / 100).toFixed(3)})`;
     }, 250);
     loadingTimer = setTimeout(() => {
         document.documentElement.classList.add('is-waiting');
@@ -212,7 +212,7 @@ function stopLoading() {
     document.documentElement.removeAttribute('aria-busy');
     document.querySelectorAll('.page-skeleton').forEach((s) => s.remove());
     const bar = document.getElementById('page-progress');
-    if (bar) bar.style.width = '0';
+    if (bar) bar.style.transform = 'scaleX(0)';
 }
 
 function leavesThePage(link, event) {
