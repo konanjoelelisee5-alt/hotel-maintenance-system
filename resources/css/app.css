@@ -91,6 +91,10 @@ main { animation: page-in .18s ease-out; }
 /* Zone du pouce (action de la page en bas de l'écran) : boutons d'au moins 44 px ; une
    action seule occupe toute la largeur, atteignable de la main droite comme de la gauche. */
 [data-thumb-bar] .btn { min-height: 44px; }
+/* Plusieurs actions (ex. Export CSV + Export PDF des rapports) : calées à droite, sous le
+   pouce droit. Marge automatique plutôt que justify-end : si la barre déborde, elle reste
+   défilable jusqu'à la première action. */
+[data-thumb-bar] > :first-child:not(:only-child) { margin-left: auto; }
 [data-thumb-bar] > .btn:only-child,
 [data-thumb-bar] > form:only-child,
 [data-thumb-bar] > form:only-child > .btn { flex: 1 1 auto; width: 100%; }
