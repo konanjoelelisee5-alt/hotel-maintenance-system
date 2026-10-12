@@ -1,6 +1,6 @@
 {{-- En-tête de synthèse de la fiche OT : badges, description, les 4 repères qu'on
-     cherche d'un coup d'œil (lieu, technicien, échéance, SLA), puis la frise
-     d'avancement Ouvert → En cours → Résolu → Fermé. --}}
+     cherche d'un coup d'œil (lieu, technicien, échéance, SLA), puis la frise du
+     parcours, commune à tous les rôles (x-work-order-journey). --}}
 @php
     $status = $workOrder->status;
     $finished = in_array($status, \App\Models\WorkOrder::FINISHED_STATUSES, true);
@@ -12,20 +12,25 @@
         : $workOrder->slaColorClass();
     $showPlanLink = $workOrder->maintenance_plan_id && auth()->user()->role->seesAllWorkOrders();
 
-    // Frise : étape atteinte par statut ; « en attente » et « rejeté » se lisent
-    // comme un arrêt sur l'étape en cours / résolue, signalés en couleur.
-    $steps = ['ouvert' => 'Ouvert', 'en_cours' => 'En cours', 'resolu' => 'Résolu', 'ferme' => 'Fermé'];
-    $reached = ['ouvert' => 0, 'en_cours' => 1, 'en_attente' => 1, 'resolu' => 2, 'rejete' => 2, 'ferme' => 3, 'annule' => -1][$status] ?? 0;
-    $stepNote = match ($status) {
-        'en_attente' => ['En attente', \App\Models\WorkOrder::statusColor($status)],
-        'rejete' => ['Correction demandée', \App\Models\WorkOrder::statusColor($status)],
+    // Prochaine étape pour qui suit l'OT sans y agir (demandeur, responsable de service,
+    // autre technicien). Le superviseur a son panneau « Pilotage », l'intervenant sa
+    // carte « À vous », le demandeur sa question « Le problème est-il réglé ? ».
+    $user = auth()->user();
+    $observes = ! $user->can('pilot', $workOrder) && ! $user->can('perform', $workOrder) && ! $user->can('confirmResolution', $workOrder);
+    $who = $assignee?->name ?? 'La maintenance';
+    $nextStep = $observes ? match ($status) {
+        'ouvert' => $assignee
+            ? $who.' va intervenir'.($workOrder->scheduled_at ? ' le '.$workOrder->scheduled_at->format('d/m à H\hi') : '').'.'
+            : 'La maintenance va affecter un technicien.',
+        'en_cours' => $who.' répare.',
+        'en_attente' => 'Réparation en attente (pièce, accès…) : elle reprend dès que le blocage est levé.',
+        'rejete' => 'Le contrôle a demandé une reprise : '.$who.' corrige.',
+        'resolu' => 'Réparé : la maintenance fait le contrôle qualité.',
+        'ferme' => \App\Support\WorkOrderJourney::hasRequesterStep($workOrder) && ! $workOrder->requester_confirmed_at
+            ? 'Réparé et contrôlé : le service demandeur confirme sur place.'
+            : 'Réparation terminée et contrôlée.',
         default => null,
-    };
-    $stepDate = fn (string $key) => match ($key) {
-        'ouvert' => $workOrder->created_at,
-        'en_cours' => $workOrder->started_at ?? $workOrder->statusHistories->firstWhere('new_status', 'en_cours')?->created_at,
-        default => $workOrder->statusHistories->firstWhere('new_status', $key)?->created_at,
-    };
+    } : null;
 @endphp
 
 <section class="bg-white border border-line rounded-xl overflow-hidden">
@@ -157,39 +162,13 @@
                 <span><strong class="text-navy">OT annulé.</strong> Il reste consultable ; le motif figure dans l'historique.</span>
             </div>
         @else
-            <ol class="m-0 p-0 list-none flex items-start">
-                @foreach ($steps as $key => $label)
-                    @php
-                        $index = $loop->index;
-                        $done = $index < $reached || ($index === $reached && $status === 'ferme');
-                        $current = $index === $reached && $status !== 'ferme';
-                        $date = $index <= $reached ? $stepDate($key) : null;
-                    @endphp
-                    <li class="flex-1 flex flex-col items-center text-center relative min-w-0">
-                        @unless ($loop->first)
-                            <span class="absolute top-[13px] right-1/2 w-full h-[2px] {{ $index <= $reached ? 'bg-navy' : 'bg-line' }}" aria-hidden="true"></span>
-                        @endunless
-                        <span @class([
-                            'relative z-10 w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold',
-                            'bg-navy text-white' => $done,
-                            'bg-gold text-navy ring-4 ring-gold/25' => $current && ! $stepNote,
-                            'bg-amber text-white ring-4 ring-amber/20' => $current && ($stepNote[1] ?? null) === 'amber',
-                            'bg-red text-white ring-4 ring-red/20' => $current && ($stepNote[1] ?? null) === 'red',
-                            'bg-white border-2 border-line text-ink-grey' => ! $done && ! $current,
-                        ])>
-                            @if ($done)
-                                <x-nav-icon name="check" class="w-3.5 h-3.5" />
-                            @else
-                                {{ $index + 1 }}
-                            @endif
-                        </span>
-                        <span class="mt-1.5 text-[12px] sm:text-[12.5px] font-semibold {{ $index <= $reached ? 'text-navy' : 'text-ink-grey' }}">
-                            {{ $current && $stepNote ? $stepNote[0] : $label }}
-                        </span>
-                        <span class="text-[11px] text-ink-grey">{{ $date?->format('d/m H\hi') ?? ' ' }}</span>
-                    </li>
-                @endforeach
-            </ol>
+            <x-work-order-journey :work-order="$workOrder" />
+            @if ($nextStep)
+                <p class="m-0 mt-3.5 pt-3 border-t border-line-soft flex items-start gap-2 text-[13px] text-ink-strong">
+                    <x-nav-icon name="info" class="w-4 h-4 flex-shrink-0 mt-0.5 text-gold" />
+                    <span><span class="font-semibold text-navy">Prochaine étape :</span> {{ $nextStep }}</span>
+                </p>
+            @endif
         @endif
     </div>
 </section>

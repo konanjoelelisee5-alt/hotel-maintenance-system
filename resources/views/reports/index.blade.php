@@ -40,11 +40,11 @@
         {{-- ===== Filtres ===== --}}
         <section class="bg-white border border-line rounded-xl">
             <div class="flex flex-col tab:flex-row tab:items-center gap-3 px-5 py-3.5 border-b border-line-soft">
-                <div class="flex gap-1.5 overflow-x-auto -mx-5 px-5 tab:mx-0 tab:px-0 pb-0.5" role="group" aria-label="Période rapide">
+                <div class="tap-row flex gap-1.5 overflow-x-auto -mx-5 px-5 tab:mx-0 tab:px-0" role="group" aria-label="Période rapide">
                     @foreach ($presets as $label => [$start, $end])
                         @php $active = $from === $start->toDateString() && $to === $end->toDateString(); @endphp
                         <a href="{{ route('reports.index', [...$keep, 'date_from' => $start->toDateString(), 'date_to' => $end->toDateString()]) }}"
-                           @class(['flex-shrink-0 h-[32px] px-3.5 inline-flex items-center rounded-full border text-[12.5px] font-semibold transition',
+                           @class(['tap flex-shrink-0 h-[32px] px-3.5 inline-flex items-center rounded-full border text-[12.5px] font-semibold transition',
                                    'bg-navy text-white border-navy' => $active, 'bg-white text-ink-body border-line hover:bg-paper' => ! $active])>{{ $label }}</a>
                     @endforeach
                 </div>

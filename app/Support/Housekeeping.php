@@ -7,7 +7,6 @@ use App\Enums\RoomOccupancy;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Models\WorkOrder;
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
@@ -126,26 +125,6 @@ class Housekeeping
             RoomOccupancy::ClientPresent => 'user',
             RoomOccupancy::Depart => 'log-out',
         };
-    }
-
-    /**
-     * Frise de suivi de la fiche : Signalé → Technicien affecté → En cours → Réparé.
-     *
-     * @return array<int, array{label: string, done: bool, at: ?Carbon, meta: ?string}>
-     */
-    public static function timeline(WorkOrder $workOrder): array
-    {
-        $repaired = in_array($workOrder->status, self::GROUPS['done'], true);
-        $started = $repaired || in_array($workOrder->status, self::GROUPS['progress'], true);
-
-        return [
-            ['label' => 'Signalé', 'done' => true, 'at' => $workOrder->created_at, 'meta' => $workOrder->reporter?->name],
-            // L'heure d'affectation n'est pas enregistrée : on montre le passage prévu.
-            ['label' => 'Technicien affecté', 'done' => $workOrder->assigned_to !== null, 'at' => null,
-                'meta' => $workOrder->assignee ? $workOrder->assignee->name.($workOrder->scheduled_at ? ' · passage prévu '.$workOrder->scheduled_at->format('d/m H\hi') : '') : null],
-            ['label' => 'En cours', 'done' => $started, 'at' => $workOrder->started_at, 'meta' => null],
-            ['label' => 'Réparé', 'done' => $repaired, 'at' => $workOrder->completed_at, 'meta' => null],
-        ];
     }
 
     /**

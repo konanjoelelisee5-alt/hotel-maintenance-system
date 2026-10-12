@@ -108,9 +108,10 @@ class SeparationOfDutiesTest extends TestCase
             ->assertSee("Pilotage de l'OT", false)
             ->assertSee("Je m'en charge", false);
 
+        // L'intervenant : l'assistant en 4 étapes (chrono, puis « Signer et envoyer » le rapport).
         $this->actingAs($this->technician)->get(route('work-orders.show', $this->workOrder))
             ->assertSee('Démarrer le chrono')
-            ->assertSee('Enregistrer le rapport');
+            ->assertSee('Signer et envoyer');
     }
 
     public function test_supervisor_sees_time_spent_and_existing_report_read_only(): void

@@ -51,21 +51,15 @@
          ">
         @include('work-orders.partials.summary')
 
-        {{-- Nouvel OT pour l'intervenant : un geste pour dire au manager qu'il l'a vu. --}}
-        @can('acknowledge', $workOrder)
-            <form method="POST" action="{{ route('work-orders.acknowledge', $workOrder) }}"
-                  class="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 rounded-xl border border-gold/50 bg-warn-bg">
-                @csrf
-                <div class="flex gap-3 flex-1 min-w-0">
-                    <x-nav-icon name="bell" class="w-5 h-5 flex-shrink-0 mt-0.5 text-gold" />
-                    <div class="min-w-0">
-                        <p class="m-0 text-[14.5px] font-semibold text-ink-deep">Nouvel ordre pour vous</p>
-                        <p class="m-0 text-[13px] text-ink-strong">Dites au manager que vous l'avez vu. Démarrer le chrono le fait aussi.</p>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-lg w-full sm:w-auto"><x-nav-icon name="check" /> J'ai vu, je m'en occupe</button>
-            </form>
+        {{-- La prochaine étape, au-dessus des onglets pour rester visible partout : le
+             superviseur pilote, l'intervenant a sa carte « À vous », le demandeur sa
+             question « Le problème est-il réglé ? ». Les autres la lisent sous la frise. --}}
+        @can('pilot', $workOrder)
+            @include('work-orders.partials.pilot-panel')
+        @elsecan('perform', $workOrder)
+            @include('work-orders.partials.performer-next-step')
         @endcan
+        @include('work-orders.partials.requester-confirmation')
 
         <div class="bg-white border border-line rounded-xl px-2 sm:px-4 pt-2.5 -mb-2 tab:mb-0">
             <x-tabs :items="$tabs" model="tab" label="Sections de l'ordre de travail" />
@@ -75,11 +69,7 @@
         <div id="panel-apercu" data-tab-panel="apercu" role="tabpanel" aria-labelledby="tab-apercu" x-show="tab === 'apercu'" @if ($defaultTab !== 'apercu') x-cloak @endif
              class="grid grid-cols-1 split:grid-cols-[minmax(0,1fr)_320px] desk:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
             <div class="flex flex-col gap-5 min-w-0">
-                @include('work-orders.partials.requester-confirmation')
                 @include('work-orders.partials.requester-actions')
-                @can('pilot', $workOrder)
-                    @include('work-orders.partials.pilot-panel')
-                @endcan
                 @include('work-orders.partials.info-card')
             </div>
             <aside class="flex flex-col gap-5 min-w-0">
@@ -96,18 +86,18 @@
             </aside>
         </div>
 
-        {{-- Intervention : chrono, avancement et rapport de l'intervenant ; pièces pour tous.
-             Un superviseur ne voit le rapport que s'il y en a un à lire. --}}
-        <div id="panel-intervention" data-tab-panel="intervention" role="tabpanel" aria-labelledby="tab-intervention" x-show="tab === 'intervention'" @if ($defaultTab !== 'intervention') x-cloak @endif
-             class="grid grid-cols-1 split:grid-cols-[minmax(0,1fr)_320px] desk:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
-            <div class="flex flex-col gap-5 min-w-0">
-                @if ($performs)
-                    @include('work-orders.partials.intervention-tracking')
-                    @include('work-orders.partials.status-form')
-                    @include('work-orders.partials.intervention-report')
-                @else
-                    {{-- Superviseur : les temps saisis (corrections signalées) et le rapport,
-                         seulement s'il y a quelque chose à lire. --}}
+        {{-- Intervention. L'intervenant : « la mission en 3 temps » (préparer, sur place,
+             terminer), une étape ouverte à la fois. Le superviseur : les temps et le rapport,
+             seulement s'il y a quelque chose à lire, et les pièces. --}}
+        @if ($performs)
+            <div id="panel-intervention" data-tab-panel="intervention" role="tabpanel" aria-labelledby="tab-intervention" x-show="tab === 'intervention'" @if ($defaultTab !== 'intervention') x-cloak @endif
+                 class="min-w-0 max-w-3xl">
+                @include('work-orders.partials.mission')
+            </div>
+        @else
+            <div id="panel-intervention" data-tab-panel="intervention" role="tabpanel" aria-labelledby="tab-intervention" x-show="tab === 'intervention'" @if ($defaultTab !== 'intervention') x-cloak @endif
+                 class="grid grid-cols-1 split:grid-cols-[minmax(0,1fr)_320px] desk:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
+                <div class="flex flex-col gap-5 min-w-0">
                     @php $hasReport = $user->can('work', $workOrder) && $workOrder->interventionReport; @endphp
                     @if ($user->can('pilot', $workOrder) && $workOrder->interventionSessions->isNotEmpty())
                         @include('work-orders.partials.intervention-tracking', ['readonly' => true])
@@ -121,15 +111,12 @@
                             </p>
                         </x-panel>
                     @endif
-                @endif
+                </div>
+                <aside class="flex flex-col gap-5 min-w-0">
+                    @include('work-orders.partials.parts-card')
+                </aside>
             </div>
-            <aside class="flex flex-col gap-5 min-w-0">
-                @include('work-orders.partials.parts-card')
-                @if ($performs)
-                    @include('work-orders.partials.previous-repairs')
-                @endif
-            </aside>
-        </div>
+        @endif
 
         {{-- Validation : contrôle qualité et corrections demandées --}}
         @if ($showValidation)

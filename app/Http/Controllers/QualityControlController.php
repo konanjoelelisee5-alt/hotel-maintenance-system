@@ -125,6 +125,10 @@ class QualityControlController extends Controller
                 if ($workOrder->reporter) {
                     $workOrder->reporter->notify(new QualityControlNotification($workOrder, 'approuve'));
                 }
+                // Le technicien attendait cette vérification (écran « Réparation envoyée »).
+                if ($workOrder->assignee && $workOrder->assignee->isNot($workOrder->reporter)) {
+                    $workOrder->assignee->notify(new QualityControlNotification($workOrder, 'approuve'));
+                }
             } else {
                 $workOrder->update(['status' => 'rejete']);
 

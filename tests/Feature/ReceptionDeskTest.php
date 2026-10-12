@@ -77,7 +77,19 @@ class ReceptionDeskTest extends TestCase
             ->assertOk()
             ->assertSee('Clients concernés maintenant')->assertSee('Client dans la chambre')
             ->assertSee('Astreinte de jour')->assertSee('Awa Manager')->assertSee('tel:+2250700000001', false)
+            ->assertSee('https://wa.me/2250700000001', false)->assertSee('Appeler depuis votre téléphone')
             ->assertSee('Blocages à décider');
+    }
+
+    public function test_on_call_phone_numbers_are_ready_to_dial_and_for_whatsapp(): void
+    {
+        $local = new User(['phone' => '07 07 12 34 56']);
+        $this->assertSame('0707123456', $local->dialablePhone());
+        $this->assertSame('2250707123456', $local->whatsappPhone());
+
+        $this->assertSame('2250707123456', (new User(['phone' => '+225 07 07 12 34 56']))->whatsappPhone());
+        $this->assertSame('33612345678', (new User(['phone' => '0033 6 12 34 56 78']))->whatsappPhone());
+        $this->assertNull((new User(['phone' => null]))->whatsappPhone());
     }
 
     public function test_reception_tells_maintenance_the_guest_was_moved(): void

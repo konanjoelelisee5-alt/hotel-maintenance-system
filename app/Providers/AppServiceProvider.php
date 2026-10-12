@@ -6,6 +6,7 @@ use App\Contracts\PhoneAlertSender;
 use App\Services\PhoneAlerts\LogPhoneAlertSender;
 use App\Support\AuthenticationAudit;
 use App\Support\OpenAccess;
+use App\Support\PushNotifications;
 use App\Support\SchedulerHealth;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Event;
@@ -36,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Connexions, déconnexions, échecs et blocages au journal d'activité.
         Event::subscribe(AuthenticationAudit::class);
+        // La cloche suit aussi en push les appareils abonnés.
+        Event::subscribe(PushNotifications::class);
 
         // Proxys de confiance (config/app.php, TRUSTED_PROXIES) : aucun par défaut.
         if ($proxies = config('app.trusted_proxies')) {

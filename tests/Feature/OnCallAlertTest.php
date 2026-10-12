@@ -11,6 +11,7 @@ use App\Models\WorkOrder;
 use App\Models\WorkOrderPriority;
 use App\Models\WorkOrderType;
 use App\Notifications\PriorityWorkOrderCreatedNotification;
+use App\Notifications\SensitiveAdminActionNotification;
 use App\Notifications\SlaEscalationNotification;
 use App\Support\OnCall;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -112,6 +113,42 @@ class OnCallAlertTest extends TestCase
         $this->assertStringContainsString('Agent Yao', $this->sentToPhones[0]['message']);
         $this->assertSame(1, $team['chef']->notifications()->count());
         $this->assertSame(0, $team['informatique']->notifications()->count());
+    }
+
+    public function test_urgent_work_order_is_also_emailed_in_the_background(): void
+    {
+        Notification::fake();
+        $team = $this->team();
+        $this->travelTo(today()->setTime(23, 0));
+
+        $this->actingAs(User::factory()->housekeeping()->create())
+            ->post(route('work-orders.store'), $this->workOrderPayload('urgente'));
+
+        Notification::assertSentTo($team['chef'], PriorityWorkOrderCreatedNotification::class, function ($notification, array $channels) use ($team) {
+            $mail = $notification->toMail($team['chef']);
+            $connections = $notification->viaConnections();
+
+            return in_array('mail', $channels, true)
+                && str_contains($mail->subject, 'URGENTE')
+                && $mail->actionUrl === route('work-orders.show', WorkOrder::latest('id')->first())
+                // La cloche reste immédiate ; seul l'e-mail attend la file.
+                && $connections['database'] === 'sync'
+                && $connections['mail'] === config('queue.default');
+        });
+    }
+
+    public function test_sensitive_admin_action_is_emailed_to_the_other_admins(): void
+    {
+        Notification::fake();
+        $team = $this->team();
+
+        ActivityLog::record('user.deactivated', 'Compte de Paul désactivé.', actor: $team['chef']);
+
+        Notification::assertSentTo($team['informatique'], SensitiveAdminActionNotification::class, function ($notification, array $channels) use ($team) {
+            return in_array('mail', $channels, true)
+                && str_contains(implode(' ', $notification->toMail($team['informatique'])->introLines), 'Compte de Paul désactivé.');
+        });
+        Notification::assertNotSentTo($team['chef'], SensitiveAdminActionNotification::class);
     }
 
     public function test_normal_priority_work_order_does_not_alert(): void

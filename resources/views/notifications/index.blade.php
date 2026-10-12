@@ -22,6 +22,8 @@
         </x-slot:primaryAction>
     @endif
 
+    <x-push-toggle />
+
     @if ($notifications->isEmpty())
         <div class="bg-white border border-line rounded-xl px-5 py-14 flex flex-col items-center gap-2 text-center">
             <div class="w-[42px] h-[42px] rounded-full bg-line-soft flex items-center justify-center text-ink-faint"><x-nav-icon name="bell" class="w-5 h-5" /></div>

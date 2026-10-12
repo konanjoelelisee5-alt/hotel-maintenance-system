@@ -35,7 +35,7 @@
     ])->values()->all();
 
     // Couleur du rond de catégorie selon l'état (en attente, en cours, réparé).
-    $circle = ['pending' => 'bg-[#FDEBDD] text-[#B4561A]', 'progress' => 'bg-[rgb(var(--rc-sky))] text-[rgb(var(--rc-sky-ink))]', 'done' => 'bg-ok-bg text-green'];
+    $circle = ['pending' => 'bg-[#FDEBDD] text-[#9A4614]', 'progress' => 'bg-[rgb(var(--rc-sky))] text-[rgb(var(--rc-sky-ink))]', 'done' => 'bg-ok-bg text-green'];
 @endphp
 
 <x-app-layout page-title="Accueil">

@@ -1,7 +1,8 @@
 {{-- File des ordres de travail des accueils de maintenance (admin, manager, technicien), au
      style de la feuille : rond d'état, intervention (lieu et intervenant dessous), statut à
      pastille, délai (SLA), menu. Onglets en pastilles avec compteur. Triés par urgence SLA (WorkQueue).
-     $queue, $filters, $filterCounts, $filter, $here (fn (?string $filter) => url), $queueTitle. --}}
+     $queue, $filters, $filterCounts, $filter, $here (fn (?string $filter) => url), $queueTitle ;
+     facultatifs : $tabs (false : sans onglets, accueil admin), $moreUrl et $moreLabel (lien du bas). --}}
 @php
     $hk = \App\Support\Housekeeping::class;
     $statusDot = ['ouvert' => 'bg-blue', 'en_cours' => 'bg-amber', 'en_attente' => 'bg-ink-faint', 'resolu' => 'bg-green',
@@ -12,16 +13,18 @@
         <h2 id="queue-title" class="m-0 text-[20px] font-bold tracking-[-0.015em]">{{ $queueTitle }}</h2>
         <span class="hidden sm:block h-5 w-px bg-line" aria-hidden="true"></span>
         <span class="text-[14px] font-semibold text-ink-body">triés par urgence</span>
-        <nav class="sm:ml-auto flex items-center gap-1 p-1 rounded-full bg-paper max-w-full overflow-x-auto" aria-label="Filtres">
+        @if ($tabs ?? true)
+        <nav class="sm:ml-auto flex items-center gap-1 p-1 rounded-full bg-paper max-w-full overflow-x-auto [scrollbar-width:none]" aria-label="Filtres">
             @foreach ($filters as $f)
                 @php $active = $filter === $f['key']; @endphp
                 <a href="{{ $here($f['key']) }}" @if ($active) aria-current="page" @endif
-                   class="h-8 px-3.5 rounded-full inline-flex items-center gap-1.5 text-[13px] whitespace-nowrap transition-colors {{ $active ? 'bg-white font-bold text-ink-deep shadow-[0_4px_12px_-8px_rgba(23,25,31,.5)]' : 'font-semibold text-ink-muted hover:text-ink-deep' }}">
+                   class="tap h-9 px-3.5 rounded-full inline-flex items-center gap-1.5 text-[13px] whitespace-nowrap transition-colors {{ $active ? 'bg-white font-bold text-ink-deep shadow-[0_4px_12px_-8px_rgba(23,25,31,.5)]' : 'font-semibold text-ink-muted hover:text-ink-deep' }}">
                     {{ $f['label'] }}
                     <span class="tabular text-[12px] {{ $active ? 'text-blue' : 'text-ink-grey' }}">{{ $filterCounts[$f['key']] ?? 0 }}</span>
                 </a>
             @endforeach
         </nav>
+        @endif
     </div>
 
     <div class="mt-3">
@@ -32,7 +35,7 @@
                 $done = in_array($w->status, ['resolu', 'ferme'], true);
                 $circle = match (true) {
                     $sla['late'] && ! $done => 'bg-danger-soft text-red',
-                    $urgent && ! $done => 'bg-[#FDEBDD] text-[#B4561A]',
+                    $urgent && ! $done => 'bg-[#FDEBDD] text-[#9A4614]',
                     $done => 'bg-ok-bg text-green',
                     default => 'bg-[rgb(var(--rc-sky))] text-[rgb(var(--rc-sky-ink))]',
                 };
@@ -46,7 +49,7 @@
                 <span class="min-w-0">
                     <span class="flex items-center gap-2 min-w-0">
                         <span class="text-[15px] font-semibold truncate">{{ $w->title }}</span>
-                        @if ($urgent)<span class="flex-shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#FDEBDD] text-[#B4561A]">Urgent</span>@endif
+                        @if ($urgent)<span class="flex-shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#FDEBDD] text-[#9A4614]">Urgent</span>@endif
                     </span>
                     <span class="block text-[12.5px] text-ink-muted truncate">
                         <span class="tabular">{{ $w->code() }}</span> · {{ $w->room?->label ?? 'Sans lieu' }}
@@ -78,14 +81,18 @@
         @empty
             <div class="py-12 flex flex-col items-center gap-2 text-center">
                 <span class="w-12 h-12 rounded-full bg-ok-bg text-green flex items-center justify-center"><x-nav-icon name="check" class="w-5 h-5" /></span>
-                <div class="text-[15px] font-semibold">Aucun ordre dans cet onglet</div>
-                <div class="text-[13.5px] text-ink-grey">Rien à traiter ici. Changez d'onglet pour voir le reste.</div>
+                @if ($tabs ?? true)
+                    <div class="text-[15px] font-semibold">Aucun ordre dans cet onglet</div>
+                    <div class="text-[13.5px] text-ink-grey">Rien à traiter ici. Changez d'onglet pour voir le reste.</div>
+                @else
+                    <div class="text-[15px] font-semibold">Aucune urgence en cours</div>
+                @endif
             </div>
         @endforelse
     </div>
 
-    <a href="{{ route('work-orders.index') }}" class="mt-2 h-10 px-4 rounded-full border border-line inline-flex items-center gap-1.5 text-[13px] font-semibold hover:bg-paper transition-colors">
-        Voir tous les ordres
+    <a href="{{ $moreUrl ?? route('work-orders.index') }}" class="mt-2 h-11 px-5 rounded-full border border-line inline-flex items-center gap-1.5 text-[13px] font-semibold hover:bg-paper transition-colors">
+        {{ $moreLabel ?? 'Voir tous les ordres' }}
         <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
     </a>
 </section>

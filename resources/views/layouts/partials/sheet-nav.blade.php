@@ -100,5 +100,6 @@
                 </button>
             </form>
         @endif
+        <x-app-version class="mt-2 px-3 border-t border-line-soft" />
     </div>
 </div>

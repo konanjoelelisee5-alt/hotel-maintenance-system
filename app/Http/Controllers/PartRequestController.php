@@ -47,6 +47,8 @@ class PartRequestController extends Controller
                 'note' => "Pièce manquante : {$partRequest->quantity} × {$partRequest->description}.",
             ]);
             $workOrder->update(['status' => 'en_attente', 'acknowledged_at' => $workOrder->acknowledged_at ?? now()]);
+            // Attendre la pièce n'est pas du travail : le chrono s'arrête.
+            $workOrder->activeSession()?->stop();
         }
 
         Notification::send(self::stockKeepers(), new PartRequestedNotification($partRequest->load('workOrder.room', 'requester')));

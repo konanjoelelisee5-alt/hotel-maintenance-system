@@ -2,7 +2,8 @@
 //
 // 1. Envoi de formulaire : le bouton passe en « chargement » et un second clic est ignoré.
 // 2. Bouton retour [data-back] : revient à l'écran précédent (filtres et défilement
-//    conservés) quand il appartient à l'application, sinon suit son lien.
+//    conservés) quand il appartient à l'application, sinon suit son lien. Bouton fermer
+//    [data-close] : ressort vers l'écran d'où l'on était entré sur la page.
 // 3. Clavier du téléphone ouvert : classe .kb-open sur <html> (barres du bas remises
 //    dans le flux, navigation basse masquée — resources/css/app.css).
 // 4. Connexion Internet perdue / retrouvée : bandeau #offline-banner des layouts.
@@ -60,6 +61,24 @@ document.addEventListener('click', (event) => {
         history.back();
     }
 });
+
+// Fermer [data-close] (profil, notifications, nouveautés : App\Support\Navigation::phoneExit) :
+// on sort complètement de la page, vers l'écran d'où l'on y était entré, même après y avoir
+// enregistré un formulaire (le recul pas à pas repasserait par chaque envoi). Ce point d'entrée
+// est retenu pour l'onglet (sessionStorage), page par page ; à défaut, le lien (l'accueil).
+(() => {
+    const close = document.querySelector('a[data-close]');
+    if (!close) return;
+    const key = `close-to:${location.pathname}`;
+    try {
+        const previous = document.referrer ? new URL(document.referrer) : null;
+        const entering = previous && previous.origin === location.origin
+            && previous.pathname !== location.pathname && ! previous.pathname.startsWith('/login');
+        if (entering) sessionStorage.setItem(key, previous.href);
+        const saved = sessionStorage.getItem(key);
+        if (saved) close.href = saved;
+    } catch (e) { /* stockage indisponible (navigation privée) : le lien garde l'accueil */ }
+})();
 
 // ---------------------------------------------------------------------------
 // 3. Clavier du téléphone

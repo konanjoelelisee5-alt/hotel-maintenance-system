@@ -72,7 +72,7 @@ class HousekeepingWorkOrderController extends Controller
         $selected?->load([
             'room', 'assignee', 'reporter', 'priority', 'requesterConfirmedBy',
             'attachments.uploader', 'comments.user', 'interventionReport.technician',
-            'statusHistories' => fn ($h) => $h->where('new_status', 'annule')->with('changedBy'),
+            'statusHistories' => fn ($h) => $h->whereIn('new_status', ['annule', 'ferme'])->with('changedBy'),
         ]);
 
         return view('housekeeping.work-orders', [

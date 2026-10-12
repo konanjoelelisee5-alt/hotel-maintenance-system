@@ -40,7 +40,7 @@ class WorkOrderTabsTest extends TestCase
 
         $this->actingAs($technician)->get(route('work-orders.show', $workOrder))
             ->assertSee("x-data=\"{ tab: 'intervention' }\"", false)
-            ->assertSee('Avancement de mon intervention');
+            ->assertSee('id="mission"', false);
     }
 
     public function test_validation_tab_only_appears_once_the_repair_is_declared(): void

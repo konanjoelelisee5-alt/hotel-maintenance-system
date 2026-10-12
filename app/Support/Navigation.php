@@ -165,22 +165,21 @@ class Navigation
     }
 
     /**
-     * Barre du bas (téléphone) : les 3 à 5 destinations quotidiennes du rôle. Ce qui
+     * Barre du bas (téléphone) : les 3 ou 4 destinations quotidiennes du rôle. Ce qui
      * attend une décision du rôle porte un compteur (badge), comme dans la sidebar.
+     * Ni profil ni paramètres : admin, manager et technicien les trouvent dans le menu ⋮,
+     * Housekeeping et réception (sans menu sur téléphone) dans le bouton profil en haut.
      *
      * @return array<int, array{label: string, route: string, icon: string, params?: array, badge?: int}>
      */
     public static function forBottomNav(User $user): array
     {
-        $profile = ['label' => 'Profil', 'route' => 'profile.edit', 'icon' => 'user'];
-
         return match ($user->role) {
             UserRole::Technicien => [
                 ['label' => 'Ma journée', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Mes ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ['label' => 'Signaler', 'route' => 'quick-reports.create', 'icon' => 'mic'],
                 ['label' => 'Planning', 'route' => 'planning.technician', 'params' => ['technician' => $user->id], 'icon' => 'calendar'],
-                $profile,
             ],
             UserRole::Housekeeping => [
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'match' => [$user->dashboardRoute()], 'icon' => 'home'],
@@ -191,30 +190,61 @@ class Navigation
                 ...($user->isDepartmentHead()
                     ? [['label' => 'Blocages', 'route' => 'room-blocks.index', 'icon' => 'building', 'badge' => self::roomBlockCount(RoomBlock::BLOCKED)]]
                     : []),
-                $profile,
             ],
             UserRole::Reception => [
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'match' => [$user->dashboardRoute()], 'icon' => 'home'],
                 ['label' => 'Demandes', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 // Accepter ou refuser un blocage est la décision clé de la réception.
                 ['label' => 'Blocages', 'route' => 'room-blocks.index', 'icon' => 'building', 'badge' => self::roomBlockCount(RoomBlock::REQUESTED)],
-                $profile,
             ],
             UserRole::Manager => [
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ['label' => 'Validation', 'route' => 'quality-controls.index', 'icon' => 'shield', 'badge' => self::toReviewCount()],
                 ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
-                $profile,
             ],
             UserRole::Admin => [
                 ['label' => 'Accueil', 'route' => $user->dashboardRoute(), 'icon' => 'home'],
                 ['label' => 'Ordres', 'route' => 'work-orders.index', 'icon' => 'clipboard'],
                 ['label' => 'Planning', 'route' => 'planning.index', 'icon' => 'calendar'],
-                ['label' => 'Paramètres', 'route' => 'settings.index', 'icon' => 'settings', 'match' => self::settingsRoutePatterns()],
-                $profile,
             ],
         };
+    }
+
+    /** Pages « à côté » du travail : on les ferme (croix) pour revenir là où on était. */
+    public const ASIDE_ROUTES = ['profile.edit', 'notifications.index', 'release-notes.index'];
+
+    /**
+     * Bouton en haut à gauche du téléphone et de la tablette, quand la page n'en déclare pas
+     * (back-route) : sans lui, l'application installée sur iPhone n'a aucun moyen de revenir.
+     * - page « à côté » (ASIDE_ROUTES) : croix, qui ramène là où on était avant d'y entrer
+     *   (resources/js/ui.js, data-close), même après un enregistrement sur la page ;
+     * - page hors de la barre du bas : ←, qui recule d'un écran (data-back) ;
+     * - page de la barre du bas : rien (le logo), on en sort par la barre.
+     * Le lien est la sortie de secours quand l'historique ne sert pas (page ouverte depuis
+     * une notification) : l'écran parent, sinon l'accueil du rôle.
+     *
+     * @return array{href: string, close: bool}|null
+     */
+    public static function phoneExit(User $user, array $bottomNav): ?array
+    {
+        $home = route($user->dashboardRoute());
+
+        if (request()->routeIs(...self::ASIDE_ROUTES)) {
+            return ['href' => $home, 'close' => true];
+        }
+        // Route exacte (pas activePatterns) : la fiche d'un OT n'est pas la liste des OT.
+        foreach ($bottomNav as $item) {
+            if (request()->routeIs(...($item['match'] ?? [$item['route']]))) {
+                return null;
+            }
+        }
+
+        $parent = request()->routeIs('planning.technician') && $user->role?->dispatchesWork()
+            ? route('planning.index')
+            : $home;
+
+        return ['href' => $parent, 'close' => false];
     }
 
     /**

@@ -13,7 +13,7 @@
 @php
     $pills = $variant === 'pills';
     $base = $pills
-        ? 'flex-shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-full border text-[14px] whitespace-nowrap transition'
+        ? 'tap flex-shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-full border text-[14px] whitespace-nowrap transition'
         : 'flex items-center gap-1.5 px-3.5 pb-3 pt-1 border-b-2 text-[13.5px] whitespace-nowrap transition';
     $on = $pills ? 'bg-navy border-navy text-white font-semibold' : 'border-navy text-navy font-semibold';
     $off = $pills ? 'bg-white border-line text-navy font-medium' : 'border-transparent text-ink-muted font-medium hover:text-navy';
@@ -22,7 +22,7 @@
     $countBase = $pills ? 'min-w-[22px] h-[22px] px-1.5 rounded-full text-[11.5px] font-mono flex items-center justify-center' : 'font-mono text-[11.5px]';
 @endphp
 
-<nav {{ $attributes->merge(['class' => 'flex overflow-x-auto [scrollbar-width:none] '.($pills ? 'gap-2' : 'gap-1 -mb-px')]) }}
+<nav {{ $attributes->merge(['class' => 'flex overflow-x-auto [scrollbar-width:none] '.($pills ? 'tap-row gap-2' : 'gap-1 -mb-px')]) }}
      aria-label="{{ $label }}" @if ($model) role="tablist" @endif
      x-data x-init="$nextTick(() => {
          const a = $el.querySelector('[aria-current=page], [aria-selected=true]');

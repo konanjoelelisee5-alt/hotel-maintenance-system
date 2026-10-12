@@ -34,7 +34,7 @@
             @endunless
         </dl>
     @else
-        <form method="POST" action="{{ route('work-orders.report.store', $workOrder) }}" class="flex flex-col gap-4">
+        <form id="report-form" method="POST" action="{{ route('work-orders.report.store', $workOrder) }}" class="flex flex-col gap-4">
             @csrf
 
             <div>
@@ -46,7 +46,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="parts_used">Pièces / matériel utilisés</label>
-                    <textarea id="parts_used" name="parts_used" rows="2">{{ old('parts_used', $report?->parts_used) }}</textarea>
+                    {{-- Premier rapport : les pièces déjà sorties du magasin pour cet OT, à compléter. --}}
+                    <textarea id="parts_used" name="parts_used" rows="2">{{ old('parts_used', $report?->parts_used ?? $workOrder->partReservations->where('status', 'sortie')->map(fn ($r) => $r->quantity.' × '.$r->part->name)->implode("\n")) }}</textarea>
                     <x-input-error :messages="$errors->get('parts_used')" />
                 </div>
                 <div>
@@ -74,9 +75,12 @@
                 <input type="hidden" name="signature" id="signature-input">
             </div>
 
-            <div class="flex justify-end">
-                <button type="submit" class="btn btn-primary"><x-nav-icon name="report" /> Enregistrer le rapport</button>
-            </div>
+            {{-- Dans l'assistant du technicien (mission), le bouton est en bas avec « Retour ». --}}
+            @unless ($inWizard ?? false)
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary"><x-nav-icon name="report" /> Enregistrer le rapport</button>
+                </div>
+            @endunless
         </form>
     @endif
 </x-panel>

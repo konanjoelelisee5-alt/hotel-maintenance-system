@@ -22,6 +22,8 @@
     @endif
 
     <div class="w-full max-w-[760px] flex flex-col gap-5">
+        <x-push-toggle />
+
         @if ($notifications->isEmpty())
             <div class="bg-white border border-line rounded-xl px-5 py-14 flex flex-col items-center gap-2 text-center">
                 <span class="w-[42px] h-[42px] rounded-full bg-line-soft text-ink-grey flex items-center justify-center"><x-hk.icon name="bell-off" :size="18" /></span>

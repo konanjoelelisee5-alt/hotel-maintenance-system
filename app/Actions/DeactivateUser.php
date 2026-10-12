@@ -67,6 +67,8 @@ class DeactivateUser
                 ->each(fn (InterventionSession $session) => $session->stop());
 
             $leaving->update(['is_active' => false]);
+            // Plus aucune notification push sur ses appareils.
+            $leaving->pushSubscriptions()->delete();
 
             ActivityLog::record(
                 'user.deactivated',

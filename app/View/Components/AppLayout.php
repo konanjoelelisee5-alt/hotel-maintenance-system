@@ -29,12 +29,15 @@ class AppLayout extends Component
     {
         $user = auth()->user();
         $notifications = $user->notifications()->latest('created_at')->limit(6)->get();
+        $bottomNav = Navigation::forBottomNav($user);
 
         // Une seule coquille pour tous les rôles : la « feuille » claire (layouts.sheet) ; chaque
         // rôle y a ses menus (Navigation) et ses particularités (poste partagé, envois hors réseau).
         return view('layouts.sheet', [
             'nav' => Navigation::forSidebar($user),
-            'bottomNav' => Navigation::forBottomNav($user),
+            'bottomNav' => $bottomNav,
+            // Retour (←) ou fermeture (croix) en haut à gauche, si la page n'en déclare pas.
+            'phoneExit' => $this->backRoute ? null : Navigation::phoneExit($user, $bottomNav),
             'notifications' => $notifications,
             'unreadCount' => $user->unreadNotifications()->count(),
         ]);

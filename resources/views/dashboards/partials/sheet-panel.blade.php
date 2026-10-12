@@ -7,7 +7,7 @@
     <div class="flex items-baseline justify-between gap-3">
         <h2 class="m-0 text-[15px] font-bold">{{ $panel['title'] }}</h2>
         @isset($link)
-            <a href="{{ $link[1] }}" class="text-[12.5px] font-semibold text-blue whitespace-nowrap hover:underline">{{ $link[0] }}</a>
+            <a href="{{ $link[1] }}" class="tap text-[12.5px] font-semibold text-blue whitespace-nowrap hover:underline">{{ $link[0] }}</a>
         @endisset
     </div>
     @if (! empty($panel['sub']))<p class="m-0 text-[12.5px] text-ink-grey">{{ $panel['sub'] }}</p>@endif
@@ -26,7 +26,7 @@
             </div>
         @else
             @php $tag = empty($item['url']) ? 'div' : 'a'; @endphp
-            <{{ $tag }} @unless (empty($item['url'])) href="{{ $item['url'] }}" @endunless class="mt-3 flex items-start gap-3 {{ $tag === 'a' ? 'group' : '' }}">
+            <{{ $tag }} @unless (empty($item['url'])) href="{{ $item['url'] }}" @endunless class="mt-3 flex items-start gap-3 {{ $tag === 'a' ? 'group min-h-11' : '' }}">
                 <span class="w-2 h-2 rounded-full mt-[7px] flex-shrink-0 {{ \App\Support\Swatch::bg($item['color']) }}"></span>
                 <span class="flex-1 min-w-0">
                     <span class="block text-[13.5px] font-medium leading-snug group-hover:underline">{{ $item['label'] }}</span>

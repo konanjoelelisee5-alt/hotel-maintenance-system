@@ -24,3 +24,9 @@ Schedule::command(GeneratePreventiveWorkOrders::class)
         return now()->gte($fiveAm) && ! SchedulerHealth::ranSince('preventive', $fiveAm);
     });
 Schedule::command(WatchGuestReturns::class)->everyFifteenMinutes();
+// E-mails en attente (SendsMailInBackground) : vidés chaque minute par les tâches
+// automatiques, sans worker permanent à surveiller. Un `queue:work` lancé à la main
+// (tests en local) fait le même travail, en continu.
+Schedule::command('queue:work --stop-when-empty --max-time=50')
+    ->everyMinute()
+    ->withoutOverlapping();

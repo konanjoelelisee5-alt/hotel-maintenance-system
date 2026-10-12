@@ -26,6 +26,15 @@ class NotificationController extends Controller
      */
     public function markAsRead(Request $request, string $id): RedirectResponse
     {
+        return $this->open($request, $id);
+    }
+
+    /**
+     * Même chose en GET : lien d'une notification push (le téléphone ouvre une adresse,
+     * il ne peut pas envoyer de formulaire). Ne touche qu'aux notifications de la personne.
+     */
+    public function open(Request $request, string $id): RedirectResponse
+    {
         $notification = $request->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 

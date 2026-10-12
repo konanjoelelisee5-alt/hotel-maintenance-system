@@ -61,12 +61,14 @@ class AdminDashboardTest extends TestCase
         $this->makeWorkOrder('resolu');
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
+        // Chaque repère ouvre Ordres de travail sur l'onglet correspondant (pas de double liste à l'accueil).
         $tabs = collect($response->viewData('filters'))->pluck('key');
-        foreach ($response->viewData('pulse') as $p) {
+        foreach (collect($response->viewData('pulse'))->whereNotNull('filter') as $p) {
             $this->assertContains($p['filter'], $tabs);
+            $response->assertSee('href="'.route('work-orders.index', ['filter' => $p['filter']]).'"', false);
         }
 
-        $this->actingAs($admin)->get(route('admin.dashboard', ['filter' => 'to_review']))
+        $this->actingAs($admin)->get(route('work-orders.index', ['filter' => 'to_review']))
             ->assertSee('Ordres à contrôler')
             ->assertSee('OT resolu moyenne');
     }
@@ -126,14 +128,25 @@ class AdminDashboardTest extends TestCase
             ->assertSee('OT resolu moyenne');
     }
 
-    public function test_recent_activity_leaves_out_logins(): void
+    public function test_dashboard_has_no_chrome_style_activity_tabs(): void
+    {
+        // Retiré à la demande de l'utilisateur (jugé encombrant) : l'activité se lit dans la fiche OT.
+        $this->actingAs(User::factory()->admin()->create())->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertDontSee('activity-tabs', false);
+    }
+
+    public function test_admin_activity_lives_in_settings_not_on_the_dashboard(): void
     {
         $admin = User::factory()->admin()->create(['phone' => '0700000000']);
-        ActivityLog::record('auth.login', 'Connexion de quelqu\'un', null, [], $admin);
         ActivityLog::record('sla_policy.updated', 'Modification de la politique SLA « Urgente »', null, [], $admin);
 
+        // Déjà dans Paramètres › Journal d'activité : pas répété sur l'accueil.
         $this->actingAs($admin)->get(route('admin.dashboard'))
-            ->assertSee('Modification de la politique SLA')
-            ->assertDontSee('Connexion de quelqu');
+            ->assertDontSee('Activité administrative')
+            ->assertDontSee('Modification de la politique SLA');
+
+        $this->actingAs($admin)->get(route('activity-logs.index'))
+            ->assertSee('Modification de la politique SLA');
     }
 }

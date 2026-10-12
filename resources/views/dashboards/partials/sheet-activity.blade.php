@@ -24,7 +24,7 @@
                     <div class="text-[13px] text-ink-muted">
                         {{ $a['verb'] }}
                         @if ($a['room'])
-                            · <a href="{{ route('reception.dashboard', ['chambre' => $a['room']->number]) }}" class="font-semibold text-blue hover:underline">{{ $a['room']->label }}</a>
+                            · <a href="{{ route('reception.dashboard', ['chambre' => $a['room']->number]) }}" class="tap font-semibold text-blue hover:underline">{{ $a['room']->label }}</a>
                         @endif
                     </div>
                     @if ($a['quote'])

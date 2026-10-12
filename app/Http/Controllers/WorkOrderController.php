@@ -236,6 +236,11 @@ class WorkOrderController extends Controller
             $updateData['completed_at'] = now();
         }
 
+        // « Je suis bloqué » : le temps d'attente n'est pas du travail, le chrono s'arrête.
+        if ($newStatus === 'en_attente') {
+            $workOrder->activeSession()?->stop();
+        }
+
         $workOrder->update($updateData);
 
         return back()->with('success', 'Statut mis à jour avec succès.');

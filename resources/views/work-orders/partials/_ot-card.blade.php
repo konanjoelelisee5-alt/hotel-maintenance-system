@@ -17,11 +17,11 @@
         <span class="truncate">{{ $w->room?->label ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</span>
         @if ($w->assignee)
             <span class="flex items-center gap-1.5 flex-shrink-0">
-                <span class="w-5 h-5 rounded-full bg-gold flex items-center justify-center text-[9px] font-bold text-navy">{{ $w->assignee->initialsOrGenerated() }}</span>
+                <span class="w-6 h-6 rounded-full bg-gold flex items-center justify-center text-[10px] font-bold text-white">{{ $w->assignee->initialsOrGenerated() }}</span>
                 <span>{{ $w->assignee->name }}</span>
             </span>
         @else
-            <span class="text-ink-faint flex-shrink-0">— à affecter</span>
+            <span class="font-semibold text-amber flex-shrink-0">à affecter</span>
         @endif
     </div>
 

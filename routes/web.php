@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HousekeepingSupervisionController;
 use App\Http\Controllers\QuickReportController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\ReleaseNotesController;
 use App\Http\Controllers\RoomBlockController;
 use App\Http\Controllers\RoomInspectionController;
 use App\Http\Controllers\TechnicianAvailabilityController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\TechnicianSkillController;
 use App\Http\Controllers\WorkOrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\InterventionReportController;
 use App\Http\Controllers\InterventionSessionController;
 use App\Http\Controllers\InvoiceController;
@@ -51,6 +53,9 @@ use App\Http\Controllers\OpenAccessController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+// Version en service : une page restée ouverte la compare à la sienne (x-update-available).
+Route::get('/version', [ReleaseNotesController::class, 'version'])->name('app.version');
 
 // === DASHBOARDS PAR RÔLE ===
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -170,6 +175,8 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Journal des versions (resources/changelog.php), filtré par rôle.
+    Route::get('/nouveautes', [ReleaseNotesController::class, 'index'])->name('release-notes.index');
     // Accès ouvert (APP_OPEN_ACCESS) : passer d'un rôle à l'autre. 404 sinon.
     Route::post('/voir-en-tant-que/{user}', OpenAccessController::class)->name('open-access.switch');
     // Pas d'auto-suppression : un compte porte l'historique des OT (signalés,
@@ -205,6 +212,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    // Lien d'une notification push (resources/js/push.js, public/sw.js).
+    Route::get('/notifications/{id}/open', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store'])->name('push-subscriptions.store');
+    Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy'])->name('push-subscriptions.destroy');
 });
 
 // === MODULE D : GESTION INTERVENTIONS & EXÉCUTION ===
@@ -224,6 +235,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/work-orders/{workOrder}/report', [InterventionReportController::class, 'store'])
         ->name('work-orders.report.store');
+    // Après la signature : « Réparation envoyée », en attente de vérification.
+    Route::get('/work-orders/{workOrder}/rapport-envoye', [InterventionReportController::class, 'sent'])
+        ->name('work-orders.report.sent');
 
 });
 

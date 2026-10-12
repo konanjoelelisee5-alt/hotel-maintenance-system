@@ -33,7 +33,7 @@
             <span class="text-ink-faint truncate">Annulé, aucune intervention</span>
         @elseif ($w->assignee)
             <span class="flex items-center gap-1.5 min-w-0">
-                <span class="w-5 h-5 rounded-full bg-gold flex items-center justify-center text-[9px] font-bold text-navy flex-shrink-0">{{ $w->assignee->initialsOrGenerated() }}</span>
+                <span class="w-6 h-6 rounded-full bg-gold flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">{{ $w->assignee->initialsOrGenerated() }}</span>
                 <span class="truncate">{{ $w->assignee->name }}</span>
             </span>
         @else

@@ -103,7 +103,9 @@ class WorkOrderShowPageTest extends TestCase
         $response = $this->actingAs($workOrder->assignee)->get(route('work-orders.show', $workOrder));
 
         $response->assertOk();
-        $response->assertSee('Avancement de mon intervention');
+        // L'assistant en 4 étapes remplace les blocs empilés (avancement, temps, rapport).
+        $response->assertSeeInOrder(['Préparer', 'Sur place', 'Pièces utilisées', 'Rapport et signature']);
+        $response->assertDontSee('Avancement de mon intervention');
         $response->assertSee("Rapport d'intervention", false);
         // Le panneau de pilotage est réservé aux superviseurs.
         $response->assertDontSee("Pilotage de l'OT", false);

@@ -29,8 +29,7 @@
     // Textes posés par le signalement rapide quand l'agent n'a rien écrit : pas une description.
     $note = in_array($workOrder->description, ['Signalement rapide sans description.', "Message vocal joint : écouter l'enregistrement dans les pièces jointes."], true)
         ? null : $workOrder->description;
-    $steps = $hk::timeline($workOrder);
-    $cancel = $workOrder->status === 'annule' ? $workOrder->statusHistories->sortByDesc('id')->first() : null;
+    $cancel = $workOrder->status === 'annule' ? $workOrder->statusHistories->where('new_status', 'annule')->sortByDesc('id')->first() : null;
     $withdrawn = $cancel && str_starts_with((string) $cancel->note, 'Retiré par le demandeur');
     $banner = match (true) {
         $withdrawn => 'Retiré par '.($cancel->changed_by === $user->id ? 'vous' : ($cancel->changedBy?->name ?? 'le demandeur')),
@@ -191,25 +190,7 @@
 
         <div class="flex flex-col gap-5 min-w-0">
             <x-panel title="Suivi" icon="clock">
-                <ol class="m-0 p-0 list-none">
-                    @foreach ($steps as $i => $s)
-                        @php $current = $s['done'] && ! ($steps[$i + 1]['done'] ?? false) && $status['key'] !== 'done' && ! $cancel; @endphp
-                        <li class="relative flex gap-3 pb-4 last:pb-0">
-                            @unless ($loop->last)
-                                <span class="absolute left-[11px] top-6 bottom-0 w-px {{ ($steps[$i + 1]['done'] ?? false) ? 'bg-green' : 'bg-line' }}" aria-hidden="true"></span>
-                            @endunless
-                            <span class="relative z-10 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0
-                                         {{ $s['done'] ? ($current ? 'bg-white border-2 border-gold text-gold' : 'bg-green text-white') : 'bg-white border border-line text-ink-grey' }}">
-                                @if ($s['done'] && ! $current)<x-hk.icon name="check" :size="13" />@elseif ($current)<span class="w-2 h-2 rounded-full bg-gold"></span>@else<span class="font-mono text-[11px]">{{ $i + 1 }}</span>@endif
-                            </span>
-                            <div class="flex flex-col gap-0.5 min-w-0 -mt-px">
-                                <span class="text-[13.5px] {{ $s['done'] ? 'font-semibold text-navy' : 'font-medium text-ink-grey' }}">{{ $s['label'] }}</span>
-                                @if ($s['at'])<span class="font-mono text-[11.5px] text-ink-grey">{{ $s['at']->format('d/m/Y H:i') }}</span>@endif
-                                @if ($s['meta'])<span class="text-[12.5px] text-ink-muted">{{ $s['meta'] }}</span>@endif
-                            </div>
-                        </li>
-                    @endforeach
-                </ol>
+                <x-work-order-journey :work-order="$workOrder" vertical />
             </x-panel>
 
             @if ($workOrder->room && ! $workOrder->room->isCommonArea())

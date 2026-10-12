@@ -13,7 +13,6 @@ Ces points bloquent ou gênent la mise en service ; ils seront développés, pui
 
 - [ ] **Brancher un vrai fournisseur de SMS** pour les alertes d'astreinte. Aujourd'hui, les SMS sont seulement écrits dans le journal (`PHONE_ALERTS_DRIVER=log`) : personne n'est réellement appelé la nuit. À choisir : opérateur local (Orange, MTN, Moov) ou service international (Twilio…).
 - [ ] **Page d'impression des étiquettes QR** (une étiquette par chambre), pour pouvoir les coller sur les portes.
-- [ ] **Notifications sur le téléphone** (application installable) : prévenir l'agent même quand l'application est fermée. *Souhaitable, pas bloquant.*
 
 ## 2. Préparer le serveur
 
@@ -37,14 +36,15 @@ Ces points bloquent ou gênent la mise en service ; ils seront développés, pui
   - `APP_LOCALE=fr`
   - `APP_KEY` : `php artisan key:generate` (une seule fois)
   - connexion à la base MySQL
-  - **e-mails** : renseigner un vrai serveur d'envoi (`MAIL_MAILER=smtp`, `MAIL_HOST`…). Aujourd'hui `MAIL_MAILER=log` : « mot de passe oublié » n'envoie rien.
+  - **e-mails** : renseigner le serveur d'envoi (`MAIL_MAILER=smtp`, `MAIL_HOST`…, modèle Gmail dans `.env.example`). Ils servent pour « mot de passe oublié », les urgences (astreinte, retards) et les actions sensibles des admins. Chaque compte doit avoir une **vraie adresse e-mail** (chef de maintenance, managers, admins). Avec `MAIL_MAILER=log`, rien n'est envoyé.
   - **SMS d'astreinte** : `PHONE_ALERTS_DRIVER` et les accès du fournisseur (voir partie 1).
+  - **notifications push** : `VAPID_SUBJECT` (l'adresse e-mail de l'hôtel, en `mailto:`), puis `php artisan webpush:vapid` **une seule fois** : changer les clés plus tard désabonne tous les appareils. Le push exige le https. Serveur Windows : PHP doit avoir `OPENSSL_CONF` (chemin d'un `openssl.cnf`) et `curl.cainfo` / `openssl.cafile` dans `php.ini`. C'est déjà réglé sur le PC de développement.
   - **ne pas** mettre `SEED_DEMO_DATA` (les données de démo sont refusées en production).
 - [ ] `php artisan migrate --force` (crée toutes les tables, dont celles des inspections).
 - [ ] `php artisan config:cache`, `php artisan route:cache`, `php artisan view:cache`.
 - [ ] **Tâches automatiques** : planifier `php artisan schedule:run` toutes les minutes (cron sous Linux, Planificateur de tâches sous Windows). Sans elles : pas d'escalade des retards, pas d'OT préventifs à 5 h, pas d'alerte « client qui revient dans une chambre en panne ». Vérifier ensuite le panneau « Tâches automatiques » du tableau de bord admin : les trois lignes doivent être vertes.
   - Sous Windows, modèle déjà en place sur le PC de développement : tâche « Hotel President - taches automatiques » (chaque minute) qui lance `%LOCALAPPDATA%\HotelPresident\planificateur.vbs` (sans fenêtre, journal dans `storage/logs/planificateur.log`). Sur un serveur, la régler sur « exécuter même si l'utilisateur n'est pas connecté ».
-- [ ] **File d'attente** (`QUEUE_CONNECTION=database`) : lancer un `php artisan queue:work` permanent, ou passer `QUEUE_CONNECTION=sync`.
+- [ ] **File d'attente** (`QUEUE_CONNECTION=database`) : les e-mails et les notifications push y attendent leur envoi. Les tâches automatiques ci-dessus la vident chaque minute : rien de plus à lancer. Un `php artisan queue:work` permanent (supervisor, service Windows) les envoie à la seconde au lieu de la minute. Vérifier qu'un e-mail d'urgence arrive en moins de 2 minutes ; sinon, regarder `php artisan queue:failed`.
 - [ ] **Sauvegardes** : sauvegarde automatique quotidienne de la base MySQL et du dossier `storage/app` (photos, messages vocaux). Tester une restauration une fois.
 
 ## 3. Préparer les données
@@ -62,6 +62,12 @@ Ces points bloquent ou gênent la mise en service ; ils seront développés, pui
 ## 4. Tester avec le personnel (recette)
 
 Sur de vrais téléphones : au moins un **Android** et un **iPhone**, en https.
+
+- [ ] **Application installée (PWA)**
+  - [ ] Android (Chrome) : l'invitation « Installer l'application » apparaît ; installer, puis ouvrir depuis l'icône « Maintenance » : plein écran, on arrive sur son tableau de bord.
+  - [ ] iPhone (Safari) : suivre l'explication « Partager → Sur l'écran d'accueil » ; ouvrir depuis l'icône.
+  - [ ] Couper le réseau puis ouvrir une page : la page « Pas de connexion » s'affiche, et la page revient seule au retour du réseau.
+  - [ ] Micro, photo et scan QR fonctionnent aussi dans l'application installée.
 
 - [ ] **Agent HK**
   - [ ] Signaler une panne : chambre au pavé numérique, chambre au scan QR, espace commun.
@@ -91,13 +97,15 @@ Sur de vrais téléphones : au moins un **Android** et un **iPhone**, en https.
   - [ ] Signaler une panne déjà connue : l'avertissement renvoie vers la chambre.
   - [ ] Déclarer la situation du client : relogé, sorti (heure de retour), arrivée prévue, parti ; le technicien affecté est prévenu.
   - [ ] Recevoir l'alerte « client dans une chambre en panne » : le clic ouvre la chambre.
-  - [ ] Vérifier l'encadré d'astreinte de jour et de nuit ; le bouton « Appeler » compose le bon numéro.
+  - [ ] Vérifier l'encadré d'astreinte de jour et de nuit. Sur téléphone, « Appeler » ouvre le composeur avec le bon numéro (crédit de l'appelant) et « WhatsApp » ouvre la conversation (data). Sur ordinateur, « Appeler » affiche le numéro en grand ; « Copier » le copie.
+  - [ ] Vérifier que les numéros de WhatsApp sont bien ceux de l'astreinte : un numéro saisi sans indicatif est considéré comme ivoirien (+225).
   - [ ] Décider d'un blocage (accepter, refuser avec motif).
   - [ ] Laisser l'accueil ouvert : une nouvelle alerte apparaît seule en moins d'une minute, avec un bip.
   - [ ] Retirer une demande faite par erreur (15 minutes) ; ajouter une précision quand le client rappelle.
   - [ ] **Poste partagé** : « Changer de réceptionniste » ; laisser le poste 15 minutes sans y toucher → « Toujours là ? », puis déconnexion.
   - [ ] Responsable de réception : lire le bilan du mois (réclamations clients, délais) et l'imprimer.
 - [ ] **Manager / admin** : affecter, planifier, contrôle qualité, recevoir l'alerte d'astreinte par SMS (nuit et jour) ; créer un bon de commande en 3 étapes (fournisseur, articles, vérification).
+- [ ] **Notifications push** sur un Android, un iPhone (application installée sur l'écran d'accueil) et un ordinateur : page Notifications, puis « Activer ». Déclencher une notification (OT affecté, urgence…), application fermée : elle arrive en moins de 2 minutes, et la toucher ouvre la bonne page. « Couper » l'arrête. Sur le poste de la réception : se déconnecter, puis vérifier que les notifications de l'ancienne personne n'arrivent plus.
 - [ ] **Ergonomie sur vrai téléphone** (Android et iPhone) : saisir dans un champ en bas d'écran (précision, motif, numéro de chambre) — le clavier ne doit masquer ni le champ ni le bouton d'envoi ; la flèche « retour » ramène à l'écran précédent ; couper le réseau affiche le bandeau « Pas de connexion Internet ».
 - [ ] **Ergonomie sur vraie tablette** (portrait et paysage), pour chaque rôle : le menu (3 traits, en haut à gauche) s'ouvre depuis la gauche et donne accès à tous les écrans ; la colonne de droite de l'accueil (astreinte, activité) passe sous le contenu ; aucun écran ne défile de côté.
 - [ ] Noter les remarques de chacun et les transmettre pour correction.

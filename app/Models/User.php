@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 
 // Le contrat MustVerifyEmail était importé mais jamais implémenté : les comptes
 // (créés vérifiés d'office, cf. UserController et les factories) fonctionnaient
@@ -15,7 +16,7 @@ use Illuminate\Notifications\Notifiable;
 // qu'une route Breeze de vérification d'e-mail (/verify-email) était atteinte.
 class User extends Authenticatable implements MustVerifyEmailContract
 {
-    use HasFactory, MustVerifyEmailTrait, Notifiable;
+    use HasFactory, HasPushSubscriptions, MustVerifyEmailTrait, Notifiable;
 
     protected $fillable = [
         'name',
@@ -137,6 +138,36 @@ class User extends Authenticatable implements MustVerifyEmailContract
         $initials = collect($parts)->filter()->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->take(2)->implode('');
 
         return $initials !== '' ? $initials : '?';
+    }
+
+    /**
+     * Numéro composable (lien tel:) : chiffres et « + » seulement, null sans téléphone.
+     */
+    public function dialablePhone(): ?string
+    {
+        $tel = preg_replace('/[^\d+]/', '', (string) $this->phone);
+
+        return $tel !== '' ? $tel : null;
+    }
+
+    /**
+     * Numéro au format WhatsApp (wa.me) : indicatif pays sans « + ». Un numéro saisi
+     * sans indicatif est supposé ivoirien (+225).
+     */
+    public function whatsappPhone(): ?string
+    {
+        $tel = $this->dialablePhone();
+        if ($tel === null) {
+            return null;
+        }
+        if (str_starts_with($tel, '+')) {
+            return ltrim($tel, '+');
+        }
+        if (str_starts_with($tel, '00')) {
+            return substr($tel, 2);
+        }
+
+        return '225'.$tel;
     }
 
     // ===== Relations (Module B) =====

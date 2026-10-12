@@ -37,7 +37,7 @@
                 <input type="search" name="search" value="{{ $search }}" placeholder="Nom ou référence (SKU)…" class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[13.5px] placeholder:text-ink-grey focus:ring-0">
             </label>
             @if (filled($search))
-                <a href="{{ route('parts.index', array_filter(['tab' => $tab === 'all' ? null : $tab], 'filled')) }}" class="text-[12.5px] font-semibold text-ink-muted hover:text-navy">Effacer la recherche</a>
+                <a href="{{ route('parts.index', array_filter(['tab' => $tab === 'all' ? null : $tab], 'filled')) }}" class="tap text-[12.5px] font-semibold text-ink-muted hover:text-navy">Effacer la recherche</a>
             @endif
         </form>
 

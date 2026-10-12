@@ -44,18 +44,20 @@
          tête, onglets en pastilles juste dessous, réglages repliés derrière un bouton,
          indicateurs en tuiles 2 × 2. Tablette et bureau : panneau avec onglets et barre d'outils. --}}
     @php $refineCount = (int) request()->filled('status') + (int) request()->filled('priority_id') + (int) ($sort !== 'due'); @endphp
-    <div class="tab:hidden flex flex-col gap-3" x-data="{ more: {{ $refineCount ? 'true' : 'false' }} }">
+    <div class="tab:hidden flex flex-col gap-3" x-data="{ more: {{ $refineCount ? 'true' : 'false' }}, q: @js((string) $q) }">
         <form action="{{ route('work-orders.index') }}" method="GET" class="flex flex-col gap-3">
             <input type="hidden" name="filter" value="{{ $filter }}">
             <div class="flex items-center gap-2">
                 <label class="flex-1 min-w-0 flex items-center gap-2.5 h-12 pl-4 pr-2 rounded-full bg-white border border-line shadow-sm focus-within:border-navy focus-within:ring-2 focus-within:ring-navy/10">
                     <svg class="w-[18px] h-[18px] text-ink-grey flex-shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4" stroke-linecap="round"/></svg>
                     <span class="sr-only">Rechercher un ordre</span>
+                    {{-- Une seule croix : celle du navigateur est masquée (.search-own-clear). Elle vide
+                         le champ ; si la liste est déjà filtrée par cette recherche, elle la retire aussi. --}}
                     <input type="search" name="q" value="{{ $q }}" placeholder="Rechercher un ordre, une chambre" enterkeyhint="search"
-                           class="flex-1 min-w-0 border-0 p-0 bg-transparent text-[15px] placeholder:text-ink-grey focus:ring-0">
-                    @if (filled($q))
-                        <a href="{{ $here(['q' => null, 'page' => null]) }}" class="w-8 h-8 rounded-full flex items-center justify-center text-ink-grey hover:bg-line-soft" aria-label="Effacer la recherche"><x-nav-icon name="x" class="w-4 h-4" /></a>
-                    @endif
+                           x-ref="q" x-model="q" class="search-own-clear flex-1 min-w-0 border-0 p-0 bg-transparent text-[15px] placeholder:text-ink-grey focus:ring-0">
+                    <button type="button" x-show="q !== ''" x-cloak aria-label="Effacer la recherche"
+                            @click="@if (filled($q)) window.location = @js($here(['q' => null, 'page' => null])) @else q = ''; $refs.q.focus() @endif"
+                            class="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center text-ink-grey hover:bg-line-soft"><x-nav-icon name="x" class="w-4 h-4" /></button>
                 </label>
                 <button type="button" @click="more = ! more" :aria-expanded="more.toString()" aria-controls="wo-refine"
                         class="relative w-12 h-12 flex-shrink-0 rounded-full border flex items-center justify-center transition"
@@ -203,7 +205,7 @@
                                 <td class="px-3 py-4 align-middle">
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <a href="{{ route('work-orders.show', $w) }}" class="text-[14.5px] font-semibold text-navy hover:underline">{{ $w->title }}</a>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-semibold whitespace-nowrap" style="background-color: {{ $w->priority->color }}18; color: {{ $w->priority->color }};">{{ $w->priority->label }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-semibold whitespace-nowrap" style="background-color: {{ $w->priority->color }}18; color: {{ \App\Support\Swatch::readableOnTint($w->priority->color) }};">{{ $w->priority->label }}</span>
                                     </div>
                                     <div class="text-[13px] text-ink-muted mt-0.5">{{ $w->room?->label ?? '—' }} · {{ $w->equipment?->name ?? $w->type->label }}</div>
                                 </td>
@@ -214,11 +216,11 @@
                                 <td class="px-3 py-4 align-middle">
                                     @if ($w->assignee)
                                         <span class="flex items-center gap-2.5 min-w-0">
-                                            <span class="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-[11px] font-bold text-navy flex-shrink-0">{{ $w->assignee->initialsOrGenerated() }}</span>
+                                            <span class="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">{{ $w->assignee->initialsOrGenerated() }}</span>
                                             <span class="text-[13.5px] truncate max-w-[130px]" title="{{ $w->assignee->name }}">{{ $w->assignee->name }}</span>
                                         </span>
                                     @else
-                                        <span class="text-[13px] text-ink-faint">— à affecter</span>
+                                        <span class="text-[13px] font-semibold text-amber">à affecter</span>
                                     @endif
                                 </td>
                                 <td class="px-3 py-4 align-middle whitespace-nowrap">

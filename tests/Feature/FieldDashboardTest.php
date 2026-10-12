@@ -47,11 +47,14 @@ class FieldDashboardTest extends TestCase
     {
         foreach ([User::factory()->manager()->create(), User::factory()->admin()->create()] as $user) {
             $html = $this->actingAs($user)->get(route($user->dashboardRoute()))->assertOk()->getContent();
-
-            // Recherche + nouvel ordre en en-tête, bande d'indicateurs, onglets à compteurs.
-            $this->assertStringContainsString('placeholder="Rechercher un ordre, une chambre…"', $html, $user->role->value);
             $this->assertStringContainsString('<title>Tableau de bord · ', $html);
-            $this->assertStringContainsString('aria-label="Filtres"', $html);
+            $this->assertStringContainsString('aria-label="Repères du jour"', $html);
+
+            // Manager : recherche + onglets à compteurs. Admin : ni l'un ni l'autre, ils sont
+            // déjà dans Ordres de travail (l'accueil ne garde que les 3 urgences).
+            $manager = $user->role === \App\Enums\UserRole::Manager;
+            $this->assertSame($manager, str_contains($html, 'placeholder="Rechercher un ordre, une chambre…"'), $user->role->value);
+            $this->assertSame($manager, str_contains($html, 'aria-label="Filtres"'), $user->role->value);
         }
 
         $this->actingAs(User::factory()->manager()->create())->get(route('manager.dashboard'))

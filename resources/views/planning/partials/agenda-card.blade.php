@@ -21,7 +21,7 @@
                 <x-nav-icon name="building" class="w-3.5 h-3.5" /><span x-text="e.place"></span>
             </span>
             <span x-show="e.technician" class="inline-flex items-center gap-1.5">
-                <span class="w-5 h-5 rounded-full bg-gold text-navy text-[9px] font-bold flex items-center justify-center" x-text="e.initials"></span>
+                <span class="w-6 h-6 rounded-full bg-gold text-white text-[10px] font-bold flex items-center justify-center" x-text="e.initials"></span>
                 <span x-text="e.technician"></span>
             </span>
             <span x-show="!e.technician" class="text-amber font-medium">Non affecté</span>

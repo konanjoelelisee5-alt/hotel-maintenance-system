@@ -8,12 +8,15 @@
        la colonne de droite passe sous le contenu.
      $greeting remplace le titre de la page sur tablette et ordinateur (accueil : « Bonjour, … ») ;
      le titre reste dans la barre du haut sur téléphone et dans l'onglet.
-     $focus (signalement en étapes) : barre du bas masquée, une croix ferme le parcours. --}}
+     $focus (signalement en étapes) : barre du bas masquée, une croix ferme le parcours.
+     @push('bar-actions') : boutons ajoutés après la cloche (barre du haut et en-tête ordinateur). --}}
 @php
     $user = auth()->user();
     $isActive = fn (array $item) => \App\Support\Navigation::isActive($item);
     $mobileAction = isset($primaryAction) && ! $primaryAction->attributes->has('desktop-only');
     $isReception = $user->role === \App\Enums\UserRole::Reception;
+    // Menu « ⋮ » à droite façon Chrome sur téléphone (administrateur, manager, technicien).
+    $moreMenu = in_array($user->role, [\App\Enums\UserRole::Admin, \App\Enums\UserRole::Manager, \App\Enums\UserRole::Technicien], true);
 @endphp
 <!DOCTYPE html>
 <html lang="fr">
@@ -25,6 +28,7 @@
 
     <title>{{ $pageTitle ? $pageTitle.' · ' : '' }}{{ config('app.name', 'Hôtel Président') }}</title>
     <link rel="icon" type="image/jpeg" href="{{ asset('images/logo-hotel-president-icon.jpg') }}">
+    @include('layouts.partials.pwa-head')
 
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -34,7 +38,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="theme-sheet antialiased bg-canvas text-ink-deep" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
+<body class="theme-sheet antialiased bg-canvas text-ink-deep" x-data="{ menuOpen: false, moreOpen: false, profileOpen: false }" @keydown.escape.window="menuOpen = false; moreOpen = false; profileOpen = false">
+    @include('partials.splash')
     <div class="min-h-screen desk:p-4 flex">
         <div class="flex-1 min-w-0 flex bg-white desk:rounded-[28px] desk:shadow-[0_40px_80px_-48px_rgba(23,25,31,.35)]">
 
@@ -47,15 +52,23 @@
                 {{-- Barre du haut (téléphone et tablette) --}}
                 <div class="desk:hidden print:hidden sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-line px-4 py-3 flex items-center gap-3">
                     @unless ($focus)
+                        {{-- Téléphone : pas de menu latéral (barre du bas + ⋮ ou bouton profil) ; tablette : le menu. --}}
                         <button type="button" @click="menuOpen = true" :aria-expanded="menuOpen" aria-controls="mobile-menu"
-                                class="w-10 h-10 flex-shrink-0 rounded-full bg-paper flex items-center justify-center">
+                                class="w-11 h-11 flex-shrink-0 rounded-full bg-paper hidden tab:flex items-center justify-center">
                             <x-nav-icon name="menu" class="w-5 h-5" />
                             <span class="sr-only">Ouvrir le menu</span>
                         </button>
                     @endunless
                     @isset($backRoute)
-                        <a href="{{ $backRoute }}" data-back aria-label="{{ $focus ? 'Fermer' : 'Retour' }}" class="w-10 h-10 flex-shrink-0 rounded-full bg-paper flex items-center justify-center">
+                        <a href="{{ $backRoute }}" data-back aria-label="{{ $focus ? 'Fermer' : 'Retour' }}" class="w-11 h-11 flex-shrink-0 rounded-full bg-paper flex items-center justify-center">
                             <x-nav-icon :name="$focus ? 'close' : 'back'" class="w-4 h-4" />
+                        </a>
+                    @elseif ($phoneExit)
+                        {{-- Page sans retour déclaré : ← hors de la barre du bas, croix sur une page « à côté »
+                             (profil, notifications, nouveautés). Navigation::phoneExit. --}}
+                        <a href="{{ $phoneExit['href'] }}" {{ $phoneExit['close'] ? 'data-close' : 'data-back' }}
+                           aria-label="{{ $phoneExit['close'] ? 'Fermer' : 'Retour' }}" class="w-11 h-11 flex-shrink-0 rounded-full bg-paper flex items-center justify-center">
+                            <x-nav-icon :name="$phoneExit['close'] ? 'close' : 'back'" class="w-4 h-4" />
                         </a>
                     @else
                         <img src="{{ asset('images/logo-hotel-president-icon.jpg') }}" alt="" class="w-8 h-8 rounded-[10px] object-cover flex-shrink-0">
@@ -63,6 +76,21 @@
                     <div data-phone-title class="text-[16px] font-bold truncate flex-1 min-w-0">{{ $pageTitle }}</div>
                     @unless ($focus)
                         @include('partials.notification-bell', ['round' => true])
+                        @stack('bar-actions')
+                        @if ($moreMenu)
+                            <button type="button" @click="moreOpen = true" :aria-expanded="moreOpen" aria-controls="more-menu"
+                                    class="tab:hidden w-11 h-11 -mr-2 flex-shrink-0 rounded-full flex items-center justify-center text-ink-deep active:bg-paper">
+                                <x-nav-icon name="more" class="w-5 h-5" />
+                                <span class="sr-only">Ouvrir le menu</span>
+                            </button>
+                        @else
+                            {{-- Housekeeping, réception : profil, déconnexion et version, à droite de la cloche. --}}
+                            <button type="button" @click="profileOpen = true" :aria-expanded="profileOpen" aria-controls="profile-menu"
+                                    class="tab:hidden w-11 h-11 -mr-1 flex-shrink-0 rounded-full flex items-center justify-center active:bg-paper">
+                                <span class="w-9 h-9 rounded-full bg-ink-deep text-white text-[12px] font-bold flex items-center justify-center" aria-hidden="true">{{ $user->initialsOrGenerated() }}</span>
+                                <span class="sr-only">Mon profil</span>
+                            </button>
+                        @endif
                     @endunless
                 </div>
 
@@ -86,7 +114,10 @@
                             @endisset
                             <div class="hidden tab:flex items-center gap-2.5 flex-shrink-0 print:hidden">
                                 @unless ($focus)
-                                    <div class="hidden desk:block">@include('partials.notification-bell', ['round' => true])</div>
+                                    <div class="hidden desk:flex items-center gap-2.5">
+                                        @include('partials.notification-bell', ['round' => true])
+                                        @stack('bar-actions')
+                                    </div>
                                 @endunless
                                 @isset($primaryAction)
                                     {{ $primaryAction }}
@@ -135,6 +166,12 @@
         </aside>
     </div>
 
+    @if ($moreMenu && ! $focus)
+        @include('layouts.partials.sheet-more-menu')
+    @elseif (! $focus)
+        @include('layouts.partials.sheet-profile-menu')
+    @endif
+
     {{-- Fenêtre (modale) des liens [data-modal], remplie par resources/js/modal.js.
          Téléphone : feuille qui monte du bas ; ordinateur : fenêtre centrée en haut d'écran. --}}
     <div id="remote-modal" class="hidden fixed inset-0 z-[60] flex items-end sm:items-start sm:justify-center sm:px-6 sm:pt-[7vh]"
@@ -150,10 +187,19 @@
     <x-toast :offset="$focus ? 'bottom-5' : ($mobileAction ? 'bottom-[calc(140px+env(safe-area-inset-bottom))] tab:bottom-5' : 'bottom-[calc(84px+env(safe-area-inset-bottom))] tab:bottom-5')" />
     <x-offline-banner />
     <x-role-switcher />
+    {{-- Pile du bas : mise à jour, puis invitation à installer. Pas pendant un parcours en
+         étapes : on ne coupe pas un signalement. --}}
+    @unless ($focus)
+        <div class="print:hidden pointer-events-none fixed z-[45] inset-x-3 tab:inset-x-auto tab:right-5 tab:w-[380px] flex flex-col gap-2
+                    {{ $mobileAction ? 'bottom-[calc(140px+env(safe-area-inset-bottom))]' : 'bottom-[calc(84px+env(safe-area-inset-bottom))]' }} tab:bottom-5">
+            <x-update-available />
+            <x-pwa-install />
+        </div>
+    @endunless
 
     {{-- Action principale sur téléphone : dans la zone du pouce, au-dessus de la barre du bas. --}}
     @if ($mobileAction)
-        <div data-thumb-bar class="tab:hidden print:hidden fixed inset-x-0 z-30 px-4 py-2.5 bg-white/95 backdrop-blur border-t border-line flex items-center gap-2 overflow-x-auto
+        <div data-thumb-bar="actions" class="tab:hidden print:hidden fixed inset-x-0 z-30 px-4 py-2.5 bg-white/95 backdrop-blur border-t border-line flex items-center gap-2 overflow-x-auto
                     {{ $focus ? 'bottom-0 pb-[calc(10px+env(safe-area-inset-bottom))]' : 'bottom-[calc(64px+env(safe-area-inset-bottom))]' }}">
             {{ $primaryAction }}
         </div>

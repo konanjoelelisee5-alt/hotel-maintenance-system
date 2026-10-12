@@ -9,7 +9,7 @@
         <div class="flex items-start gap-3 py-3 border-b border-line-soft">
             <span class="flex flex-col gap-0.5 min-w-0 flex-1">
                 <dt class="text-[11.5px] font-semibold uppercase tracking-wide text-ink-grey">Fournisseur</dt>
-                <dd class="m-0" :class="supplierName ? 'text-navy font-medium' : 'text-ink-faint'" x-text="supplierName || 'À compléter'"></dd>
+                <dd class="m-0" :class="supplierName ? 'text-navy font-medium' : 'text-ink-grey italic'" x-text="supplierName || 'À compléter'"></dd>
             </span>
             <button type="button" x-show="step > 1" @click="goTo(1)" class="h-8 px-2 -mr-2 rounded-md text-[12.5px] font-semibold text-navy hover:bg-paper flex-shrink-0">Modifier</button>
         </div>

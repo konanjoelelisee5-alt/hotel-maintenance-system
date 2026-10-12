@@ -14,7 +14,7 @@
 
     // Clients concernés : couleur de la pastille et de l'icône selon la situation.
     $situation = fn ($occupancy) => match ($occupancy) {
-        $occ::ClientPresent => ['dot' => 'bg-red', 'icon' => 'user', 'circle' => 'bg-[#FDEBDD] text-[#B4561A]'],
+        $occ::ClientPresent => ['dot' => 'bg-red', 'icon' => 'user', 'circle' => 'bg-[#FDEBDD] text-[#9A4614]'],
         $occ::ClientAbsent => ['dot' => 'bg-[rgb(var(--rc-orange))]', 'icon' => 'clock', 'circle' => 'bg-[rgb(var(--rc-sky))] text-[rgb(var(--rc-sky-ink))]'],
         default => ['dot' => 'bg-blue', 'icon' => 'calendar', 'circle' => 'bg-paper text-ink-deep'],
     };
@@ -56,6 +56,15 @@
     </form>
     @if ($searched !== '' && ! $lookup)
         <p class="m-0 -mt-3 px-5 text-[13.5px] font-medium text-red">Aucune chambre « {{ $searched }} ». Vérifiez le numéro.</p>
+    @endif
+
+    {{-- Responsable sur téléphone : son bilan (ailleurs, il est dans le menu). --}}
+    @if (auth()->user()->isDepartmentHead())
+        <a href="{{ route('reception.monthly-report') }}" class="tab:hidden flex items-center gap-3 min-h-[60px] px-4 rounded-[20px] bg-paper">
+            <span class="w-10 h-10 flex-shrink-0 rounded-full bg-white flex items-center justify-center"><x-nav-icon name="report" class="w-[18px] h-[18px]" /></span>
+            <span class="flex-1 min-w-0 text-[14.5px] font-semibold">Bilan du mois de l'équipe</span>
+            <svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0 text-ink-grey" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
     @endif
 
     {{-- Fiche de la chambre recherchée --}}

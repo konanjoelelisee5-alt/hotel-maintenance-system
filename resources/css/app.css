@@ -83,6 +83,11 @@ main { animation: page-in .18s ease-out; }
 @keyframes page-in { from { opacity: 0; transform: translateY(4px); } }
 @media (prefers-reduced-motion: reduce) { main { animation: none; } }
 
+/* Rond bleu du menu ⋮ (admin, manager) : la flèche va et vient dans le sens où il reste à
+   lire (--nudge : 3px vers le bas, -3px vers le haut). Coupé par « réduire les animations »
+   (classe motion-safe: dans sheet-more-menu). */
+@keyframes menu-nudge { 50% { transform: translateY(var(--nudge, 3px)); } }
+
 /* Clavier du téléphone ouvert (resources/js/ui.js) : les barres collées en bas se
    remettent dans le flux et la navigation basse s'efface, pour ne masquer ni le
    champ en cours de saisie ni le bouton d'envoi. */
@@ -93,8 +98,21 @@ main { animation: page-in .18s ease-out; }
 [data-thumb-bar] .btn { min-height: 44px; }
 /* Plusieurs actions (ex. Export CSV + Export PDF des rapports) : calées à droite, sous le
    pouce droit. Marge automatique plutôt que justify-end : si la barre déborde, elle reste
-   défilable jusqu'à la première action. */
-[data-thumb-bar] > :first-child:not(:only-child) { margin-left: auto; }
+   défilable jusqu'à la première action. Seulement la barre d'actions de layouts/sheet (pas
+   celle des parcours en étapes, dont la rangée de boutons a une largeur maximale). */
+[data-thumb-bar="actions"] > :first-child:not(:only-child) { margin-left: auto; }
+
+/* Petit lien dans une ligne de texte (« Chambre 107 », « Journal ») : zone de toucher portée à
+   44 px de haut, la taille d'un doigt, sans rien changer à l'affichage ni à la mise en page. */
+.tap { position: relative; }
+.tap::after { content: ''; position: absolute; left: -6px; right: -6px; top: 50%; height: 44px; transform: translateY(-50%); }
+/* Bande de pilules qui défile sur le côté : elle couperait la zone agrandie (.tap) ; marge
+   intérieure invisible en haut et en bas, compensée à l'extérieur. */
+.tap-row { padding-block: 8px; margin-block: -8px; }
+
+/* Recherche avec sa propre croix « Effacer » : on masque celle du navigateur (sinon deux croix). */
+.search-own-clear::-webkit-search-cancel-button,
+.search-own-clear::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
 [data-thumb-bar] > .btn:only-child,
 [data-thumb-bar] > form:only-child,
 [data-thumb-bar] > form:only-child > .btn { flex: 1 1 auto; width: 100%; }
@@ -235,13 +253,13 @@ main { animation: page-in .18s ease-out; }
 .theme-sheet {
     --c-navy: 23 25 31; --c-navy-dark: 15 19 30; --c-navy-light: 48 52 64;
     --c-gold: 47 111 214; --c-gold-400: 37 96 196;
-    --c-blue: 47 111 214; --c-red: 214 52 60; --c-amber: 194 98 12; --c-green: 18 134 98;
-    --c-ink-grey: 112 116 126; --c-ink-deep: 23 25 31; --c-ink-strong: 52 55 64; --c-ink-body: 72 75 85;
-    --c-ink-muted: 100 104 114; --c-ink-faint: 160 163 171;
+    --c-blue: 47 111 214; --c-red: 214 52 60; --c-amber: 168 84 8; --c-green: 18 134 98;
+    --c-ink-grey: 102 106 116; --c-ink-deep: 23 25 31; --c-ink-strong: 52 55 64; --c-ink-body: 72 75 85;
+    --c-ink-muted: 84 88 98; --c-ink-faint: 160 163 171;
     --c-warn-ink: 146 84 10; --c-warn-bg: 254 243 226;
     --c-danger-ink: 168 32 38; --c-danger-bg: 254 238 238; --c-danger-soft: 253 228 228;
     --c-ok-bg: 228 246 238; --c-info-bg: 234 242 253;
-    --c-side-muted: 112 116 126; --c-side-soft: 72 75 85;
+    --c-side-muted: 102 106 116; --c-side-soft: 72 75 85;
     --c-canvas: 233 233 238; --c-paper: 246 246 248; --c-line: 233 233 238; --c-line-soft: 242 242 245;
     /* Couleurs propres à la réception (courbe, pastilles) */
     --rc-sky: 223 236 253;      /* aplat bleu pâle : bouton doux, bulle */

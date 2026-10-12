@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!-- Page « Pas de connexion » de l'application installée : servie par sw.js à la place
+     d'une page demandée sans réseau, quelle que soit son adresse. D'où un fichier
+     autonome : styles en ligne, aucune image ni lien relatif. Recharge seule au retour
+     du réseau. Changer VERSION dans sw.js après toute modification. -->
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#E9E9EE">
+    <title>Pas de connexion · Hôtel Président</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; height: 100%; }
+        body {
+            display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+            background: #E9E9EE; color: #17191F;
+            font: 400 15px/1.5 Manrope, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        main {
+            width: 100%; max-width: 400px; background: #fff; border-radius: 28px; padding: 36px 28px 28px;
+            text-align: center; box-shadow: 0 32px 70px -40px rgba(23, 25, 31, .45);
+        }
+        .icon {
+            width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; background: #FBF1DE; color: #B4740F;
+        }
+        h1 { margin: 0 0 8px; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+        p { margin: 0 0 12px; color: #5C5F68; }
+        .note { font-size: 13.5px; padding: 12px 14px; border-radius: 12px; background: #F4F4F6; text-align: left; }
+        button {
+            margin-top: 12px; width: 100%; min-height: 50px; border: 0; border-radius: 999px; cursor: pointer;
+            background: #17191F; color: #fff; font: inherit; font-weight: 600; font-size: 15.5px;
+        }
+        button:focus-visible { outline: 3px solid #B58435; outline-offset: 3px; }
+        .waiting { margin-top: 14px; font-size: 12.5px; color: #6B665A; }
+        .dot { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #B4740F; }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="icon" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 8.8a15 15 0 0 1 4.2-2.6M10.7 5.1A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 5.2-2.7M14.7 10a10 10 0 0 1 4.3 2.5M8.5 16a5 5 0 0 1 7 0M12 20h.01M3 3l18 18"/>
+            </svg>
+        </div>
+        <h1>Pas de connexion</h1>
+        <p>Le téléphone n'est plus relié au réseau de l'hôtel. La page s'ouvrira dès que la connexion revient.</p>
+        <p class="note"><strong>Un signalement en cours ?</strong> S'il n'a pas pu partir, il est gardé dans le téléphone et sera envoyé automatiquement au retour du réseau.</p>
+        <button type="button" onclick="location.reload()">Réessayer</button>
+        <div class="waiting" role="status"><span class="dot" aria-hidden="true"></span>En attente du réseau…</div>
+    </main>
+    <script>
+        window.addEventListener('online', () => location.reload());
+    </script>
+</body>
+</html>

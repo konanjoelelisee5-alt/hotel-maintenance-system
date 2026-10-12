@@ -72,7 +72,7 @@ class UiFoundationsTest extends TestCase
         $html = $this->actingAs(User::factory()->admin()->create())->get(route('users.index'))->assertOk()->getContent();
 
         // Bas de l'écran, au-dessus de la barre de navigation, sans masquer la fin de la page.
-        $this->assertMatchesRegularExpression('#<div data-thumb-bar class="tab:hidden[^"]*bottom-\[calc\(64px\+env\(safe-area-inset-bottom\)\)\]#', $html);
+        $this->assertMatchesRegularExpression('#<div data-thumb-bar="actions" class="tab:hidden[^"]*bottom-\[calc\(64px\+env\(safe-area-inset-bottom\)\)\]#', $html);
         $this->assertStringContainsString('pb-[calc(136px+env(safe-area-inset-bottom))]', $html);
         $this->assertStringContainsString('<nav data-bottom-nav class="tab:hidden', $html);
         $this->assertStringContainsString('id="offline-banner"', $html);

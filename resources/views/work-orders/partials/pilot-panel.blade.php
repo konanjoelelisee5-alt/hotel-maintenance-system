@@ -43,6 +43,9 @@
                         @case(in_array($status, ['ouvert', 'en_cours'], true) && ! $assignee)
                             Personne n'est sur cet OT : <strong>affectez un technicien</strong> et planifiez son passage.
                             @break
+                        @case($status === 'ouvert' && $assignee->id === $user->id)
+                            C'est vous qui intervenez : <strong>démarrez le chrono</strong> dans l'onglet « Intervention ».
+                            @break
                         @case($status === 'ouvert')
                             {{ $assignee->name }} doit démarrer l'intervention. Suivez son passage.
                             @break

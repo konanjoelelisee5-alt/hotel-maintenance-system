@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class InterventionReportController extends Controller
 {
@@ -64,12 +65,28 @@ class InterventionReportController extends Controller
             ]);
         }
 
-        $message = $isSigned
-            ? 'Rapport d\'intervention signé avec succès. L\'OT est maintenant marqué comme résolu.'
-            : 'Rapport d\'intervention enregistré avec succès.';
+        // Signé : l'écran « Réparation envoyée » (comme le signalement HK), d'où l'on sort en
+        // attendant la vérification. Brouillon : retour à l'étape « Rapport et signature ».
+        if ($isSigned) {
+            return redirect()->route('work-orders.report.sent', $workOrder);
+        }
 
-        return redirect()->route('work-orders.show', $workOrder)
-            ->with('success', $message);
+        return redirect()->to(route('work-orders.show', $workOrder).'#etape-4')
+            ->with('success', 'Brouillon du rapport enregistré. Faites signer pour terminer.');
+    }
+
+    /** « Réparation envoyée » : récapitulatif et ce qui reste à vérifier (contrôle, demandeur). */
+    public function sent(WorkOrder $workOrder): View|RedirectResponse
+    {
+        $this->authorize('view', $workOrder);
+
+        if (! $workOrder->interventionReport?->is_signed) {
+            return redirect()->route('work-orders.show', $workOrder);
+        }
+
+        return view('work-orders.report-sent', [
+            'workOrder' => $workOrder->load('room', 'equipment', 'reporter', 'assignee', 'interventionReport', 'statusHistories.changedBy', 'partReservations.part', 'requesterConfirmedBy'),
+        ]);
     }
 
     /**

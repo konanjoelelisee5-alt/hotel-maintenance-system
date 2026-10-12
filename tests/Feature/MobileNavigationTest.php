@@ -89,6 +89,91 @@ class MobileNavigationTest extends TestCase
         $this->assertContains('planning.index', $routes(User::factory()->admin()->create()));
     }
 
+    public function test_bottom_bar_holds_neither_profile_nor_settings(): void
+    {
+        foreach ([User::factory()->admin(), User::factory()->manager(), User::factory()->technicien(), User::factory()->housekeeping(), User::factory()->reception()] as $factory) {
+            $routes = array_column(\App\Support\Navigation::forBottomNav($factory->create()), 'route');
+            $this->assertNotContains('profile.edit', $routes);
+            $this->assertNotContains('settings.index', $routes);
+        }
+
+        // Admin, manager, technicien : profil et paramètres dans le menu ⋮.
+        $html = $this->actingAs(User::factory()->admin()->create())->get(route('admin.dashboard'))->getContent();
+        $start = strpos($html, 'id="more-menu"');
+        $moreMenu = substr($html, $start, strpos($html, 'Se déconnecter', $start) - $start);
+        $this->assertStringContainsString('href="'.route('profile.edit').'"', $moreMenu);
+        $this->assertStringContainsString('href="'.route('settings.index').'"', $moreMenu);
+    }
+
+    public function test_long_menus_get_a_blue_scroll_button_instead_of_a_scrollbar(): void
+    {
+        foreach ([[User::factory()->admin()->create(), 'admin.dashboard'], [User::factory()->manager()->create(), 'manager.dashboard']] as [$user, $route]) {
+            $this->actingAs($user)->get(route($route))
+                ->assertSee('Aller en bas du menu', false)
+                ->assertSee('[scrollbar-width:none]', false);
+        }
+        // Menu court du technicien : pas de rond, barre normale.
+        $this->actingAs(User::factory()->technicien()->create())->get(route('technicien.dashboard'))
+            ->assertSee('id="more-menu"', false)
+            ->assertDontSee('Aller en bas du menu', false);
+    }
+
+    public function test_housekeeping_and_reception_get_a_profile_button_instead_of_a_menu_on_phone(): void
+    {
+        foreach ([User::factory()->housekeeping()->create(), User::factory()->reception()->create(['is_department_head' => true])] as $user) {
+            $html = $this->actingAs($user)->get(route($user->dashboardRoute()))->assertOk()
+                ->assertSee('aria-controls="profile-menu"', false)
+                ->assertDontSee('aria-controls="more-menu"', false)
+                ->getContent();
+            $start = strpos($html, 'id="profile-menu"');
+            $profileMenu = substr($html, $start, strpos($html, route('release-notes.index'), $start) - $start);
+            $this->assertStringContainsString('href="'.route('profile.edit').'"', $profileMenu);
+            $this->assertStringContainsString('action="'.route('logout').'"', $profileMenu);
+        }
+
+        // Responsable de réception : son bilan reste à un geste, sur l'accueil.
+        $this->actingAs($user)->get(route('reception.dashboard'))
+            ->assertSee('href="'.route('reception.monthly-report').'"', false);
+    }
+
+    public function test_every_page_outside_the_bottom_bar_has_a_way_back_on_phone(): void
+    {
+        $back = '#<a href="[^"]*" data-back\s+aria-label="Retour"#';
+        $close = '#<a href="[^"]*" data-close\s+aria-label="Fermer"#';
+        $users = [
+            User::factory()->admin()->create(),
+            User::factory()->manager()->create(),
+            User::factory()->technicien()->create(),
+            User::factory()->housekeeping()->create(),
+            User::factory()->housekeeping()->create(['is_department_head' => true]),
+            User::factory()->reception()->create(['is_department_head' => true]),
+        ];
+
+        foreach ($users as $user) {
+            $bottom = array_column(\App\Support\Navigation::forBottomNav($user), 'route');
+            $menu = collect(\App\Support\Navigation::forSidebar($user))->pluck('items')->flatten(1);
+
+            foreach ($menu as $item) {
+                $html = $this->actingAs($user)->get(route($item['route'], $item['params'] ?? []))->assertOk()->getContent();
+                $label = "{$user->role->value} : {$item['route']}";
+                if (in_array($item['route'], $bottom, true)) {
+                    $this->assertDoesNotMatchRegularExpression($back, $html, "Pas de retour sur une page de la barre du bas ({$label}).");
+                } else {
+                    $this->assertMatchesRegularExpression($back, $html, "Retour manquant ({$label}).");
+                }
+            }
+
+            // Pages « à côté » : on les ferme pour revenir là où on était.
+            foreach (\App\Support\Navigation::ASIDE_ROUTES as $route) {
+                $this->assertMatchesRegularExpression($close, $this->actingAs($user)->get(route($route))->assertOk()->getContent(), "Fermer manquant ({$user->role->value} : {$route}).");
+            }
+        }
+
+        // Le planning d'un technicien, ouvert par le manager, revient au planning de l'équipe.
+        $this->actingAs($users[1])->get(route('planning.technician', $users[2]))
+            ->assertSee('href="'.route('planning.index').'" data-back', false);
+    }
+
     public function test_reception_bottom_bar_counts_block_requests_to_decide(): void
     {
         \App\Models\RoomBlock::create([

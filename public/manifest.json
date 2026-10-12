@@ -1,0 +1,21 @@
+{
+    "name": "Hôtel Président — Maintenance",
+    "short_name": "Maintenance",
+    "description": "Signalements, ordres de travail et suivi des réparations de l'Hôtel Président.",
+    "lang": "fr",
+    "dir": "ltr",
+    "id": "./",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#0d0f14",
+    "theme_color": "#E9E9EE",
+    "categories": ["business", "productivity"],
+    "icons": [
+        { "src": "images/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "images/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "images/pwa/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+        { "src": "images/pwa/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

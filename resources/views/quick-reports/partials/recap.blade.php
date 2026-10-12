@@ -25,7 +25,7 @@
                 </span>
                 <span class="flex flex-col gap-0.5 min-w-0 flex-1">
                     <dt class="text-[11.5px] font-semibold uppercase tracking-wide text-ink-grey">{{ $row['label'] }}</dt>
-                    <dd class="m-0 text-[13.5px] break-words" :class="({{ $row['value'] }}) ? 'text-navy font-medium' : 'text-ink-faint'"
+                    <dd class="m-0 text-[13.5px] break-words" :class="({{ $row['value'] }}) ? 'text-navy font-medium' : 'text-ink-grey italic'"
                         x-text="({{ $row['value'] }}) || 'À compléter'"></dd>
                 </span>
                 <button type="button" x-show="step > {{ $row['step'] }}" @click="goTo({{ $row['step'] }})"
